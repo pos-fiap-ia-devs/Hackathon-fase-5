@@ -1,0 +1,31 @@
+[project]
+name = "agente-sdr-imobiliario"
+version = "0.1.0"
+description = "Agente SDR Imobiliario com IA generativa local - FIAP Tech Challenge Fase 5"
+requires-python = ">=3.12,<3.13"
+
+# Versoes pinadas de proposito: entrega de 1 dia nao comporta surpresa de dependencia.
+dependencies = [
+    "fastapi==0.115.6",
+    "uvicorn[standard]==0.34.0",
+    "jinja2==3.1.5",
+    "python-multipart==0.0.20",
+    "httpx==0.28.1",
+    "pydantic==2.10.5",
+    "pydantic-settings==2.7.1",
+    "psycopg[binary,pool]==3.2.3",
+    "pgvector==0.3.6",
+    "apscheduler==3.11.0",
+    "python-telegram-bot==21.10",
+    "json-repair==0.35.0",
+    "langgraph==1.2.11",
+]
+
+[project.optional-dependencies]
+# Etapa 8 - transcricao de audio. Separado para nao bloquear o nucleo.
+stt = ["mlx-whisper==0.4.3"]
+dev = ["pytest==8.3.4", "pytest-asyncio==0.25.2"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

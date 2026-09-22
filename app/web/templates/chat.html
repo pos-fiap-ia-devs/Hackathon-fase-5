@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Fale com a Bia{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Fale com a Bia 🏠</h1>
+<p class="text-sm text-gray-500 mb-4">Canal alternativo ao Telegram -- mesmo agente, mesmo orquestrador (seção 5.8 do plano: canal é só um adapter).</p>
+
+<div id="chat-mensagens" class="space-y-2 max-h-[60vh] overflow-y-auto border rounded p-4 bg-white mb-4">
+    {% for m in mensagens %}
+    <div class="text-sm {% if m.papel == 'user' %}text-right{% endif %}">
+        <span class="inline-block px-3 py-2 rounded-lg max-w-[80%] {% if m.papel == 'user' %}bg-blue-600 text-white{% else %}bg-slate-100{% endif %}">
+            {{ m.conteudo }}
+        </span>
+    </div>
+    {% else %}
+    <p class="text-gray-400 text-sm">Manda uma mensagem pra começar (ex: "Estou procurando apartamento na zona sul").</p>
+    {% endfor %}
+</div>
+
+<form hx-post="/chat/send" hx-target="#chat-mensagens" hx-swap="beforeend"
+      hx-on::after-request="this.reset(); document.getElementById('chat-mensagens').scrollTop = 999999"
+      class="flex gap-2">
+    <input type="text" name="mensagem" placeholder="Escreva sua mensagem..." required autofocus
+           class="flex-1 border rounded px-3 py-2" autocomplete="off">
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Enviar</button>
+</form>
+{% endblock %}

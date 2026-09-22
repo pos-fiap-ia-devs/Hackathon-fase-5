@@ -1,0 +1,30 @@
+<table class="w-full text-xs bg-white rounded-lg border overflow-hidden">
+    <thead class="bg-slate-100 text-slate-600 uppercase">
+        <tr>
+            <th class="px-3 py-2 text-left">Quando</th>
+            <th class="px-3 py-2 text-left">Lead</th>
+            <th class="px-3 py-2 text-left">Agente</th>
+            <th class="px-3 py-2 text-left">Modelo</th>
+            <th class="px-3 py-2 text-right">Latência</th>
+            <th class="px-3 py-2 text-right">Tokens</th>
+            <th class="px-3 py-2 text-right">Tokens/s</th>
+            <th class="px-3 py-2 text-left">Erro</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in traces %}
+        <tr class="border-t {% if t.erro %}bg-red-50{% endif %}">
+            <td class="px-3 py-1.5 text-gray-400">{{ t.criado_em.strftime("%H:%M:%S") }}</td>
+            <td class="px-3 py-1.5">#{{ t.lead_id }}</td>
+            <td class="px-3 py-1.5 font-medium">{{ t.agente }}</td>
+            <td class="px-3 py-1.5 text-gray-500">{{ t.modelo }}</td>
+            <td class="px-3 py-1.5 text-right">{{ t.latencia_ms }}ms</td>
+            <td class="px-3 py-1.5 text-right">{{ (t.prompt_tokens or 0) + (t.completion_tokens or 0) }}</td>
+            <td class="px-3 py-1.5 text-right">{{ t.tokens_por_s or "—" }}</td>
+            <td class="px-3 py-1.5 text-red-600">{{ t.erro or "" }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="px-3 py-6 text-center text-gray-400">Nenhum trace ainda.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>

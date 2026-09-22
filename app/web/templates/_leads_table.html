@@ -1,0 +1,34 @@
+<table class="w-full text-sm bg-white rounded-lg border overflow-hidden">
+    <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+        <tr>
+            <th class="px-3 py-2 text-left">Score</th>
+            <th class="px-3 py-2 text-left">Lead</th>
+            <th class="px-3 py-2 text-left">Status</th>
+            <th class="px-3 py-2 text-left">Intenção</th>
+            <th class="px-3 py-2 text-left">Região</th>
+            <th class="px-3 py-2 text-left">Canal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for l in leads %}
+        <tr hx-get="/dashboard/lead/{{ l.id }}" hx-target="#lead-detail" hx-swap="innerHTML"
+            class="cursor-pointer hover:bg-slate-50 border-t">
+            <td class="px-3 py-2">
+                <span class="inline-block w-10 text-center rounded px-1 py-0.5 text-xs font-bold text-white
+                    {% if l.score >= 70 %}bg-green-600{% elif l.score >= 40 %}bg-amber-500{% else %}bg-gray-400{% endif %}">
+                    {{ l.score }}
+                </span>
+            </td>
+            <td class="px-3 py-2">{{ l.nome or l.chat_id }}</td>
+            <td class="px-3 py-2">
+                <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100">{{ l.status }}</span>
+            </td>
+            <td class="px-3 py-2">{{ l.intencao or "—" }}</td>
+            <td class="px-3 py-2">{{ l.regiao or "—" }}</td>
+            <td class="px-3 py-2 text-slate-500">{{ l.canal }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="px-3 py-6 text-center text-gray-400">Nenhum lead ainda.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
