@@ -25,6 +25,12 @@ CREATE TABLE imoveis (
     -- preenchido so nos imoveis marcados para investimento; alimenta o cenario 2
     rentabilidade_estimada NUMERIC(4,2),
     descricao       TEXT        NOT NULL,
+    -- 3 fotos por imovel (pedido do usuario), URLs escolhidas no seed de
+    -- acordo com o TIPO do imovel (app/db/seed.py::_fotos_do_imovel).
+    -- Array de texto e nao tabela propria: foto aqui e dado de exibicao,
+    -- sem atributo nenhum alem da ordem -- tabela filha so adicionaria
+    -- join em toda busca sem nada em troca.
+    fotos           TEXT[]      NOT NULL DEFAULT '{}',
     embedding       vector(768),
     busca           tsvector GENERATED ALWAYS AS (
                         to_tsvector('portuguese',
@@ -104,6 +110,11 @@ CREATE TABLE mensagens (
     papel      TEXT NOT NULL,                  -- user | assistant
     conteudo   TEXT NOT NULL,
     origem     TEXT NOT NULL DEFAULT 'texto',  -- texto | audio | followup
+    -- galeria enviada JUNTO com esta mensagem: [{imovel_id, legenda, fotos[]}].
+    -- Fica gravado na mensagem, nao so montado em memoria no turno, senao
+    -- recarregar o chat web (ou abrir o lead no dashboard) mostraria a
+    -- apresentacao de imoveis sem as fotos que o cliente recebeu.
+    anexos     JSONB NOT NULL DEFAULT '[]',
     criado_em  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -181,3 +192,12 @@ CREATE TABLE follow_up_jobs (
 );
 
 CREATE INDEX followup_due_idx ON follow_up_jobs (executar_em) WHERE status = 'pendente';
+
+-- ---------------------------------------------------------------- colunas novas em banco ja criado
+-- `run.sh` aplica este arquivo inteiro a cada subida e engole os erros
+-- (`|| true`): num banco que ja existe, todo CREATE TABLE acima falha por
+-- duplicidade e e ignorado -- o que significa que coluna nova adicionada la
+-- em cima NUNCA chegaria a um banco existente. Estes ALTERs idempotentes
+-- sao o caminho pelo qual ela chega, sem precisar dropar o volume.
+ALTER TABLE imoveis   ADD COLUMN IF NOT EXISTS fotos  TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE mensagens ADD COLUMN IF NOT EXISTS anexos JSONB  NOT NULL DEFAULT '[]';

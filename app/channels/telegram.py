@@ -2,8 +2,10 @@
 tunel/webhook caindo no meio da demo).
 
 Adapter fino: recebe update, chama o orquestrador de turno, manda a resposta
-de volta. Nao sabe nada de LLM, banco ou agentes -- so texto entra, texto
-sai. E o que faz "trocar de canal = escrever um adapter" ser verdade
+de volta. Nao sabe nada de LLM, banco ou agentes -- texto entra, texto (mais
+as fotos dos imoveis, quando o turno apresenta imoveis) sai; como isso vira
+album de fotos no Telegram e decisao deste arquivo, nao do orquestrador,
+que so devolve as URLs. E o que faz "trocar de canal = escrever um adapter" ser verdade
 (secao 5.8) -- este arquivo e o channels/cli.py chamam exatamente a mesma
 `processar_turno`.
 """
@@ -13,7 +15,9 @@ import logging
 import tempfile
 from pathlib import Path
 
-from telegram import Update
+import httpx
+
+from telegram import InputMediaPhoto, Update
 from telegram.constants import ChatAction
 from telegram.ext import Application, ContextTypes, MessageHandler, filters
 
@@ -61,6 +65,53 @@ async def _on_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         digitando.cancel()
 
     await update.message.reply_text(resposta)
+    # Fotos depois do texto: o cliente le a lista numerada e ve os albuns na
+    # mesma ordem logo abaixo. `getattr` porque o fallback de excecao acima
+    # e uma string comum, sem galeria.
+    await _enviar_galeria(context, telegram_chat_id, getattr(resposta, "galeria", []))
+
+
+async def _enviar_galeria(context: ContextTypes.DEFAULT_TYPE, telegram_chat_id: int, galeria: list[dict]) -> None:
+    """Um album por imovel (pedido do usuario: fotos junto com cada
+    casa/apartamento), legenda na primeira foto com o mesmo numero do card
+    -- e assim que o cliente liga a foto ao "quero o 2".
+
+    Falha aqui nunca derruba o turno: o texto com preco, bairro e numero ja
+    foi entregue: a foto e complemento. O caso realista de falha e o
+    Telegram nao conseguir baixar a URL da foto (ele busca a imagem pelo
+    proprio servidor), e um imovel sem album e melhor que um turno perdido."""
+    async with httpx.AsyncClient(timeout=20, follow_redirects=True) as http:
+        for item in galeria:
+            midias = []
+            for url in item["fotos"]:
+                imagem = await _baixar_foto(http, url)
+                if imagem:
+                    legenda = item["legenda"] if not midias else None
+                    midias.append(InputMediaPhoto(media=imagem, caption=legenda))
+            if not midias:
+                continue
+            try:
+                await context.bot.send_media_group(chat_id=telegram_chat_id, media=midias)
+            except Exception:
+                logger.warning(
+                    "falha enviando fotos do imovel %s (chat=%s) -- segue sem album",
+                    item.get("imovel_id"), telegram_chat_id, exc_info=True,
+                )
+
+
+async def _baixar_foto(http: "httpx.AsyncClient", url: str) -> bytes | None:
+    """Baixa a imagem aqui e sobe os bytes, em vez de passar a URL pro
+    Telegram buscar sozinho. O servico de fotos responde com um 302 pro
+    arquivo final (ver app/db/seed.py), e depender do servidor do Telegram
+    seguir esse redirect de terceiro e apostar num comportamento que nao
+    esta no nosso controle -- baixar aqui torna o envio um upload comum."""
+    try:
+        r = await http.get(url)
+        r.raise_for_status()
+        return r.content
+    except Exception:
+        logger.warning("falha baixando foto %s -- segue sem ela", url, exc_info=True)
+        return None
 
 
 async def _manter_digitando(context: ContextTypes.DEFAULT_TYPE, telegram_chat_id: int) -> None:

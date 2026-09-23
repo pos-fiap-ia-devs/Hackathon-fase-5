@@ -32,6 +32,7 @@
                     {% if m.origem == 'audio' %}<span class="text-xs opacity-70"> 🎙️</span>{% endif %}
                     {% if m.origem == 'followup' %}<span class="text-xs opacity-70"> ⏰</span>{% endif %}
                 </span>
+                {% with galeria = m.anexos %}{% include "_galeria.html" %}{% endwith %}
             </div>
             {% endfor %}
         </div>

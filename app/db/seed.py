@@ -119,6 +119,39 @@ PRECO_VENDA_MIN, PRECO_VENDA_MAX = 110_000, 2_000_000
 PRECO_ALUGUEL_MIN, PRECO_ALUGUEL_MAX = 1_200, 30_000
 
 TIPOS = ["apartamento", "casa", "studio", "cobertura"]
+
+# ---------------------------------------------------------------- fotos (pedido do usuario)
+#
+# 3 fotos por imovel, buscadas na internet POR TIPO -- cada tipo tem seu
+# conjunto de tags, entao casa vem com fachada/quintal e studio com loft
+# compacto, em vez de a mesma foto generica em tudo.
+#
+# loremflickr faz a busca por tag no Flickr e devolve a imagem; `lock=N`
+# fixa qual foto sai pra aquela URL, que e o que torna o seed reproduzivel
+# (mesmo principio do `random.seed(42)` acima) -- sem o lock, cada request
+# traria uma foto diferente e o mesmo imovel mudaria de cara a cada reload
+# da pagina. Sem chave de API de proposito: qualquer coisa com cadastro
+# (Unsplash, Pexels) viraria um segredo a mais pra configurar antes da
+# demo rodar.
+#
+# Limite conhecido: a foto ilustra o TIPO, nao aquele imovel especifico --
+# e dataset sintetico, os 200 imoveis tambem nao existem. Trocar por fotos
+# reais depois e so preencher `imoveis.fotos` com outras URLs.
+FOTOS_POR_TIPO: dict[str, list[str]] = {
+    "apartamento": ["apartment,interior", "apartment,living+room", "apartment,building"],
+    "casa": ["house,facade", "house,living+room", "house,backyard"],
+    "studio": ["studio+apartment,interior", "loft,interior", "small+apartment,kitchen"],
+    "cobertura": ["penthouse,interior", "penthouse,terrace", "luxury+apartment,living+room"],
+}
+FOTOS_PADRAO = FOTOS_POR_TIPO["apartamento"]
+
+
+def _fotos_do_imovel(tipo: str, seq: int) -> list[str]:
+    """URLs das 3 fotos. `seq` (posicao do imovel no dataset) entra no lock
+    pra que dois apartamentos vizinhos na mesma lista nao saiam com
+    exatamente as mesmas 3 fotos."""
+    tags = FOTOS_POR_TIPO.get(tipo, FOTOS_PADRAO)
+    return [f"https://loremflickr.com/800/600/{tag}/all?lock={seq * 10 + i}" for i, tag in enumerate(tags)]
 # investimento tende a unidade compacta -- e o que de fato se aluga bem
 TIPOS_INVESTIMENTO = ["apartamento", "studio"]
 
@@ -311,14 +344,14 @@ def run() -> None:
                     INSERT INTO imoveis
                         (titulo, tipo, finalidade, bairro, zona, cidade, preco,
                          quartos, banheiros, vagas, area, condominio,
-                         rentabilidade_estimada, descricao, embedding)
+                         rentabilidade_estimada, descricao, fotos, embedding)
                     VALUES
                         (%(titulo)s, %(tipo)s, %(finalidade)s, %(bairro)s, %(zona)s,
                          %(cidade)s, %(preco)s, %(quartos)s, %(banheiros)s, %(vagas)s,
                          %(area)s, %(condominio)s, %(rentabilidade_estimada)s,
-                         %(descricao)s, %(embedding)s)
+                         %(descricao)s, %(fotos)s, %(embedding)s)
                     """,
-                    {**im, "embedding": vetor},
+                    {**im, "fotos": _fotos_do_imovel(im["tipo"], i), "embedding": vetor},
                 )
                 if i % 25 == 0:
                     print(f"  {i}/{len(imoveis)}")

@@ -10,6 +10,8 @@
         <span class="inline-block px-3 py-2 rounded-lg max-w-[85%] text-left break-words {% if m.papel == 'user' %}bg-blue-600 text-white{% else %}bg-slate-100{% endif %}">
             {{ m.conteudo }}
         </span>
+        {# fotos ficam gravadas na mensagem, entao recarregar a pagina nao perde a galeria #}
+        {% with galeria = m.anexos %}{% include "_galeria.html" %}{% endwith %}
     </div>
     {% else %}
     <p class="text-gray-400 text-sm">Manda uma mensagem pra começar (ex: "Estou procurando apartamento na zona sul").</p>

@@ -1,0 +1,17 @@
+{# Fotos que vieram junto com a mensagem (core/turno.py::RespostaTurno).
+   Espera `galeria`: [{imovel_id, numero, legenda, fotos: [url, ...]}]. #}
+{% if galeria %}
+<div class="mt-2 space-y-3">
+    {% for item in galeria %}
+    <div class="max-w-md">
+        <p class="text-xs text-gray-500 mb-1 break-words">{{ item.legenda }}</p>
+        <div class="grid grid-cols-3 gap-1">
+            {% for url in item.fotos %}
+            <img src="{{ url }}" alt="Foto {{ loop.index }} da opção {{ item.numero }}" loading="lazy"
+                 class="w-full h-24 object-cover rounded border bg-slate-100">
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

@@ -39,6 +39,13 @@ def run() -> None:
 
         print(f"bia > {resposta}\n")
 
+        # Terminal nao renderiza imagem: o canal entrega o que sabe
+        # entregar -- as URLs das fotos, na ordem dos cards.
+        for item in getattr(resposta, "galeria", []):
+            print(f"       fotos {item['numero']}: " + " ".join(item["fotos"]))
+        if getattr(resposta, "galeria", []):
+            print()
+
 
 if __name__ == "__main__":
     run()

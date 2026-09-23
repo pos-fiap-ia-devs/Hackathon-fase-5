@@ -73,6 +73,9 @@ class TurnState(TypedDict, total=False):
     escolha: object  # LeadQualification/EscolhaVisita do agente -- tipo dinamico de proposito
     resolvido: dict
     resposta: str
+    # fotos dos imoveis apresentados neste turno -- so o no de apresentacao
+    # preenche; formato em core/turno.py::RespostaTurno
+    galeria: list[dict]
 
 
 # ---------------------------------------------------------------- ramo A: qualificacao (cenarios 1 e 2)
@@ -122,8 +125,8 @@ def _rota_pos_decisao(state: TurnState) -> str:
 
 def _no_apresentar_imoveis(state: TurnState) -> dict:
     lead_id = state["lead"]["id"]
-    resposta = _apresentar_imoveis(lead_id, state["slots"], state["mensagem"], turno=state["turno"])
-    return {"resposta": resposta}
+    resposta, galeria = _apresentar_imoveis(lead_id, state["slots"], state["mensagem"], turno=state["turno"])
+    return {"resposta": resposta, "galeria": galeria}
 
 
 def _no_listar_regioes(state: TurnState) -> dict:
@@ -367,12 +370,15 @@ def _construir_grafo():
 _GRAFO = _construir_grafo()
 
 
-def processar_turno_grafo(lead: dict, mensagem: str, *, turno: int) -> str:
+def processar_turno_grafo(lead: dict, mensagem: str, *, turno: int) -> tuple[str, list[dict]]:
     """Ponto de entrada usado por `core/turno.py::processar_turno` no lugar
     do `match`/`if` aninhado. Mesma assinatura de efeito (le e grava no
-    Postgres via os nos), so a orquestracao muda."""
+    Postgres via os nos), so a orquestracao muda.
+
+    Devolve (texto, galeria de fotos). So o no de apresentacao de imoveis
+    preenche a galeria -- nos demais ela volta vazia."""
     resultado = _GRAFO.invoke({"lead": lead, "mensagem": mensagem, "turno": turno})
-    return resultado["resposta"]
+    return resultado["resposta"], resultado.get("galeria") or []
 
 
 def exportar_mermaid() -> str:

@@ -7,6 +7,7 @@ from functools import lru_cache
 from pgvector.psycopg import register_vector
 from psycopg import Connection
 from psycopg.rows import dict_row
+from psycopg.types.json import Jsonb
 from psycopg_pool import ConnectionPool
 
 from app.core.config import get_settings
@@ -88,11 +89,16 @@ def salvar_slots(lead_id: int, slots: dict) -> None:
         conn.commit()
 
 
-def salvar_mensagem(lead_id: int, *, papel: str, conteudo: str, origem: str = "texto") -> None:
+def salvar_mensagem(
+    lead_id: int, *, papel: str, conteudo: str, origem: str = "texto", anexos: list[dict] | None = None
+) -> None:
+    """`anexos` guarda a galeria de fotos enviada junto com a mensagem
+    (core/turno.py::RespostaTurno). `Jsonb` explicito porque psycopg3
+    adapta lista Python pra ARRAY, nao pra jsonb."""
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
-            "INSERT INTO mensagens (lead_id, papel, conteudo, origem) VALUES (%s, %s, %s, %s)",
-            (lead_id, papel, conteudo, origem),
+            "INSERT INTO mensagens (lead_id, papel, conteudo, origem, anexos) VALUES (%s, %s, %s, %s, %s)",
+            (lead_id, papel, conteudo, origem, Jsonb(anexos or [])),
         )
         conn.commit()
 
@@ -543,7 +549,7 @@ def listar_mensagens(lead_id: int) -> list[dict]:
     (get_historico e limitado, pensado pro prompt do LLM, nao pra tela)."""
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
-            "SELECT papel, conteudo, origem, criado_em FROM mensagens WHERE lead_id = %s ORDER BY criado_em",
+            "SELECT papel, conteudo, origem, anexos, criado_em FROM mensagens WHERE lead_id = %s ORDER BY criado_em",
             (lead_id,),
         )
         return cur.fetchall()

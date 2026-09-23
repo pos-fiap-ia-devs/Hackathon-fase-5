@@ -77,7 +77,7 @@ def buscar_imoveis(
         sql = f"""
             SELECT id, titulo, tipo, finalidade, bairro, zona, cidade, preco,
                    quartos, banheiros, vagas, area, condominio,
-                   rentabilidade_estimada, descricao,
+                   rentabilidade_estimada, descricao, fotos,
                    0.6 * (1 - (embedding <=> %(vetor)s))
                    + 0.4 * coalesce(ts_rank(busca, plainto_tsquery('portuguese', %(query_ts)s)), 0)
                    AS score
@@ -91,7 +91,7 @@ def buscar_imoveis(
         sql = f"""
             SELECT id, titulo, tipo, finalidade, bairro, zona, cidade, preco,
                    quartos, banheiros, vagas, area, condominio,
-                   rentabilidade_estimada, descricao, NULL AS score
+                   rentabilidade_estimada, descricao, fotos, NULL AS score
             FROM imoveis
             WHERE {where_sql}
             ORDER BY preco ASC

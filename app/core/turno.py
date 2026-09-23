@@ -53,6 +53,30 @@ logger = logging.getLogger(__name__)
 RESPOSTA_FALLBACK = "Desculpa, tive um probleminha aqui agora. Pode repetir o que voce disse?"
 
 
+class RespostaTurno(str):
+    """Texto do turno + a galeria de fotos que vai junto com ele.
+
+    Subclasse de `str` de proposito. Ate aqui o contrato do orquestrador
+    era "texto entra, texto sai" (secao 5.8) e os tres canais, a suite e o
+    chat web tratam o retorno de `processar_turno` como string. Foto so
+    existe num turno especifico (a apresentacao de imoveis); trocar o
+    retorno por uma tupla ou um dataclass obrigaria todo call site a
+    desempacotar algo que quase sempre vem vazio. Herdando de str, quem so
+    quer o texto continua funcionando sem mudar uma linha, e quem sabe
+    renderizar imagem (Telegram, chat web) le `.galeria`.
+
+    Formato de `galeria`: [{imovel_id, numero, legenda, fotos: [url, ...]}],
+    na mesma ordem e com a mesma numeracao dos cards.
+    """
+
+    galeria: list[dict]
+
+    def __new__(cls, texto: str, galeria: list[dict] | None = None) -> "RespostaTurno":
+        obj = super().__new__(cls, texto)
+        obj.galeria = galeria or []
+        return obj
+
+
 def _persona_com_data(turno: int) -> str:
     """Todo prompt do agente de resposta passa por aqui -- achado no
     Telegram real: perguntado "que dia é hoje?", o LLM respondeu "dia 26
@@ -119,10 +143,13 @@ def processar_turno(*, chat_id: str, canal: str, mensagem: str, origem: str = "t
 
     repo.salvar_mensagem(lead_id, papel="user", conteudo=mensagem, origem=origem)
 
-    resposta = processar_turno_grafo(lead, mensagem, turno=turno)
+    resposta, galeria = processar_turno_grafo(lead, mensagem, turno=turno)
 
-    repo.salvar_mensagem(lead_id, papel="assistant", conteudo=resposta, origem="texto")
-    return resposta
+    # Galeria gravada NA mensagem, nao so devolvida ao canal: sem isso,
+    # recarregar o chat web mostraria a apresentacao de imoveis sem as
+    # fotos que o cliente recebeu, e o dashboard idem.
+    repo.salvar_mensagem(lead_id, papel="assistant", conteudo=resposta, origem="texto", anexos=galeria)
+    return RespostaTurno(resposta, galeria)
 
 
 # ---------------------------------------------------------------- qualificacao (cenarios 1 e 2, antes do desfecho)
@@ -290,7 +317,10 @@ def _gerar_frase(instrucao: str, *, lead_id: int, turno: int, fallback: str, slo
 
 # ---------------------------------------------------------------- cenario 1: busca + apresentacao (RAG, secao 5.4)
 
-def _apresentar_imoveis(lead_id: int, slots: dict, mensagem: str, *, turno: int) -> str:
+def _apresentar_imoveis(lead_id: int, slots: dict, mensagem: str, *, turno: int) -> tuple[str, list[dict]]:
+    """Devolve (texto, galeria). A galeria vem separada do texto porque
+    cada canal renderiza imagem do seu jeito (album no Telegram, <img> no
+    chat web, URL crua no CLI) -- o orquestrador nao sabe nada disso."""
     finalidade = "aluguel" if slots.get("intencao") == "aluguel" else "venda"
     resultados = buscar_imoveis(
         finalidade=finalidade,
@@ -312,7 +342,8 @@ def _apresentar_imoveis(lead_id: int, slots: dict, mensagem: str, *, turno: int)
         # cidade dele esta ok. Aqui e sempre "existe, mas nao nessa faixa".
         return (
             "Poxa, não encontrei nada com exatamente esses critérios agora. "
-            "Quer tentar ajustar a faixa de preço ou a região?"
+            "Quer tentar ajustar a faixa de preço ou a região?",
+            [],
         )
 
     repo.salvar_imoveis_apresentados(lead_id, [im["id"] for im in resultados])
@@ -331,11 +362,12 @@ def _apresentar_imoveis(lead_id: int, slots: dict, mensagem: str, *, turno: int)
         lead_id=lead_id, turno=turno, slots=slots,
         fallback="Encontrei essas opções pra você:",
     )
-    return (
+    texto = (
         f"{intro}\n\n{cards}\n\n"
         "Qual te interessou -- pode dizer o número ou o bairro? E qual dia costuma "
         "funcionar melhor pra uma visita?"
     )
+    return texto, _galeria_imoveis(resultados)
 
 
 def _cidades_atendidas(regiao_pedida: str, *, finalidade: str, lead_id: int, turno: int) -> str:
@@ -438,23 +470,53 @@ def _listar_regioes(lead_id: int, slots: dict, *, turno: int) -> str:
     return f"{intro}\n\n{blocos}\n\nQual dessas regiões faz mais sentido pra você?"
 
 
+def _preco_formatado(imovel: dict) -> str:
+    preco = f"R$ {imovel['preco']:,.0f}".replace(",", ".")
+    return preco + ("/mês" if imovel["finalidade"] == "aluguel" else "")
+
+
 def _formatar_cards(imoveis: list[dict]) -> str:
     """Card montado em codigo -- ver guardrail no docstring do modulo.
     Numeros (1, 2, 3) sao o que `_turno_escolha_visita` usa pra mapear a
     resposta do cliente de volta ao imovel, sem precisar repetir titulo."""
     linhas = []
     for i, im in enumerate(imoveis, start=1):
-        preco_fmt = f"R$ {im['preco']:,.0f}".replace(",", ".")
-        sufixo = "/mês" if im["finalidade"] == "aluguel" else ""
         linha = (
             f"{i}. {im['titulo']} — {im['bairro']}\n"
-            f"   {preco_fmt}{sufixo} · {im['quartos']} quarto(s) · "
+            f"   {_preco_formatado(im)} · {im['quartos']} quarto(s) · "
             f"{im['banheiros']} banheiro(s) · {im['area']}m²"
         )
         if im.get("rentabilidade_estimada"):
             linha += f"\n   rentabilidade estimada: {im['rentabilidade_estimada']}% a.a."
         linhas.append(linha)
     return "\n\n".join(linhas)
+
+
+def _galeria_imoveis(imoveis: list[dict]) -> list[dict]:
+    """As fotos que vao JUNTO com os cards (pedido do usuario) -- uma
+    entrada por imovel, mesma ordem e mesmo numero do card, porque o
+    cliente responde "quero o 2" e a foto precisa carregar esse 2 junto.
+
+    Legenda montada aqui em codigo pelo mesmo motivo do card (secao 5.3):
+    titulo, bairro e preco nunca passam pelo LLM. Renderizar e papel de
+    cada canal -- album no Telegram, grade de miniaturas no chat web.
+
+    Imovel sem foto no banco simplesmente nao entra: o card dele continua
+    no texto, so nao tem imagem. E o mesmo principio do resto do projeto
+    (secao 5.6) -- dado que nao existe nao vira placeholder inventado.
+    """
+    galeria = []
+    for i, im in enumerate(imoveis, start=1):
+        fotos = list(im.get("fotos") or [])
+        if not fotos:
+            continue
+        galeria.append({
+            "imovel_id": im["id"],
+            "numero": i,
+            "legenda": f"{i}. {im['titulo']} — {im['bairro']} · {_preco_formatado(im)}",
+            "fotos": fotos,
+        })
+    return galeria
 
 
 # ---------------------------------------------------------------- cenario 2: encaminhamento a especialista

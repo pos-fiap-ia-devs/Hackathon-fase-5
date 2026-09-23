@@ -190,7 +190,16 @@ def chat_send(request: Request, mensagem: str = Form(...)):
         resposta = "Desculpa, tive um probleminha aqui agora. Pode repetir o que você disse?"
 
     r = templates.TemplateResponse(
-        "_chat_mensagens.html", {"request": request, "mensagem_usuario": mensagem, "resposta": resposta}
+        "_chat_mensagens.html",
+        {
+            "request": request,
+            "mensagem_usuario": mensagem,
+            "resposta": resposta,
+            # fotos dos imoveis apresentados neste turno (core/turno.py::
+            # RespostaTurno) -- vazio em todo turno que nao apresenta imovel,
+            # e ausente no fallback de excecao acima, que e string comum.
+            "galeria": getattr(resposta, "galeria", []),
+        },
     )
     r.set_cookie(SESSION_COOKIE, sid, max_age=SESSION_MAX_AGE_S)
     return r
