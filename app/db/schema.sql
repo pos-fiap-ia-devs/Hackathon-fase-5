@@ -56,8 +56,11 @@ CREATE TABLE leads (
                                                 -- | aguardando_escolha | visita_agendada
                                                 -- | encaminhado | perdido | encerrado
                                                 -- (encerrado = fechado por inatividade;
-                                                -- cliente respondeu de novo = reseta pra
-                                                -- 'novo', repo.resetar_qualificacao)
+                                                -- cliente respondeu de novo = retoma de onde
+                                                -- parou, sem apagar slots/contato --
+                                                -- repo.retomar_atendimento; se havia visita
+                                                -- marcada e nao passou, volta pra
+                                                -- 'visita_agendada')
     score               INT         NOT NULL DEFAULT 0,
     -- ids de imoveis.id mostrados na ultima busca (Etapa 5) -- permite o
     -- lead responder "quero o 2" sem repetir o titulo do imovel

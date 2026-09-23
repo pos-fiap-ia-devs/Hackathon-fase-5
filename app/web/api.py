@@ -73,6 +73,12 @@ app = FastAPI(title="Agente SDR Imobiliário", lifespan=lifespan)
 templates = Jinja2Templates(directory="app/web/templates")
 
 SESSION_COOKIE = "web_session"
+# 180 dias: o cookie e a UNICA coisa que liga o navegador ao lead no canal
+# web (chat_id = "web:<uuid>"). Com os 7 dias de antes, voltar duas semanas
+# depois criava um lead novo e zerado -- o cliente via um agente que tinha
+# esquecido nome, telefone e a visita marcada, mesmo com tudo gravado no
+# banco. Vida do cookie >= vida util do atendimento.
+SESSION_MAX_AGE_S = 60 * 60 * 24 * 180
 
 
 @app.get("/health")
@@ -155,7 +161,7 @@ def _session_id(request: Request, response: Response) -> str:
     sid = request.cookies.get(SESSION_COOKIE)
     if not sid:
         sid = uuid.uuid4().hex
-        response.set_cookie(SESSION_COOKIE, sid, max_age=60 * 60 * 24 * 7)
+        response.set_cookie(SESSION_COOKIE, sid, max_age=SESSION_MAX_AGE_S)
     return sid
 
 
@@ -166,7 +172,7 @@ def chat_page(request: Request, response: Response):
     lead = repo.get_or_create_lead(chat_id=lead_chat_id, canal="web")
     mensagens = repo.listar_mensagens(lead["id"])
     pagina = templates.TemplateResponse("chat.html", {"request": request, "mensagens": mensagens})
-    pagina.set_cookie(SESSION_COOKIE, sid, max_age=60 * 60 * 24 * 7)
+    pagina.set_cookie(SESSION_COOKIE, sid, max_age=SESSION_MAX_AGE_S)
     return pagina
 
 
@@ -186,5 +192,5 @@ def chat_send(request: Request, mensagem: str = Form(...)):
     r = templates.TemplateResponse(
         "_chat_mensagens.html", {"request": request, "mensagem_usuario": mensagem, "resposta": resposta}
     )
-    r.set_cookie(SESSION_COOKIE, sid, max_age=60 * 60 * 24 * 7)
+    r.set_cookie(SESSION_COOKIE, sid, max_age=SESSION_MAX_AGE_S)
     return r

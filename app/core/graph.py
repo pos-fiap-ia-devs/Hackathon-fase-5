@@ -203,7 +203,8 @@ def _no_proxima_pergunta_agendamento(state: TurnState) -> dict:
         lead_id, imovel_id=r["imovel_id"], horario_texto=r["horario"], nome=r["nome"], telefone=r["telefone"]
     )
     resposta = _proxima_pergunta_agendamento(
-        tem_imovel=bool(r["imovel_id"]), tem_horario=bool(r["horario"]), tem_contato=bool(r["nome"] and r["telefone"])
+        tem_imovel=bool(r["imovel_id"]), tem_horario=bool(r["horario"]),
+        tem_nome=bool(r["nome"]), tem_telefone=bool(r["telefone"]),
     )
     return {"resposta": resposta}
 

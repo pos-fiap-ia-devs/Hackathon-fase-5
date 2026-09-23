@@ -223,26 +223,39 @@ def leads_inativos(minutos: int) -> list[dict]:
         return cur.fetchall()
 
 
-def resetar_qualificacao(lead_id: int) -> None:
-    """"Novo atendimento" quando o cliente volta depois de encerrado por
-    inatividade -- limpa so os dados de qualificacao (slots + estado do
-    sub-fluxo de agendamento), nunca o historico de mensagens/memoria/
-    resumo, que continuam auditaveis no dashboard."""
+def retomar_atendimento(lead_id: int) -> None:
+    """Cliente voltou depois de encerrado por inatividade.
+
+    Antes isso era um "novo atendimento" que zerava slots, score e imoveis
+    apresentados. Virou retomada (pedido do usuario): nada do que o cliente
+    ja contou e apagado -- nome, telefone, slots, score, historico, memoria
+    e desfechos continuam gravados, e o agente recebe esses dados de volta
+    no contexto do turno (core/turno.py::_contexto_cliente_conhecido), pra
+    nao perguntar duas vezes a mesma coisa.
+
+    A unica coisa limpa aqui e o estado PARCIAL do sub-fluxo de agendamento
+    (`visita_*`): ele descreve uma escolha em andamento sobre uma lista de
+    imoveis que nao esta mais na conversa. Visita ja confirmada nao mora
+    nesses campos, e sim na tabela `visitas` -- essa nunca e tocada.
+
+    Status volta pro ramo de qualificacao: 'qualificando' se ja havia
+    intencao definida (o agente retoma de onde parou), 'novo' se nao.
+    """
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
             """
-            UPDATE slots SET intencao = NULL, faixa_preco_min = NULL, faixa_preco_max = NULL,
-                quartos = NULL, regiao = NULL, urgencia = NULL, perfil_investidor = NULL,
-                ticket = NULL, expectativa_retorno = NULL, atualizado_em = now()
-            WHERE lead_id = %s
-            """,
-            (lead_id,),
-        )
-        cur.execute(
-            """
-            UPDATE leads SET status = 'novo', score = 0, imoveis_apresentados = NULL,
+            UPDATE leads SET
+                status = CASE
+                    WHEN EXISTS (
+                        SELECT 1 FROM slots s
+                        WHERE s.lead_id = leads.id
+                          AND s.intencao IS NOT NULL AND s.intencao <> 'indefinido'
+                    ) THEN 'qualificando'
+                    ELSE 'novo'
+                END,
                 visita_imovel_escolhido = NULL, visita_horario_texto = NULL,
-                visita_nome_texto = NULL, visita_telefone_texto = NULL
+                visita_nome_texto = NULL, visita_telefone_texto = NULL,
+                ultima_interacao_em = now()
             WHERE id = %s
             """,
             (lead_id,),
@@ -341,6 +354,29 @@ def criar_encaminhamento(lead_id: int, *, especialista: str, motivo: str) -> dic
         enc = cur.fetchone()
         conn.commit()
         return enc
+
+
+def get_visita_ativa(lead_id: int) -> dict | None:
+    """Visita agendada que ainda nao passou -- o compromisso vale ate o DIA
+    da visita (pedido do usuario). Comparacao contra `date_trunc('day')`,
+    nao contra `now()`: visita marcada pra hoje as 10h continua ativa as
+    15h, o cliente ainda esta dentro do dia dela.
+
+    Usado em dois pontos: nao transformar o retorno do cliente em "novo
+    atendimento" quando ha visita marcada (core/turno.py::processar_turno)
+    e lembrar a visita no contexto do agente (_contexto_cliente_conhecido).
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT * FROM visitas
+            WHERE lead_id = %s AND status = 'agendada'
+              AND data_hora >= date_trunc('day', now())
+            ORDER BY data_hora LIMIT 1
+            """,
+            (lead_id,),
+        )
+        return cur.fetchone()
 
 
 def get_ultima_visita(lead_id: int) -> dict | None:

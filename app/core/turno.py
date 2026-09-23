@@ -94,14 +94,25 @@ def processar_turno(*, chat_id: str, canal: str, mensagem: str, origem: str = "t
     lead = repo.get_or_create_lead(chat_id=chat_id, canal=canal)
     lead_id = lead["id"]
 
-    # "Novo atendimento" (pedido do usuario) -- o cliente voltou depois do
-    # fechamento por inatividade (core/followup.py::verificar_inatividade).
-    # Limpa so os dados de qualificacao, nunca o historico de mensagens/
-    # memoria/resumo (continuam auditaveis no dashboard). `lead` precisa
-    # ser recarregado depois do reset -- o resto do turno usa o status
-    # dele pra rotear no grafo (core/graph.py::_rota_por_status).
+    # Cliente voltou depois do fechamento por inatividade (core/followup.py
+    # ::verificar_inatividade). Nada e apagado (pedido do usuario) -- o que
+    # muda e so pra qual ramo do grafo ele volta:
+    #
+    #   - com visita marcada que ainda nao passou: volta pro ramo
+    #     pos-desfecho, que ja sabe citar imovel/corretor/data da visita
+    #     (`_resumo_desfecho`). Sem isso o compromisso ja marcado virava
+    #     "novo atendimento" e o agente recomecava a qualificacao de quem
+    #     ja tem visita no dia seguinte.
+    #   - sem visita ativa: retoma a qualificacao com os slots e o contato
+    #     que ja existiam (repo.retomar_atendimento).
+    #
+    # `lead` precisa ser recarregado depois -- o resto do turno usa o
+    # status dele pra rotear (core/graph.py::_rota_por_status).
     if lead["status"] == "encerrado":
-        repo.resetar_qualificacao(lead_id)
+        if repo.get_visita_ativa(lead_id):
+            repo.atualizar_status(lead_id, "visita_agendada")
+        else:
+            repo.retomar_atendimento(lead_id)
         lead = repo.get_lead(lead_id)
 
     turno = repo.contar_turnos(lead_id) + 1
@@ -147,6 +158,47 @@ def _extrair_e_mesclar(
         return slots_atuais
 
 
+def _contexto_cliente_conhecido(lead_id: int) -> str:
+    """Fatos que a Horizonte JA tem sobre este cliente de antes deste turno:
+    nome, telefone registrado e visita marcada que ainda nao passou.
+
+    Achado em uso real (pedido do usuario): fechando e reabrindo a
+    conversa, o agente perguntava o nome outra vez e nao sabia da visita
+    ja agendada -- os dados estavam no banco desde sempre, so nunca
+    chegavam ao prompt. Slots iam no contexto, `leads.nome` e a tabela
+    `visitas` nao. Mesmo principio do resto do projeto (secao 5.6): o
+    guardrail de nao inventar so vale se o fato real estiver no contexto.
+    """
+    lead = repo.get_lead(lead_id)
+    if not lead:
+        return ""
+
+    fatos = []
+    if lead.get("nome"):
+        fatos.append(f"nome: {lead['nome']}")
+    if lead.get("telefone_mascarado"):
+        fatos.append(f"telefone ja registrado no cadastro: {lead['telefone_mascarado']}")
+
+    visita = repo.get_visita_ativa(lead_id)
+    if visita:
+        imovel = repo.get_imovel(visita["imovel_id"]) if visita["imovel_id"] else None
+        onde = f"{imovel['titulo']} ({imovel['bairro']})" if imovel else "imovel ja escolhido"
+        fatos.append(
+            f"visita JA MARCADA e ainda por acontecer: {onde} com {visita['corretor']}, "
+            f"{_formatar_data_extenso(visita['data_hora'].date())}"
+            + (f' (preferencia dita: "{visita["horario_solicitado"]}")' if visita["horario_solicitado"] else "")
+        )
+
+    if not fatos:
+        return ""
+
+    return (
+        "Dados que você JÁ tem deste cliente de conversas anteriores (use "
+        "naturalmente, trate-o pelo nome, e NUNCA pergunte de novo o que estiver "
+        "aqui): " + "; ".join(fatos) + "."
+    )
+
+
 def _gerar_resposta(mensagem: str, slots: dict, proxima_acao: str, *, lead_id: int, turno: int) -> str:
     instrucao = INSTRUCOES_POR_ACAO.get(proxima_acao, INSTRUCAO_PADRAO)
 
@@ -167,8 +219,10 @@ def _gerar_resposta(mensagem: str, slots: dict, proxima_acao: str, *, lead_id: i
     # alem dos slots estruturados; conversa curta (turno 1-2) nao tem resumo
     # ainda, entao contexto_conversa devolve vazio e nao infla o prompt.
     memoria = contexto_conversa(lead_id)
+    conhecido = _contexto_cliente_conhecido(lead_id)
     user = (
-        (f"{memoria}\n\n" if memoria else "")
+        (f"{conhecido}\n\n" if conhecido else "")
+        + (f"{memoria}\n\n" if memoria else "")
         + f"Dados ja coletados do cliente: {slots}\n"
         f'Ultima mensagem do cliente: "{mensagem}"\n\n'
         f"O que fazer agora: {instrucao}"
@@ -477,8 +531,16 @@ def _parece_nome_de_bairro(texto: str, imoveis: list[dict]) -> bool:
     )
 
 
-def _proxima_pergunta_agendamento(*, tem_imovel: bool, tem_horario: bool, tem_contato: bool) -> str:
+def _proxima_pergunta_agendamento(
+    *, tem_imovel: bool, tem_horario: bool, tem_nome: bool, tem_telefone: bool
+) -> str:
+    tem_contato = tem_nome and tem_telefone
     if tem_imovel and tem_horario and not tem_contato:
+        # Nome pode vir de atendimento anterior (`_resolver_escolha`) -- nesse
+        # caso so falta o telefone, e pedir "seu nome e um telefone" seria
+        # exatamente o esquecimento que o resto desta mudanca corrige.
+        if tem_nome:
+            return "Perfeito! Só me confirma um telefone pra contato?"
         return "Perfeito! Última coisa: pode me passar seu nome e um telefone pra contato?"
     if tem_imovel and not tem_horario:
         return "Legal! E qual dia ou período costuma funcionar melhor pra você visitar?"
@@ -517,7 +579,12 @@ def _resolver_escolha(lead: dict, mensagem: str, escolha) -> dict:
     nome_extraido = escolha.nome
     if nome_extraido and _parece_nome_de_bairro(nome_extraido, imoveis_apresentados):
         nome_extraido = None
-    nome = nome_extraido or lead.get("visita_nome_texto")
+    # `leads.nome` no fim da cadeia: nome ja dado num atendimento anterior
+    # continua valendo -- pedir de novo e o tipo de esquecimento que o
+    # cliente percebe na hora (pedido do usuario). Telefone nao entra
+    # nessa herança: o banco so guarda a versao mascarada (secao 7), que
+    # nao serve pra equipe ligar, entao ele e sempre perguntado de novo.
+    nome = nome_extraido or lead.get("visita_nome_texto") or lead.get("nome")
     telefone = escolha.telefone or lead.get("visita_telefone_texto")
 
     return {
