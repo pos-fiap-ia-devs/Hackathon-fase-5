@@ -7,7 +7,7 @@
 <div id="chat-mensagens" class="space-y-2 max-h-[60vh] overflow-y-auto border rounded p-4 bg-white mb-4">
     {% for m in mensagens %}
     <div class="text-sm {% if m.papel == 'user' %}text-right{% endif %}">
-        <span class="inline-block px-3 py-2 rounded-lg max-w-[80%] {% if m.papel == 'user' %}bg-blue-600 text-white{% else %}bg-slate-100{% endif %}">
+        <span class="inline-block px-3 py-2 rounded-lg max-w-[85%] text-left break-words {% if m.papel == 'user' %}bg-blue-600 text-white{% else %}bg-slate-100{% endif %}">
             {{ m.conteudo }}
         </span>
     </div>

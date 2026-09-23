@@ -3,15 +3,15 @@
 {% block content %}
 <h1 class="text-2xl font-bold mb-4">Leads</h1>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+    <div class="min-w-0">
         <div id="leads-table" hx-get="/dashboard/leads-table" hx-trigger="load, every 3s" hx-swap="innerHTML"></div>
     </div>
-    <div id="lead-detail" class="bg-white rounded-lg border p-4 min-h-[200px]">
+    <div id="lead-detail" class="min-w-0 bg-white rounded-lg border p-4 min-h-[200px]">
         <p class="text-gray-400 text-sm">Clique num lead pra ver os detalhes.</p>
     </div>
 </div>
 
 <h2 class="text-xl font-bold mt-10 mb-4">Observabilidade <span class="text-sm font-normal text-gray-500">(agent_traces)</span></h2>
-<div id="traces" hx-get="/dashboard/traces" hx-trigger="load, every 3s" hx-swap="innerHTML"></div>
+<div id="traces" class="min-w-0" hx-get="/dashboard/traces" hx-trigger="load, every 3s" hx-swap="innerHTML"></div>
 {% endblock %}

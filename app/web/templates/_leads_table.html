@@ -1,6 +1,7 @@
-<table class="w-full text-sm bg-white rounded-lg border overflow-hidden">
+<div class="overflow-x-auto bg-white rounded-lg border">
+<table class="w-full min-w-[560px] text-sm">
     <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
-        <tr>
+        <tr class="whitespace-nowrap">
             <th class="px-3 py-2 text-left">Score</th>
             <th class="px-3 py-2 text-left">Lead</th>
             <th class="px-3 py-2 text-left">Status</th>
@@ -12,7 +13,7 @@
     <tbody>
         {% for l in leads %}
         <tr hx-get="/dashboard/lead/{{ l.id }}" hx-target="#lead-detail" hx-swap="innerHTML"
-            class="cursor-pointer hover:bg-slate-50 border-t">
+            class="cursor-pointer hover:bg-slate-50 border-t whitespace-nowrap">
             <td class="px-3 py-2">
                 <span class="inline-block w-10 text-center rounded px-1 py-0.5 text-xs font-bold text-white
                     {% if l.score >= 70 %}bg-green-600{% elif l.score >= 40 %}bg-amber-500{% else %}bg-gray-400{% endif %}">
@@ -32,3 +33,4 @@
         {% endfor %}
     </tbody>
 </table>
+</div>

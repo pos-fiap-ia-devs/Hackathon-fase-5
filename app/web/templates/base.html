@@ -11,12 +11,12 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
-    <nav class="bg-slate-800 text-white px-6 py-3 flex gap-6 items-center">
+    <nav class="bg-slate-800 text-white px-4 sm:px-6 py-3 flex flex-wrap gap-x-6 gap-y-2 items-center">
         <span class="font-semibold">🏠 Horizonte SDR</span>
         <a href="/dashboard" class="text-sm hover:underline">Dashboard</a>
         <a href="/chat" class="text-sm hover:underline">Chat do lead</a>
     </nav>
-    <main class="p-6 max-w-6xl mx-auto">
+    <main class="p-4 sm:p-6 max-w-6xl mx-auto">
         {% block content %}{% endblock %}
     </main>
 </body>

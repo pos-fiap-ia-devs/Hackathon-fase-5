@@ -1,7 +1,7 @@
 <div>
-    <div class="flex justify-between items-start mb-2">
-        <h3 class="font-bold text-lg">{{ lead.nome or lead.chat_id }}</h3>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100">{{ lead.status }}</span>
+    <div class="flex justify-between items-start gap-2 mb-2">
+        <h3 class="font-bold text-lg break-words min-w-0">{{ lead.nome or lead.chat_id }}</h3>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 whitespace-nowrap shrink-0">{{ lead.status }}</span>
     </div>
     <p class="text-xs text-gray-500 mb-4">Canal: {{ lead.canal }} · Score: {{ lead.score }} · Telefone: {{ lead.telefone_mascarado or "não informado" }}</p>
 
@@ -14,7 +14,7 @@
 
     <div class="mb-4">
         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Dados coletados</p>
-        <ul class="text-sm grid grid-cols-2 gap-x-4 gap-y-1">
+        <ul class="text-sm grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 break-words">
             {% for campo, valor in slots.items() %}
                 {% if valor %}<li><span class="text-gray-400">{{ campo }}:</span> {{ valor }}</li>{% endif %}
             {% endfor %}
@@ -26,7 +26,7 @@
         <div class="space-y-2 max-h-96 overflow-y-auto border rounded p-3 bg-slate-50">
             {% for m in mensagens %}
             <div class="text-sm {% if m.papel == 'user' %}text-right{% endif %}">
-                <span class="inline-block px-3 py-1.5 rounded-lg max-w-[80%]
+                <span class="inline-block px-3 py-1.5 rounded-lg max-w-[85%] text-left break-words
                     {% if m.papel == 'user' %}bg-blue-600 text-white{% else %}bg-white border{% endif %}">
                     {{ m.conteudo }}
                     {% if m.origem == 'audio' %}<span class="text-xs opacity-70"> 🎙️</span>{% endif %}
