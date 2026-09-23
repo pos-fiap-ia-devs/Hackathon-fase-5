@@ -1,5 +1,5 @@
 <div class="overflow-x-auto bg-white rounded-lg border">
-<table class="w-full min-w-[560px] text-sm">
+<table class="w-full min-w-[480px] text-sm">
     <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
         <tr class="whitespace-nowrap">
             <th class="px-3 py-2 text-left">Score</th>
@@ -7,7 +7,7 @@
             <th class="px-3 py-2 text-left">Status</th>
             <th class="px-3 py-2 text-left">Intenção</th>
             <th class="px-3 py-2 text-left">Região</th>
-            <th class="px-3 py-2 text-left">Canal</th>
+            <th class="px-3 py-2 text-left hidden xl:table-cell">Canal</th>
         </tr>
     </thead>
     <tbody>
@@ -20,13 +20,13 @@
                     {{ l.score }}
                 </span>
             </td>
-            <td class="px-3 py-2">{{ l.nome or l.chat_id }}</td>
+            <td class="px-3 py-2 max-w-[180px] truncate" title="{{ l.nome or l.chat_id }}">{{ l.nome or l.chat_id }}</td>
             <td class="px-3 py-2">
                 <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100">{{ l.status }}</span>
             </td>
             <td class="px-3 py-2">{{ l.intencao or "—" }}</td>
             <td class="px-3 py-2">{{ l.regiao or "—" }}</td>
-            <td class="px-3 py-2 text-slate-500">{{ l.canal }}</td>
+            <td class="px-3 py-2 text-slate-500 hidden xl:table-cell">{{ l.canal }}</td>
         </tr>
         {% else %}
         <tr><td colspan="6" class="px-3 py-6 text-center text-gray-400">Nenhum lead ainda.</td></tr>
