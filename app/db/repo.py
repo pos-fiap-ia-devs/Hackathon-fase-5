@@ -542,7 +542,7 @@ def listar_leads(limite: int = 200) -> list[dict]:
             """
             SELECT l.id, l.chat_id, l.canal, l.nome, l.status, l.score,
                    l.criado_em, l.ultima_interacao_em,
-                   s.intencao, s.regiao, s.quartos, s.faixa_preco_max, s.urgencia
+                   s.intencao, s.regiao, s.quartos, s.faixa_preco_max, s.urgencia, s.ticket
             FROM leads l LEFT JOIN slots s ON s.lead_id = l.id
             ORDER BY l.score DESC, l.ultima_interacao_em DESC
             LIMIT %s

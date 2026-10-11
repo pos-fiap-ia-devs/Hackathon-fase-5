@@ -1,0 +1,43 @@
+[
+  {
+    "file": "dashboard.png",
+    "tipo": "painel",
+    "espera": "#leads-table tbody tr",
+    "altura": 820
+  },
+  {
+    "file": "lead-detalhe.png",
+    "tipo": "painel",
+    "abrir_primeiro_lead": true,
+    "espera": "#lead-detail h3",
+    "altura": 900
+  },
+  {
+    "file": "observabilidade.png",
+    "tipo": "painel",
+    "espera": "#traces table",
+    "rolar_ate": "h2:has-text('Observabilidade')",
+    "altura": 900
+  },
+  {
+    "file": "injection.png",
+    "tipo": "painel",
+    "espera": "text=Tentativas de prompt injection",
+    "rolar_ate": "text=Tentativas de prompt injection",
+    "altura": 620
+  },
+  {
+    "file": "chat-web.png",
+    "tipo": "chat",
+    "conversa": "compra",
+    "largura": 430,
+    "altura": 1500
+  },
+  {
+    "file": "widget.png",
+    "tipo": "widget",
+    "conversa": "compra",
+    "largura": 1100,
+    "altura": 760
+  }
+]

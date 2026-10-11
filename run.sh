@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# Sobe o projeto local: Ollama, Postgres (docker), venv, deps, schema+seed, uvicorn.
+# Sobe o projeto local inteiro: Ollama, Postgres (docker), venv, deps,
+# schema+seed idempotentes e uvicorn (Telegram + dashboard + chat web +
+# widget + CRM + follow-up, tudo num processo so). Parar: ./stop.sh
+#
+# Para avaliar sem GPU, veja LLM_DEMO no README -- nao precisa deste script.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
@@ -38,8 +42,20 @@ source .env
 set +a
 
 echo "==> schema + seed"
-psql "$DATABASE_URL" -f app/db/schema.sql >/dev/null 2>&1 || true
-python -m app.db.seed
+# `scripts/preparar_banco.py`, nao `psql -f` + `python -m app.db.seed`.
+# Dois motivos, os dois descobertos doendo:
+#
+# 1. O seed comeca com `TRUNCATE imoveis RESTART IDENTITY CASCADE`, e
+#    `visitas.imovel_id` referencia `imoveis` -- o Postgres confirma
+#    ("Table visitas references imoveis"). Chamar o seed a cada subida
+#    apagava a agenda dos corretores junto. Agora so semeia se a tabela
+#    estiver vazia; `--forcar` resemeia de proposito.
+# 2. O `psql -f ... 2>&1 || true` engolia TUDO: sem o binario do psql no
+#    PATH, o schema simplesmente nao era aplicado e ninguem ficava sabendo
+#    -- com tabela nova (usuarios/sessoes/convites) isso vira erro de
+#    coluna inexistente la na frente. O script usa psycopg, que o projeto
+#    ja tem, e informa o que aplicou.
+python -m scripts.preparar_banco
 
 echo "==> subindo app em background: http://localhost:8000"
 nohup uvicorn app.web.api:app --host 0.0.0.0 --port 8000 > run.log 2>&1 &

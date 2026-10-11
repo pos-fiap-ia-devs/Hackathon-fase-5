@@ -15,9 +15,17 @@
         <tr hx-get="/dashboard/lead/{{ l.id }}" hx-target="#lead-detail" hx-swap="innerHTML"
             class="cursor-pointer hover:bg-slate-50 border-t whitespace-nowrap">
             <td class="px-3 py-2">
-                <span class="inline-block w-10 text-center rounded px-1 py-0.5 text-xs font-bold text-white
-                    {% if l.score >= 70 %}bg-green-600{% elif l.score >= 40 %}bg-amber-500{% else %}bg-gray-400{% endif %}">
-                    {{ l.score }}
+                {# Faixas iguais a SCORE_QUENTE/SCORE_MORNO de core/scoring.py.
+                   O rotulo diz por quem ligar primeiro; o numero sozinho nao dizia. #}
+                <span class="inline-flex items-center gap-1 whitespace-nowrap">
+                    <span class="inline-block w-8 text-center rounded px-1 py-0.5 text-xs font-bold text-white
+                        {% if l.prioridade == 'quente' %}bg-green-600{% elif l.prioridade == 'morno' %}bg-amber-500{% else %}bg-gray-400{% endif %}">
+                        {{ l.score }}
+                    </span>
+                    <span class="text-[10px] uppercase tracking-wide hidden sm:inline
+                        {% if l.prioridade == 'quente' %}text-green-700{% elif l.prioridade == 'morno' %}text-amber-600{% else %}text-gray-400{% endif %}">
+                        {{ l.prioridade }}
+                    </span>
                 </span>
             </td>
             <td class="px-3 py-2 max-w-[180px] truncate" title="{{ l.nome or l.chat_id }}">{{ l.nome or l.chat_id }}</td>

@@ -25,7 +25,7 @@ from fastapi import Depends, FastAPI, Form, HTTPException, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 
-from app.core import auth, custo, injecao
+from app.core import auth, custo, injecao, scoring
 from app.core.config import get_settings
 from app.core.turno import processar_turno
 from app.db import repo
@@ -346,6 +346,11 @@ def dashboard(request: Request, usuario: dict = Depends(exigir_login)):
 @app.get("/dashboard/leads-table", response_class=HTMLResponse)
 def leads_table(request: Request, usuario: dict = Depends(exigir_login)):
     leads = repo.listar_leads()
+    # Prioridade pela mesma funcao do detalhe (core/scoring.py). Calcular
+    # por faixa aqui e pela regra completa la faria a lista dizer "quente"
+    # e o detalhe "morno" no mesmo lead.
+    for lead in leads:
+        lead["prioridade"] = scoring.prioridade_de(lead["score"], lead)
     return templates.TemplateResponse("_leads_table.html", {"request": request, "leads": leads})
 
 
@@ -355,9 +360,16 @@ def lead_detail(request: Request, lead_id: int, usuario: dict = Depends(exigir_l
     mensagens = repo.listar_mensagens(lead_id)
     slots = repo.get_slots(lead_id)
     resumo = repo.get_resumo(lead_id)
+    # Recalculado na leitura, não lido de `leads.score`: a coluna guarda só
+    # o total, e a quebra tem que bater com ele. Recalcular da mesma função
+    # é o que impede o painel de mostrar uma conta que não fecha.
+    detalhe = scoring.calcular_score_detalhado(
+        slots, visita_agendada=lead["status"] == "visita_agendada"
+    )
     return templates.TemplateResponse(
         "_lead_detail.html",
-        {"request": request, "lead": lead, "mensagens": mensagens, "slots": slots, "resumo": resumo},
+        {"request": request, "lead": lead, "mensagens": mensagens, "slots": slots,
+         "resumo": resumo, "score": detalhe},
     )
 
 

@@ -1,10 +1,62 @@
-# Agente SDR Imobiliário
+# Agente SDR Imobiliário — Bia
 
-POC de um agente de IA que atende, qualifica e agenda visitas com leads de uma imobiliária, 100% local — nenhum dado sai da máquina, nenhuma chamada a API paga. Projeto do **FIAP Tech Challenge Fase 5**.
+POC de um agente de IA que atende, qualifica e agenda visitas com leads de uma imobiliária. Projeto do **FIAP Tech Challenge Fase 5**.
 
-Atende por Telegram (texto e áudio), por chat web, ou por CLI — os três canais batem no mesmo orquestrador. Qualifica intenção (compra/aluguel/investimento), busca imóveis reais no banco, agenda visita ou encaminha a um especialista, faz follow-up automático quando o lead some, gera resumo para o corretor e mantém um dashboard com tudo em tempo real.
+A Bia atende por Telegram (texto e áudio), chat web, widget embutido no site da imobiliária ou CLI — os quatro canais batem no mesmo orquestrador. Entende se o lead quer comprar, alugar ou investir, qualifica com uma pergunta por mensagem, mostra imóveis reais do banco, agenda a visita com o corretor certo e volta a procurar quem some no meio do caminho. O corretor acompanha num painel com score explicado, resumo e observabilidade.
 
-Documentos relacionados: [ARQUITETURA.md](ARQUITETURA.md) (design técnico) · [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md) (**requisito do enunciado → código → teste que comprova**) · [docs/SOLID.md](docs/SOLID.md) (princípios de design mapeados a arquivo e função reais) · [IA.md](IA.md) (como a IA foi usada, achados reais) · [PITCH.md](PITCH.md) (pitch de 5 minutos) · [PLANO.md](PLANO.md) (diário de bordo completo, com os ~15 bugs reais achados e corrigidos) · [docs/ENUNCIADO.md](docs/ENUNCIADO.md) (enunciado literal do desafio).
+> **Estado da entrega:** funcional, rodando local com Docker Compose e Ollama nativo. **271 testes passando.** O modelo é local (`qwen3.5:9b`, por Metal) — não há WhatsApp nem deploy publicado, e a transcrição de áudio só funciona em Apple Silicon. Para avaliar em Windows ou Linux, veja o [modo demonstração](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração) logo abaixo.
+
+## Guia rápido para a avaliação
+
+| Pergunta | Onde está a resposta |
+|---|---|
+| Quais requisitos do desafio foram atendidos, e como? | [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md) — requisito → código → teste que comprova |
+| Como rodo isso sem um Mac com GPU? | [Modo demonstração](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração), aqui embaixo |
+| Qual é a arquitetura? | [ARQUITETURA.md](ARQUITETURA.md) — camadas, grafo e fluxos · [docs/SOLID.md](docs/SOLID.md) — princípios mapeados a arquivo e função |
+| Que IA é usada, e por quê? | [IA.md](IA.md) — inclusive os achados que mudaram decisões |
+| Como fica na tela? | [Em imagens](#em-imagens) |
+| Quais diferenciais foram implementados? | [Diferenciais, na matriz de requisitos](docs/VALIDACAO_REQUISITOS.md#diferenciais) |
+| Como a qualidade é verificada? | [Testes](#testes) — 271, incluindo adversariais contra alucinação |
+| Por que as decisões foram essas? | [PLANO.md](PLANO.md) — diário de bordo com os ~15 bugs reais achados e corrigidos |
+
+---
+
+## O problema
+
+Imobiliária perde lead por motivo banal, e cada lead custa caro:
+
+- **Tempo de resposta.** Quem manda mensagem às 22h de sábado fala com o concorrente antes de falar com você.
+- **Falta de follow-up.** Quem não respondeu à primeira mensagem é abandonado.
+- **Falta de priorização.** O corretor trata igual quem quer mudar em 30 dias e quem está só olhando.
+- **Sobrecarga.** O corretor faz triagem em vez de vender.
+
+## A solução, e o que a diferencia
+
+Um SDR digital que atende 24h em conversa natural — e que, neste projeto, roda **inteiramente na máquina da imobiliária**:
+
+- **Custo de inferência zero e dado que não viaja.** Modelo local, banco local. Nenhum token do seu cliente sai da máquina, e não há fatura de API. O painel mostra `US$ 0,00` ao lado do que a mesma conversa teria custado numa API paga.
+- **Fato crítico nunca escrito pelo LLM.** Preço, endereço, data e corretor são montados em código a partir do banco. Testado adversarialmente: [`test_adversarial.py`](tests/test_adversarial.py) não verifica se a resposta é bonita, verifica se ela **mente**.
+- **Score explicável.** O painel abre a conta em vez de mostrar só o número, e diz o que falta perguntar.
+- **Fluxo decidido em código, texto decidido pelo LLM.** O roteador não chama o modelo — ele devolve um rótulo, e só depois o LLM escreve a frase daquele rótulo.
+
+## Em imagens
+
+<!-- Capturas da aplicação real. O que cada uma mostra, e que mudança obriga a
+     refazê-la, está em docs/imagens/README.md; scripts/screenshots/ refaz todas
+     com o mesmo enquadramento. -->
+
+| Dashboard do corretor | Detalhe do lead, com o score aberto |
+|---|---|
+| ![Lista de leads com selo quente/morno/frio](docs/imagens/dashboard.png) | ![Score decomposto em parcelas, com o que falta perguntar](docs/imagens/lead-detalhe.png) |
+| **Observabilidade: custo, p95 e injeções** | **Chat do lead, com galeria de imóveis** |
+| ![Custo real zero ao lado do contrafactual, latência p95 e tentativas de injection](docs/imagens/observabilidade.png) | ![Conversa com cartões de imóveis e fotos](docs/imagens/chat-web.png) |
+
+Mais telas: [a Bia embutida no site de uma imobiliária](docs/imagens/widget.png) ·
+[tentativa de prompt injection, marcada e classificada](docs/imagens/injection.png).
+
+---
+
+Documentos: [ARQUITETURA.md](ARQUITETURA.md) · [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md) · [docs/SOLID.md](docs/SOLID.md) · [IA.md](IA.md) · [PITCH.md](PITCH.md) · [PLANO.md](PLANO.md) · [docs/ENUNCIADO.md](docs/ENUNCIADO.md) (enunciado literal do desafio).
 
 ## Rodar em 1 minuto, em qualquer máquina (modo demonstração)
 
@@ -14,7 +66,7 @@ Para isso existe o modo demonstração. Troca o Ollama por um provedor de regras
 
 ```bash
 uv venv --python 3.12 && source .venv/bin/activate && uv pip install -e .
-docker compose up -d && python -m app.db.seed
+docker compose up -d && python -m scripts.preparar_banco
 LLM_DEMO=true python -m app.channels.cli
 ```
 
@@ -61,8 +113,7 @@ cp .env.example .env
 # web chat e CLI seguem funcionando)
 
 # 5. schema + seed de imóveis
-psql "$DATABASE_URL" -f app/db/schema.sql   # ou deixa o docker-entrypoint aplicar sozinho
-python -m app.db.seed
+python -m scripts.preparar_banco   # schema + seed, idempotente
 
 # 6. subir tudo (Telegram + dashboard + chat web + CRM + follow-up, um processo só)
 uvicorn app.web.api:app --host 0.0.0.0 --port 8000
@@ -123,7 +174,20 @@ SKIPPED tests/test_inatividade.py:25: precisa do Postgres (docker compose up -d)
 
 **Telegram**: conversa normal, texto ou áudio. Ex.: *"Estou procurando apartamento na zona sul"* → o agente pergunta faixa de preço, quartos, região, urgência, e no fim apresenta imóveis reais do banco com opção de agendar visita. *"Quero investir em imóveis para renda"* leva pro fluxo de investimento (perfil, ticket, expectativa de retorno) e termina em encaminhamento a um especialista.
 
-**Dashboard** (`/dashboard`): lista de leads ordenada por score, com card de detalhe (slots coletados, resumo pro corretor, histórico de mensagens) e aba de observabilidade (`agent_traces` — latência, tokens, tokens/s de cada chamada ao LLM).
+**Dashboard** (`/dashboard`): lista de leads ordenada por score, com selo **quente/morno/frio**, card de detalhe (slots coletados, resumo pro corretor, histórico de mensagens) e aba de observabilidade.
+
+**Score explicável.** O número nunca é pedido ao LLM — a fórmula é determinística, e o painel mostra a conta aberta em vez de só o total:
+
+```
+86  quente  de 100
+Dados coletados   40/40   4 de 4 campos de qualificação preenchidos.
+Urgência          30/30   Urgência alta.
+Ticket             6/20   Ticket de R$ 600.000 (teto de referência: R$ 2.000.000).
+Visita agendada   10/10   Visita confirmada.
+Qualificação completa.
+```
+
+A explicação **é** o cálculo, não uma narração dele: o total é a soma das parcelas, e um teste trava isso. Quando falta dado, o painel diz o que perguntar ("Falta perguntar: orçamento, urgência"). Uma regra de negócio fica acima do número: **sem orçamento informado, a prioridade não passa de morno** — um lead pode somar 70+ só com urgência e campos preenchidos sem nunca ter dito quanto pode pagar, e mandar o corretor ligar primeiro pra esse desperdiça a ligação.
 
 **Observabilidade** (`/dashboard/traces`): além da tabela de chamadas, indicadores agregados da janela — latência p50/p95/pior, tokens/s mediano, taxa de erro e quebra por agente (qual agente custa caro). E o número que resume a arquitetura: **custo real US$ 0,00** ao lado do contrafactual *"se fosse nuvem"*, calculado aplicando preço de tabela aos tokens realmente medidos. Os preços são de referência e ficam no `.env` — não há consulta a API de preço nem de câmbio.
 

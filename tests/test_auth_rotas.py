@@ -50,7 +50,15 @@ def admin(client):
         email=email, nome="Admin de Teste", senha_hash=auth.hash_senha(senha), papel="admin",
     )
     client.post("/login", data={"email": email, "senha": senha})
-    return {"id": usuario["id"], "email": email, "senha": senha}
+    yield {"id": usuario["id"], "email": email, "senha": senha}
+
+    # Limpa o que criou. Sem isto cada rodada de `pytest` deixava ~36
+    # contas `@teste.local` no banco -- e este é o MESMO banco da demo,
+    # então a tela de usuários do painel ia enchendo de lixo a cada
+    # execução da suíte. As sessões somem junto, por `ON DELETE CASCADE`.
+    with repo.get_conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM usuarios WHERE email LIKE %s", ("%@teste.local",))
+        conn.commit()
 
 
 # ---------------------------------------------------------------- guard

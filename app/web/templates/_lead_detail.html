@@ -3,7 +3,48 @@
         <h3 class="font-bold text-lg break-words min-w-0">{{ lead.nome or lead.chat_id }}</h3>
         <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 whitespace-nowrap shrink-0">{{ lead.status }}</span>
     </div>
-    <p class="text-xs text-gray-500 mb-4">Canal: {{ lead.canal }} · Score: {{ lead.score }} · Telefone: {{ lead.telefone_mascarado or "não informado" }}</p>
+    <p class="text-xs text-gray-500 mb-3">Canal: {{ lead.canal }} · Telefone: {{ lead.telefone_mascarado or "não informado" }}</p>
+
+    {# Score com a conta aberta. "66" sozinho obriga o corretor a confiar;
+       a quebra diz de onde veio e, mais util, o que falta perguntar pra
+       subir. A soma das parcelas E o total -- core/scoring.py. #}
+    <div class="border rounded-lg p-3 mb-4">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="inline-block rounded px-2 py-0.5 text-sm font-bold text-white
+                {% if score.prioridade == 'quente' %}bg-green-600
+                {% elif score.prioridade == 'morno' %}bg-amber-500
+                {% else %}bg-gray-400{% endif %}">{{ score.total }}</span>
+            <span class="text-sm font-semibold capitalize">{{ score.prioridade }}</span>
+            <span class="text-xs text-gray-400">de 100</span>
+        </div>
+
+        <table class="w-full text-xs mb-2">
+            {% for c in score.criterios %}
+            <tr class="border-t">
+                <td class="py-1 pr-2 whitespace-nowrap">{{ c.nome }}</td>
+                <td class="py-1 pr-2 text-right whitespace-nowrap font-medium
+                    {% if not c.pontos %}text-gray-300{% endif %}">{{ c.pontos }}/{{ c.maximo }}</td>
+                {# Barra proporcional: o peso de cada critério fica visível
+                   sem ter que ler a fórmula. #}
+                <td class="py-1 w-20">
+                    <div class="bg-gray-100 rounded h-1.5">
+                        <div class="bg-slate-500 rounded h-1.5"
+                             style="width: {{ (100 * c.pontos / c.maximo)|round|int }}%"></div>
+                    </div>
+                </td>
+                <td class="py-1 pl-2 text-gray-500">{{ c.motivo }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        {% if score.campos_faltantes %}
+        <p class="text-xs text-amber-700">
+            Falta perguntar: {{ score.campos_faltantes | join(", ") }}.
+        </p>
+        {% else %}
+        <p class="text-xs text-emerald-700">Qualificação completa.</p>
+        {% endif %}
+    </div>
 
     {% if resumo %}
     <div class="bg-amber-50 border border-amber-200 rounded p-3 mb-4">

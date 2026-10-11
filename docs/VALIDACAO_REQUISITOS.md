@@ -2,7 +2,7 @@
 
 Cada item do enunciado do Tech Challenge — Fase 5, com **onde está no
 código** e **qual teste comprova**. Conferido contra `pytest` em 11/10/2026:
-**242 testes passando**, nenhum falhando.
+**271 testes passando**, nenhum falhando.
 
 Os testes rodam contra o **Ollama e o Postgres reais**, sem mock — decisão
 explicada em [SOLID.md](SOLID.md) e [ARQUITETURA.md](../ARQUITETURA.md). Os
@@ -10,9 +10,9 @@ que dependem de serviço **pulam** com a razão e o comando na mensagem
 quando a infra não está de pé, em vez de falhar ([`tests/conftest.py`](../tests/conftest.py)):
 
 ```
-sem Docker e sem Ollama   →  178 passed, 64 skipped em 3,2s
-só com o Postgres          →  199 passed,  7 skipped
-tudo no ar                 →  242 passed
+sem Docker e sem Ollama   →  207 passed, 64 skipped em 3,3s
+só com o Postgres          →  228 passed,  7 skipped
+tudo no ar                 →  271 passed
 ```
 
 Legenda: ✅ feito · ⚠️ parcial, com a limitação escrita · ❌ não feito.
@@ -25,7 +25,7 @@ Legenda: ✅ feito · ⚠️ parcial, com a limitação escrita · ❌ não feit
 |---|---|---|---|---|
 | 1 | Atender leads automaticamente | ✅ | 4 canais no mesmo orquestrador: Telegram (long polling), chat web, widget em site de terceiro, CLI. Todos chamam `core/turno.py::processar_turno` | `test_widget.py` (26) · `test_galeria.py` (6) |
 | 2 | Conversa humanizada | ✅ | Persona fixa em [`core/prompts.py`](../app/core/prompts.py); 1 pergunta por mensagem; reconhece o que o cliente disse antes de perguntar o próximo campo; 5 tipos de objeção de venda tratados ([`router.py`](../app/agents/router.py)); despedida e aceite curto reconhecidos | `test_router.py` (17) · `test_autorreferencia.py` |
-| 3 | Qualificar clientes | ✅ | [`qualifier.py`](../app/agents/qualifier.py) extrai slots via JSON Schema; score determinístico em [`scoring.py`](../app/core/scoring.py) — nunca pedido ao LLM, porque número estável no painel vale mais que número "inteligente" | `test_qualifier.py` (5) · `test_scoring.py` (5) |
+| 3 | Qualificar clientes | ✅ | [`qualifier.py`](../app/agents/qualifier.py) extrai slots via JSON Schema; score determinístico e **explicável** em [`scoring.py`](../app/core/scoring.py) — nunca pedido ao LLM. O painel abre a conta: cada parcela com pontos, máximo e motivo, mais o que falta perguntar e a prioridade quente/morno/frio. Regra de negócio sobreposta: sem orçamento informado, a prioridade não passa de morno | `test_scoring.py` (5) · `test_scoring_explicavel.py` (29) |
 | 4 | Identificar intenção (compra, aluguel, investimento) | ✅ | Campo `intencao` no schema, com regra por padrão de frase. A 1ª versão do prompt classificava o Cenário 1 do enunciado como aluguel; a atual acerta os 3 | `test_qualifier.py::test_cenario_1_compra` · `test_cenario_2_investimento` |
 | 5 | Coletar informações relevantes | ✅ | 9 slots: intenção, região, quartos, faixa de preço (mín/máx), urgência, perfil de investidor, ticket, expectativa de retorno. Resposta curta ambígua ("2") é desambiguada pela pergunta pendente | `test_pergunta_vs_preferencia.py` · `test_qualifier.py` |
 | 6 | Follow-up automático | ✅ | [`core/followup.py`](../app/core/followup.py) + APScheduler; 3 tentativas com intervalos crescentes; `DEMO_MODE` encurta 30 min/2 h/24 h → 90 s/180 s/300 s para a demo acontecer ao vivo. Fechamento por inatividade roda em paralelo | `test_inatividade.py` (5) |

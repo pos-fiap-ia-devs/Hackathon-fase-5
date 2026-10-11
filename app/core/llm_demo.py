@@ -117,6 +117,68 @@ _ACAO_POR_INSTRUCAO = {instrucao: acao for acao, instrucao in INSTRUCOES_POR_ACA
 _FRASE_GENERICA = "Certo, entendi. Me conta um pouco mais pra eu te ajudar melhor."
 
 
+# O resumo pro corretor é o único texto do projeto que não é conversa: é
+# ficha montada a partir de dado estruturado. Isso um provedor de regras
+# faz BEM -- e faz melhor que cair na frase genérica, que numa captura de
+# tela do painel pareceria defeito do produto.
+_SLOTS_DO_RESUMO = re.compile(r"dados coletados do lead:\s*(\{.*?\})", re.IGNORECASE | re.DOTALL)
+_STATUS_DO_RESUMO = re.compile(r"^status:\s*(\w+)", re.IGNORECASE | re.MULTILINE)
+_DESFECHO_DO_RESUMO = re.compile(r"^desfecho:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
+
+_VERBO_POR_INTENCAO = {"compra": "comprar", "aluguel": "alugar", "investimento": "investir"}
+
+
+def _campo(bruto: str, nome: str) -> str | None:
+    achado = re.search(rf"'{nome}':\s*(?:'([^']*)'|(\d+))", bruto)
+    if not achado:
+        return None
+    return achado.group(1) or achado.group(2)
+
+
+def _reais(valor: str | None) -> str | None:
+    if not valor or not valor.isdigit():
+        return None
+    return f"R$ {int(valor):,}".replace(",", ".")
+
+
+def _resumo_pro_corretor(prompt: str) -> str | None:
+    """Ficha a partir dos slots que o próprio prompt carrega. `None` quando
+    o prompt não é de resumo -- aí o chamador segue pro caminho normal."""
+    achado = _SLOTS_DO_RESUMO.search(prompt)
+    if not achado:
+        return None
+    slots = achado.group(1)
+
+    intencao = _campo(slots, "intencao")
+    verbo = _VERBO_POR_INTENCAO.get(intencao or "", "negociar")
+
+    partes = []
+    if intencao == "investimento":
+        detalhes = [
+            _campo(slots, "perfil_investidor"),
+            (f"ticket de {t}" if (t := _reais(_campo(slots, "ticket"))) else None),
+            (f"espera {r}" if (r := _campo(slots, "expectativa_retorno")) else None),
+        ]
+    else:
+        detalhes = [
+            (f"{q} quartos" if (q := _campo(slots, "quartos")) else None),
+            _campo(slots, "regiao"),
+            (f"até {p}" if (p := _reais(_campo(slots, "faixa_preco_max"))) else None),
+        ]
+    presentes = [d for d in detalhes if d]
+    partes.append(f"Cliente quer {verbo}" + (f": {', '.join(presentes)}." if presentes else "."))
+
+    if urgencia := _campo(slots, "urgencia"):
+        partes.append(f"Urgência {urgencia}.")
+
+    if desfecho := _DESFECHO_DO_RESUMO.search(prompt):
+        partes.append(desfecho.group(1).strip().rstrip(".") + ".")
+    elif (status := _STATUS_DO_RESUMO.search(prompt)) and status.group(1) == "aguardando_escolha":
+        partes.append("Escolhendo o imóvel pra visita.")
+
+    return " ".join(partes)
+
+
 def chat_text(*, agente: str, system: str, user: str, **_ignorado) -> tuple[str, TraceInfo]:
     """Devolve a frase pronta da ação que o router decidiu.
 
@@ -126,6 +188,8 @@ def chat_text(*, agente: str, system: str, user: str, **_ignorado) -> tuple[str,
     qual instrução conhecida aparece no prompt. Sem alteração nenhuma no
     fluxo real."""
     inicio = time.monotonic()
+    if resumo := _resumo_pro_corretor(user):
+        return resumo, _trace(agente, inicio)
     for instrucao, acao in _ACAO_POR_INSTRUCAO.items():
         if instrucao in user and acao in _FRASE_POR_ACAO:
             return _FRASE_POR_ACAO[acao], _trace(agente, inicio)
