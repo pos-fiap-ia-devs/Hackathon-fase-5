@@ -10,6 +10,14 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql://sdr:sdr@localhost:5433/sdr"
 
+    # Modo demonstracao: substitui o Ollama por um provedor de regras
+    # (core/llm_demo.py). Serve pra rodar o projeto inteiro em qualquer
+    # maquina, sem GPU e sem baixar modelo -- avaliacao, CI, demo em
+    # Windows/Linux. Respostas muito piores de proposito: demonstra FLUXO,
+    # nao qualidade de redacao. Os testes de integracao continuam exigindo
+    # o Ollama real (ver core/llm_demo.py sobre por que nao se mocka aqui).
+    llm_demo: bool = False
+
     ollama_host: str = "http://localhost:11434"
     ollama_model: str = "qwen3.5:9b"
     ollama_embed_model: str = "nomic-embed-text"

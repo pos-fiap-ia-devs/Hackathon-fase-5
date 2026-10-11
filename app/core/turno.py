@@ -41,6 +41,7 @@ from app.agents.scheduler_agent import (
 )
 from app.agents.search import buscar_imoveis
 from app.core import injecao
+from app.core.config import get_settings
 from app.core.llm import LLMError, chat_text
 from app.core.memory import contexto_conversa
 from app.core.prompts import INSTRUCAO_PADRAO, INSTRUCOES_POR_ACAO, PERSONA, REGRAS
@@ -314,6 +315,13 @@ def _gerar_frase(instrucao: str, *, lead_id: int, turno: int, fallback: str, slo
     fato. Sem essa checagem, a instrucao "nao cite preco" seria so mais
     uma regra de prompt -- exatamente o tipo de garantia que este projeto
     ja provou nao segurar (secao 5.3 do PLANO.md)."""
+    # Modo demonstracao (core/llm_demo.py): o `fallback` ja E a frase certa
+    # pra este caso, escrita a mao. Chamar o provedor de regras aqui so
+    # produziria texto generico pior que o fallback que ja esta na linha de
+    # baixo -- entao o atalho devolve a frase boa direto.
+    if get_settings().llm_demo:
+        return fallback
+
     system = _persona_com_data(turno)
     try:
         texto, trace = chat_text(agente="responder", system=system, user=instrucao, temperature=0.4, slots=slots)

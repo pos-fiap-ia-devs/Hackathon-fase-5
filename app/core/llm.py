@@ -36,6 +36,7 @@ import httpx
 from json_repair import repair_json
 from pydantic import BaseModel
 
+from app.core import llm_demo
 from app.core.config import get_settings
 from app.core.traces import TraceInfo
 
@@ -51,6 +52,8 @@ class LLMError(Exception):
 def embed_text(text: str) -> list[float]:
     """Vetor de 768 dims via nomic-embed-text. Usado no seed e na busca hibrida."""
     settings = get_settings()
+    if settings.llm_demo:
+        return llm_demo.embed_text(text)
     resp = httpx.post(
         f"{settings.ollama_host}/api/embeddings",
         json={"model": settings.ollama_embed_model, "prompt": text},
@@ -357,6 +360,13 @@ def chat_text(
     mesma filosofia do retry por JSON malformado em chat_structured.
     """
     settings = get_settings()
+    # Modo demonstracao: nenhuma chamada ao Ollama. Desvio no TOPO, antes de
+    # montar payload -- a logica real abaixo (retry, 4 sanitizadores,
+    # heuristico de resposta ruim) fica intocada, que e o ponto: este
+    # arquivo carrega ~15 correcoes validadas contra o servidor real.
+    if settings.llm_demo:
+        return llm_demo.chat_text(agente=agente, system=system, user=user)
+
     payload = {
         "model": settings.ollama_model,
         "messages": [
@@ -423,6 +433,9 @@ def chat_structured[T: BaseModel](
     Retry unico com parser tolerante (json_repair) se o JSON vier malformado.
     """
     settings = get_settings()
+    if settings.llm_demo:
+        return llm_demo.chat_structured(agente=agente, system=system, user=user, schema=schema)
+
     payload = {
         "model": settings.ollama_model,
         "messages": [

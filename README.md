@@ -4,7 +4,38 @@ POC de um agente de IA que atende, qualifica e agenda visitas com leads de uma i
 
 Atende por Telegram (texto e áudio), por chat web, ou por CLI — os três canais batem no mesmo orquestrador. Qualifica intenção (compra/aluguel/investimento), busca imóveis reais no banco, agenda visita ou encaminha a um especialista, faz follow-up automático quando o lead some, gera resumo para o corretor e mantém um dashboard com tudo em tempo real.
 
-Documentos relacionados: [ARQUITETURA.md](ARQUITETURA.md) (design técnico) · [IA.md](IA.md) (como a IA foi usada, achados reais) · [PITCH.md](PITCH.md) (pitch de 5 minutos) · [PLANO.md](PLANO.md) (diário de bordo completo, com os ~15 bugs reais achados e corrigidos) · [docs/ENUNCIADO.md](docs/ENUNCIADO.md) (enunciado literal do desafio).
+Documentos relacionados: [ARQUITETURA.md](ARQUITETURA.md) (design técnico) · [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md) (**requisito do enunciado → código → teste que comprova**) · [docs/SOLID.md](docs/SOLID.md) (princípios de design mapeados a arquivo e função reais) · [IA.md](IA.md) (como a IA foi usada, achados reais) · [PITCH.md](PITCH.md) (pitch de 5 minutos) · [PLANO.md](PLANO.md) (diário de bordo completo, com os ~15 bugs reais achados e corrigidos) · [docs/ENUNCIADO.md](docs/ENUNCIADO.md) (enunciado literal do desafio).
+
+## Rodar em 1 minuto, em qualquer máquina (modo demonstração)
+
+O projeto roda com um modelo de 9B local, por Metal — é a decisão central da arquitetura. Mas isso tem um custo que não é técnico: quem for **avaliar** precisaria de um Mac com Apple Silicon, 9 GB de modelo em disco, Docker e Postgres.
+
+Para isso existe o modo demonstração. Troca o Ollama por um provedor de regras ([`app/core/llm_demo.py`](app/core/llm_demo.py)) e roda o fluxo inteiro — qualificação, busca no banco, agendamento, follow-up, resumo — em Windows, Linux ou Mac sem GPU:
+
+```bash
+uv venv --python 3.12 && source .venv/bin/activate && uv pip install -e .
+docker compose up -d && python -m app.db.seed
+LLM_DEMO=true python -m app.channels.cli
+```
+
+```
+> Estou procurando apartamento na zona sul
+< Perfeito, anotei. Qual faixa de preço você tem em mente?
+> Até 600 mil
+< Ótimo. De quantos quartos você precisa?
+> 2 quartos
+< Entendi. Você tem pressa pra fechar, ou pode esperar um pouco?
+> Tenho pressa, quero mudar logo
+< Encontrei essas opções pra você:
+  1. Apartamento 2 quarto(s) — Campo Belo · R$ 311.000 · 45m²
+> Quero o 1 … Sábado de manhã … Meu nome é Wellson, telefone 11 98888-7777
+< Show, Wellson! Marquei sua visita ao Apartamento Campo Belo com Fernanda Souza,
+  para sábado de manhã — 17/10.
+```
+
+Os imóveis, o corretor, a data e o preço são reais, vindos do Postgres: só o **texto** sai de regra em vez de modelo. As respostas são bem piores que as do Ollama, e é esse o ponto — demonstra **fluxo**, não qualidade de redação. Em `agent_traces` o modelo aparece como `demo-rules`, sem contagem de tokens, para que o painel de observabilidade nunca passe número inventado por medição.
+
+Os testes de integração continuam exigindo o Ollama real: os bugs que mais custaram neste projeto foram de formato (`anyOf` devolvendo `null` em silêncio, chave `"intenção"` com acento, `think: false` faltando) e nenhum deles apareceria contra um provedor de regra.
 
 ## Como rodar
 
