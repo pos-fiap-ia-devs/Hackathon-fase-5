@@ -40,6 +40,7 @@ from app.agents.scheduler_agent import (
     proximo_horario_util,
 )
 from app.agents.search import buscar_imoveis
+from app.core import injecao
 from app.core.llm import LLMError, chat_text
 from app.core.memory import contexto_conversa
 from app.core.prompts import INSTRUCAO_PADRAO, INSTRUCOES_POR_ACAO, PERSONA, REGRAS
@@ -141,7 +142,19 @@ def processar_turno(*, chat_id: str, canal: str, mensagem: str, origem: str = "t
 
     turno = repo.contar_turnos(lead_id) + 1
 
-    repo.salvar_mensagem(lead_id, papel="user", conteudo=mensagem, origem=origem)
+    # Marca tentativa de prompt injection ANTES de processar -- e so
+    # marcacao, nao bloqueio: a mitigacao ja e estrutural (a mensagem vai
+    # como turno `user`, nunca concatenada no system prompt, e fato
+    # critico e montado em codigo). O atendimento segue normal; o que muda
+    # e que agora a tentativa aparece no painel em vez de passar batida.
+    suspeita = injecao.detectar(mensagem)
+    if suspeita:
+        logger.warning(
+            "suspeita de prompt injection (lead_id=%s, tipo=%s)", lead_id, suspeita
+        )
+    repo.salvar_mensagem(
+        lead_id, papel="user", conteudo=mensagem, origem=origem, suspeita_injecao=suspeita
+    )
 
     resposta, galeria = processar_turno_grafo(lead, mensagem, turno=turno)
 

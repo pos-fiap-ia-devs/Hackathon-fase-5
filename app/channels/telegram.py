@@ -149,6 +149,21 @@ async def _processar_em_thread(lead_chat_id: str, texto: str, origem: str = "tex
     )
 
 
+def _chat_id_telegram(chat_id: str) -> int | None:
+    """Id numerico do Telegram, ou None se o `chat_id` do lead nao for um.
+
+    Existe porque a guarda de `canal` nao basta: lead gravado com
+    canal='telegram' e chat_id nao-numerico (fixture de teste, import de
+    CRM malformado) fazia o `int()` estourar DENTRO do job do APScheduler.
+    Sem error handler registrado no ptb, a excecao subia a cada varredura
+    -- 30s de intervalo, para sempre, enchendo o log e impedindo que os
+    follow-ups legitimos DA MESMA RODADA fossem enviados."""
+    try:
+        return int(chat_id.removeprefix("tg:"))
+    except (ValueError, AttributeError):
+        return None
+
+
 async def _checar_followups(context: ContextTypes.DEFAULT_TYPE) -> None:
     """Job periodico (Etapa 6, cenario 3 do PDF) -- varre follow_up_jobs
     vencidos e envia as mensagens de reengajamento. So sabe empurrar
@@ -169,7 +184,16 @@ async def _checar_followups(context: ContextTypes.DEFAULT_TYPE) -> None:
         if not mensagem:
             continue
 
-        telegram_chat_id = int(job["chat_id"].removeprefix("tg:"))
+        telegram_chat_id = _chat_id_telegram(job["chat_id"])
+        if telegram_chat_id is None:
+            # Nao da pra entregar, e tentar de novo a cada 30s so repete o
+            # erro: cancela o job e segue pros proximos da rodada.
+            logger.warning(
+                "follow-up com chat_id nao-numerico, cancelando (lead_id=%s, chat_id=%r)",
+                job["lead_id"], job["chat_id"],
+            )
+            await asyncio.to_thread(repo.marcar_followup_cancelado, job["job_id"])
+            continue
         try:
             await context.bot.send_message(chat_id=telegram_chat_id, text=mensagem)
         except Exception:
@@ -187,11 +211,25 @@ async def _checar_inatividade(context: ContextTypes.DEFAULT_TYPE) -> None:
     for item in encerrados:
         if item["canal"] != "telegram":
             continue
-        telegram_chat_id = int(item["chat_id"].removeprefix("tg:"))
+        telegram_chat_id = _chat_id_telegram(item["chat_id"])
+        if telegram_chat_id is None:
+            logger.warning(
+                "encerramento com chat_id nao-numerico, ignorando (lead_id=%s, chat_id=%r)",
+                item["lead_id"], item["chat_id"],
+            )
+            continue
         try:
             await context.bot.send_message(chat_id=telegram_chat_id, text=item["mensagem"])
         except Exception:
             logger.exception("falha enviando encerramento por inatividade (lead_id=%s)", item["lead_id"])
+
+
+async def _on_error(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Sem isto o ptb logava 'No error handlers are registered' e despejava
+    o traceback inteiro a cada falha -- inclusive a cada varredura de
+    follow-up, de 30 em 30 segundos. Com o handler, a falha vira uma linha
+    de log nossa e o job continua."""
+    logger.exception("erro nao tratado no bot do Telegram", exc_info=context.error)
 
 
 def build_app() -> Application:
@@ -200,6 +238,7 @@ def build_app() -> Application:
     application.add_handler(
         MessageHandler((filters.TEXT & ~filters.COMMAND) | filters.VOICE | filters.AUDIO, _on_message)
     )
+    application.add_error_handler(_on_error)
     application.job_queue.run_repeating(_checar_followups, interval=settings.followup_scan_s, first=10)
     application.job_queue.run_repeating(_checar_inatividade, interval=settings.followup_scan_s, first=15)
     return application

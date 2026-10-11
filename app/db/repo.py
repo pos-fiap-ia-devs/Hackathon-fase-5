@@ -90,15 +90,23 @@ def salvar_slots(lead_id: int, slots: dict) -> None:
 
 
 def salvar_mensagem(
-    lead_id: int, *, papel: str, conteudo: str, origem: str = "texto", anexos: list[dict] | None = None
+    lead_id: int, *, papel: str, conteudo: str, origem: str = "texto",
+    anexos: list[dict] | None = None, suspeita_injecao: str | None = None,
 ) -> None:
     """`anexos` guarda a galeria de fotos enviada junto com a mensagem
     (core/turno.py::RespostaTurno). `Jsonb` explicito porque psycopg3
-    adapta lista Python pra ARRAY, nao pra jsonb."""
+    adapta lista Python pra ARRAY, nao pra jsonb.
+
+    `suspeita_injecao` e o tipo detectado por core/injecao.py (None =
+    limpa). Fica NA mensagem, nao numa tabela de evento a parte, porque a
+    tentativa so faz sentido lida junto com o que o cliente escreveu."""
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
-            "INSERT INTO mensagens (lead_id, papel, conteudo, origem, anexos) VALUES (%s, %s, %s, %s, %s)",
-            (lead_id, papel, conteudo, origem, Jsonb(anexos or [])),
+            """
+            INSERT INTO mensagens (lead_id, papel, conteudo, origem, anexos, suspeita_injecao)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            (lead_id, papel, conteudo, origem, Jsonb(anexos or []), suspeita_injecao),
         )
         conn.commit()
 
@@ -549,7 +557,8 @@ def listar_mensagens(lead_id: int) -> list[dict]:
     (get_historico e limitado, pensado pro prompt do LLM, nao pra tela)."""
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
-            "SELECT papel, conteudo, origem, anexos, criado_em FROM mensagens WHERE lead_id = %s ORDER BY criado_em",
+            "SELECT papel, conteudo, origem, anexos, suspeita_injecao, criado_em "
+            "FROM mensagens WHERE lead_id = %s ORDER BY criado_em",
             (lead_id,),
         )
         return cur.fetchall()
@@ -577,4 +586,270 @@ def listar_traces(lead_id: int | None = None, limite: int = 100) -> list[dict]:
                 """,
                 (limite,),
             )
+        return cur.fetchall()
+
+
+# ---------------------------------------------------------------- login do dashboard
+# Usuarios, sessoes e convites. Mesma regra do resto do arquivo: so
+# leitura/escrita, nenhuma decisao -- hash e geracao de token moram em
+# core/auth.py, a politica de quem pode o que mora em web/api.py.
+
+
+def contar_usuarios() -> int:
+    """Zero = instalacao nova, e `/registro` abre pro primeiro admin."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT count(*) AS n FROM usuarios")
+        return cur.fetchone()["n"]
+
+
+def criar_usuario(*, email: str, nome: str, senha_hash: str, papel: str) -> dict | None:
+    """None quando o e-mail ja existe -- o chamador transforma isso na
+    mensagem da tela, em vez de estourar IntegrityError na cara do usuario."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO usuarios (email, nome, senha_hash, papel)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (email) DO NOTHING
+            RETURNING id, email, nome, papel, ativo, criado_em
+            """,
+            (email, nome, senha_hash, papel),
+        )
+        usuario = cur.fetchone()
+        conn.commit()
+        return usuario
+
+
+def get_usuario_por_email(email: str) -> dict | None:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT id, email, nome, senha_hash, papel, ativo FROM usuarios WHERE email = %s",
+            (email,),
+        )
+        return cur.fetchone()
+
+
+def listar_usuarios() -> list[dict]:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT id, email, nome, papel, ativo, criado_em FROM usuarios ORDER BY criado_em"
+        )
+        return cur.fetchall()
+
+
+def atualizar_senha(usuario_id: int, senha_hash: str) -> None:
+    """Usado no rehash silencioso do login (core/auth.py::verificar_senha)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("UPDATE usuarios SET senha_hash = %s WHERE id = %s", (senha_hash, usuario_id))
+        conn.commit()
+
+
+def definir_usuario_ativo(usuario_id: int, ativo: bool) -> None:
+    """Desativar corta o acesso na hora: as sessoes do usuario somem junto.
+    E a razao de a sessao ser server-side e nao um JWT assinado."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("UPDATE usuarios SET ativo = %s WHERE id = %s", (ativo, usuario_id))
+        if not ativo:
+            cur.execute("DELETE FROM sessoes WHERE usuario_id = %s", (usuario_id,))
+        conn.commit()
+
+
+def criar_sessao(*, token_hash: str, usuario_id: int, expira_em) -> None:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO sessoes (token_hash, usuario_id, expira_em) VALUES (%s, %s, %s)",
+            (token_hash, usuario_id, expira_em),
+        )
+        conn.commit()
+
+
+def get_sessao(token_hash: str) -> dict | None:
+    """Sessao valida -> dados do usuario. Junta com `usuarios` pra que
+    usuario desativado nao passe nem se a linha da sessao sobrar."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT u.id, u.email, u.nome, u.papel, s.expira_em
+            FROM sessoes s JOIN usuarios u ON u.id = s.usuario_id
+            WHERE s.token_hash = %s AND s.expira_em > now() AND u.ativo
+            """,
+            (token_hash,),
+        )
+        return cur.fetchone()
+
+
+def apagar_sessao(token_hash: str) -> None:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM sessoes WHERE token_hash = %s", (token_hash,))
+        conn.commit()
+
+
+def limpar_sessoes_expiradas() -> int:
+    """Chamado no login -- barato, e evita um job so pra isso numa POC."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM sessoes WHERE expira_em <= now()")
+        apagadas = cur.rowcount
+        conn.commit()
+        return apagadas
+
+
+def criar_convite(*, token_hash: str, email: str, papel: str, criado_por: int, expira_em) -> None:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO convites (token_hash, email, papel, criado_por, expira_em)
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (token_hash, email, papel, criado_por, expira_em),
+        )
+        conn.commit()
+
+
+def get_convite_valido(token_hash: str) -> dict | None:
+    """So convite no prazo e ainda nao usado."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT token_hash, email, papel, expira_em FROM convites
+            WHERE token_hash = %s AND usado_em IS NULL AND expira_em > now()
+            """,
+            (token_hash,),
+        )
+        return cur.fetchone()
+
+
+def marcar_convite_usado(token_hash: str) -> bool:
+    """True so se ESTA chamada fechou o convite. O `usado_em IS NULL` no
+    WHERE faz o banco resolver a corrida de dois cadastros simultaneos com
+    o mesmo link -- quem chegar depois leva False e nao cria usuario."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE convites SET usado_em = now() WHERE token_hash = %s AND usado_em IS NULL",
+            (token_hash,),
+        )
+        fechou = cur.rowcount == 1
+        conn.commit()
+        return fechou
+
+
+def listar_convites_pendentes() -> list[dict]:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT email, papel, expira_em, criado_em FROM convites
+            WHERE usado_em IS NULL AND expira_em > now() ORDER BY criado_em DESC
+            """
+        )
+        return cur.fetchall()
+
+
+# ---------------------------------------------------------------- indicadores de observabilidade
+
+
+def resumo_traces(janela_horas: int = 24) -> dict:
+    """Agregado de `agent_traces` na janela -- o que vira os cartoes no topo
+    da aba de observabilidade.
+
+    p95 e nao media de proposito: media esconde a cauda, e a cauda e
+    exatamente o que o cliente sente. Com 9-10s de turno tipico, uma
+    chamada de 25s e a diferenca entre "pensando" e "travou".
+
+    `percentile_cont` interpola entre as duas amostras vizinhas; com
+    poucas chamadas o numero oscila, e por isso o template mostra a
+    contagem ao lado -- p95 de 7 chamadas nao e p95 de nada.
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT
+                count(*)                                           AS chamadas,
+                count(*) FILTER (WHERE erro IS NOT NULL)           AS erros,
+                coalesce(sum(prompt_tokens), 0)                    AS tokens_entrada,
+                coalesce(sum(completion_tokens), 0)                AS tokens_saida,
+                percentile_cont(0.5)  WITHIN GROUP (ORDER BY latencia_ms) AS p50_ms,
+                percentile_cont(0.95) WITHIN GROUP (ORDER BY latencia_ms) AS p95_ms,
+                max(latencia_ms)                                   AS pior_ms,
+                percentile_cont(0.5) WITHIN GROUP (ORDER BY tokens_por_s)
+                    FILTER (WHERE tokens_por_s IS NOT NULL)        AS tps_mediano
+            FROM agent_traces
+            WHERE criado_em > now() - make_interval(hours => %s)
+            """,
+            (janela_horas,),
+        )
+        return cur.fetchone()
+
+
+def resumo_traces_por_agente(janela_horas: int = 24) -> list[dict]:
+    """Mesmo recorte, quebrado por agente -- mostra QUEM custa caro. Medido
+    assim que o resumo e a memoria sairam do caminho critico do turno
+    (core/graph.py::_tarefas_de_fundo)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT
+                agente,
+                count(*)                                           AS chamadas,
+                percentile_cont(0.95) WITHIN GROUP (ORDER BY latencia_ms) AS p95_ms,
+                -- coalesce por campo, nao na soma: um unico NULL dentro de
+                -- `prompt_tokens + completion_tokens` anularia a linha toda.
+                sum(coalesce(prompt_tokens, 0) + coalesce(completion_tokens, 0)) AS tokens
+            FROM agent_traces
+            WHERE criado_em > now() - make_interval(hours => %s)
+            GROUP BY agente
+            ORDER BY count(*) DESC
+            """,
+            (janela_horas,),
+        )
+        return cur.fetchall()
+
+
+def contar_leads_atendidos(janela_horas: int = 24) -> int:
+    """Leads com ao menos uma chamada de LLM na janela -- denominador do
+    "custo por conversa". Conta `agent_traces`, nao `leads`: lead que
+    entrou pelo CRM e nunca conversou nao consumiu inferencia nenhuma e
+    baixaria a media artificialmente."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT count(DISTINCT lead_id) AS n FROM agent_traces
+            WHERE lead_id IS NOT NULL AND criado_em > now() - make_interval(hours => %s)
+            """,
+            (janela_horas,),
+        )
+        return cur.fetchone()["n"]
+
+
+def resumo_injecoes(janela_horas: int = 24) -> list[dict]:
+    """Tentativas de prompt injection na janela, por tipo (core/injecao.py).
+
+    Alimenta o cartao da aba de observabilidade. Lista vazia e o estado
+    normal e o template trata como tal -- "0 tentativas" e informacao boa,
+    nao ausencia de dado."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT suspeita_injecao AS tipo, count(*) AS tentativas
+            FROM mensagens
+            WHERE suspeita_injecao IS NOT NULL
+              AND criado_em > now() - make_interval(hours => %s)
+            GROUP BY suspeita_injecao
+            ORDER BY count(*) DESC
+            """,
+            (janela_horas,),
+        )
+        return cur.fetchall()
+
+
+def listar_mensagens_suspeitas(limite: int = 20) -> list[dict]:
+    """As tentativas em si, pro corretor ver o que foi escrito -- numero
+    agregado sem o texto nao deixa ninguem julgar se e falso positivo."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT lead_id, conteudo, suspeita_injecao, criado_em
+            FROM mensagens WHERE suspeita_injecao IS NOT NULL
+            ORDER BY criado_em DESC LIMIT %s
+            """,
+            (limite,),
+        )
         return cur.fetchall()

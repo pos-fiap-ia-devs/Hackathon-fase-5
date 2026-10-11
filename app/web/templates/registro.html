@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Criar conta · Horizonte SDR{% endblock %}
+
+{% block content %}
+<div class="max-w-sm mx-auto mt-10 sm:mt-16">
+
+    {% if bloqueado %}
+    <h1 class="text-xl font-semibold mb-1">Cadastro fechado</h1>
+    <div class="mt-4 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
+        {{ erro }}
+    </div>
+    <a href="/login" class="block text-center text-sm text-slate-600 hover:underline mt-6">Ir para o login</a>
+
+    {% else %}
+    {% if bootstrap %}
+    <h1 class="text-xl font-semibold mb-1">Criar o administrador</h1>
+    <p class="text-sm text-gray-500 mb-6">
+        Ainda não há nenhum usuário. Esta primeira conta entra como <strong>administrador</strong>
+        e o cadastro aberto fecha logo depois.
+    </p>
+    {% else %}
+    <h1 class="text-xl font-semibold mb-1">Criar sua conta</h1>
+    <p class="text-sm text-gray-500 mb-6">
+        Convite para <strong>{{ email }}</strong>, com o papel <strong>{{ papel }}</strong>.
+    </p>
+    {% endif %}
+
+    {% if erro %}
+    <div class="mb-4 rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
+        {{ erro }}
+    </div>
+    {% endif %}
+
+    <form method="post" action="/registro" class="bg-white rounded-lg border border-gray-200 p-5 space-y-4">
+        <input type="hidden" name="token" value="{{ token }}">
+        <div>
+            <label for="nome" class="block text-sm font-medium mb-1">Nome</label>
+            <input id="nome" name="nome" type="text" required autofocus autocomplete="name"
+                   class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
+                          focus:outline-none focus:ring-2 focus:ring-slate-400">
+        </div>
+        <div>
+            <label for="email" class="block text-sm font-medium mb-1">E-mail</label>
+            {# No fluxo de convite o e-mail vem do convite e e so leitura: o
+               servidor ignora este campo de qualquer jeito (web/api.py). #}
+            <input id="email" name="email" type="email" required autocomplete="username"
+                   value="{{ email }}" {% if not bootstrap %}readonly{% endif %}
+                   class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
+                          {% if not bootstrap %}bg-gray-50 text-gray-500{% endif %}
+                          focus:outline-none focus:ring-2 focus:ring-slate-400">
+        </div>
+        <div>
+            <label for="senha" class="block text-sm font-medium mb-1">Senha</label>
+            <input id="senha" name="senha" type="password" required minlength="10"
+                   autocomplete="new-password"
+                   class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
+                          focus:outline-none focus:ring-2 focus:ring-slate-400">
+            <p class="text-xs text-gray-400 mt-1">Pelo menos 10 caracteres.</p>
+        </div>
+        <button type="submit"
+                class="w-full bg-slate-800 text-white rounded-md py-2 text-sm font-medium hover:bg-slate-700">
+            Criar conta e entrar
+        </button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

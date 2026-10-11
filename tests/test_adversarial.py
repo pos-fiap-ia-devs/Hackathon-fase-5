@@ -17,6 +17,12 @@ from app.agents.search import buscar_imoveis
 from app.core.turno import processar_turno
 from app.db.repo import get_conn
 
+from tests.conftest import precisa_de_ollama, precisa_de_seed
+
+# Roda o turno inteiro: precisa do Ollama E do banco semeado.
+pytestmark = [precisa_de_ollama, precisa_de_seed]
+
+
 _VALORES = re.compile(r"R\$\s*([\d.,]+)")
 
 

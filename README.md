@@ -39,6 +39,25 @@ uvicorn app.web.api:app --host 0.0.0.0 --port 8000
 
 Dashboard: `http://localhost:8000/dashboard`. Chat web do lead: `http://localhost:8000/chat`. CLI alternativa (sem Telegram): `python -m app.channels.cli`.
 
+No primeiro acesso ao dashboard, o app manda pra `/registro`: essa primeira conta vira administrador e o cadastro aberto fecha em seguida. Os demais usuários entram por convite, em `/dashboard/usuarios`.
+
+### Rodando o app em container (alternativa)
+
+```bash
+docker compose --profile app up -d --build
+```
+
+Sobe Postgres e app juntos; o schema e o seed rodam sozinhos no entrypoint (idempotentes — [scripts/preparar_banco.py](scripts/preparar_banco.py) só semeia se `imoveis` estiver vazia, porque o seed começa com `TRUNCATE ... CASCADE` e levaria as visitas junto).
+
+Duas coisas que **não** mudam de lugar:
+
+- **O Ollama continua nativo no host.** Dentro de container no macOS não existe Metal e a inferência cai pra velocidade de CPU. O container chega nele por `host.docker.internal:11434`, via `extra_hosts: host-gateway`.
+- **STT fica desligado no container.** `mlx-whisper` depende do MLX (Apple Silicon + Metal) e não instala em Linux. Transcrição de áudio só rodando nativo, com `./run.sh`.
+
+`docker compose up -d` sem o `--profile app` continua subindo só o banco — o fluxo do `run.sh`.
+
+> ⚠️ **Um bot, uma instância.** O Telegram só aceita um `getUpdates` por token: rodar `./run.sh` e o container ao mesmo tempo faz os dois brigarem (`Conflict: terminated by other getUpdates request`). Escolha um.
+
 ### Transcrição de áudio (opcional)
 
 ```bash
@@ -54,13 +73,40 @@ uv pip install -e ".[dev]"
 pytest
 ```
 
+Boa parte da suíte é de integração real — fala com o Postgres e com o Ollama, sem mock. É proposital: mockar o LLM esconderia justamente os bugs de formato de schema que custaram caro (ver [IA.md](IA.md)). Mas nada disso **falha** por falta de infra: os testes que dependem de serviço pulam com a razão e o comando na mensagem ([tests/conftest.py](tests/conftest.py)).
+
+```
+# sem Docker e sem Ollama
+142 passed, 64 skipped in 3.23s
+SKIPPED tests/test_qualifier.py:17: precisa do Ollama nativo (ollama serve && ollama pull qwen3.5:9b)
+SKIPPED tests/test_inatividade.py:25: precisa do Postgres (docker compose up -d)
+
+# só com o Postgres, antes do seed
+199 passed, 7 skipped in 74s
+
+# tudo no ar
+206 passed
+```
+
 ## Como usar
 
 **Telegram**: conversa normal, texto ou áudio. Ex.: *"Estou procurando apartamento na zona sul"* → o agente pergunta faixa de preço, quartos, região, urgência, e no fim apresenta imóveis reais do banco com opção de agendar visita. *"Quero investir em imóveis para renda"* leva pro fluxo de investimento (perfil, ticket, expectativa de retorno) e termina em encaminhamento a um especialista.
 
 **Dashboard** (`/dashboard`): lista de leads ordenada por score, com card de detalhe (slots coletados, resumo pro corretor, histórico de mensagens) e aba de observabilidade (`agent_traces` — latência, tokens, tokens/s de cada chamada ao LLM).
 
+**Observabilidade** (`/dashboard/traces`): além da tabela de chamadas, indicadores agregados da janela — latência p50/p95/pior, tokens/s mediano, taxa de erro e quebra por agente (qual agente custa caro). E o número que resume a arquitetura: **custo real US$ 0,00** ao lado do contrafactual *"se fosse nuvem"*, calculado aplicando preço de tabela aos tokens realmente medidos. Os preços são de referência e ficam no `.env` — não há consulta a API de preço nem de câmbio.
+
 **CRM** (`POST /crm/leads`, `GET /crm/leads.csv`): entrada simulada de lead vindo de fora do Telegram e exportação da base de leads.
+
+**Widget** — a Bia entra no site de qualquer imobiliária com uma linha, antes de `</body>`:
+
+```html
+<script src="http://localhost:8000/widget.js" data-brand="Imobiliária Exemplo" defer></script>
+```
+
+Uma bolha flutuante abre o chat num iframe (tela cheia no celular). O CSS fica isolado em Shadow DOM, então o tema do site não deforma o widget nem o contrário, e o iframe só carrega no primeiro clique — quem nunca abre o chat não paga o custo. A sessão vive no `localStorage` do site que hospeda, não em cookie: dentro de um iframe de outra origem o cookie seria third-party, e Safari e Firefox bloqueiam. O lead que chega por aí entra com canal `widget`, separado de `telegram` e `web` no dashboard. `data-position="left"` troca o lado; `Bia.abrir()` abre o chat a partir de um botão do próprio site.
+
+Quem pode embutir é controlado por `WIDGET_DOMINIOS` no `.env`, que vira `frame-ancestors` no CSP — quem recusa é o navegador, não o nosso código.
 
 ## Arquitetura em uma frase
 
@@ -91,8 +137,11 @@ Postgres 16 + pgvector · Ollama nativo (`qwen3.5:9b`, `nomic-embed-text`) · La
 
 ## Segurança
 
+- **Painel fechado.** O dashboard, o detalhe do lead, a aba de traces e o CRM exigem login; o chat do lead e o `/health` seguem públicos (quem é atendido não tem conta). Senhas no Postgres como hash **argon2id** (`core/auth.py`), sal por hash, rehash silencioso quando os parâmetros sobem. Sessão é server-side (tabela `sessoes`, só o SHA-256 do token), não JWT: desativar um usuário corta o acesso na hora. Cookie `HttpOnly` + `SameSite=Lax`.
+- **Primeiro acesso:** com o banco vazio, `/registro` abre e o primeiro cadastro vira administrador — e a rota fecha sozinha. Dali em diante, só entra quem o admin convidar em `/dashboard/usuarios`, por link de uso único com prazo (`CONVITE_HORAS`, 72 h por padrão). Não há SMTP nesta POC: o link aparece na tela e o admin entrega por fora.
 - Telefone do lead nunca persiste cru — `core/security.py::mascarar_telefone` guarda só DDD + 4 últimos dígitos.
 - Input do lead nunca é concatenado no system prompt (mitigação de prompt injection): sempre entra como mensagem `user`.
+- **Prompt injection, medido.** A mitigação acima é estrutural — o texto do lead não tem caminho até o system prompt, e preço/endereço/data/corretor são montados em código a partir do banco, nunca escritos pelo LLM. O que faltava era prova: `core/injecao.py` detecta e classifica a tentativa em 4 tipos (anular instrução, vazar prompt, trocar persona, extrair dados), marca na mensagem (`mensagens.suspeita_injecao`) e mostra no painel com o texto cru ao lado. **Marca, não bloqueia** — a mitigação já é estrutural, e recusar um cliente real por falso positivo custa mais caro que registrar uma tentativa que não era nada. Metade dos testes do módulo é justamente de falso positivo (*"prefiro algo sem restrições de pet"* não é ataque).
 - Token do bot do Telegram nunca aparece em log — supressão explícita do logger do `httpx` (que loga a URL completa da requisição, e a API do Telegram embute o token na URL).
 - Rate limit por `chat_id` (`RATE_LIMIT_MSGS_POR_MIN`).
 - O dado do lead nunca sai da máquina — modelo local, banco local. Efeito colateral da arquitetura, não um add-on de compliance.

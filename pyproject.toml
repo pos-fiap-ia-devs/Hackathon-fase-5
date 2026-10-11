@@ -19,6 +19,9 @@ dependencies = [
     "python-telegram-bot==21.10",
     "json-repair==0.35.0",
     "langgraph==1.2.11",
+    # Login do dashboard. argon2id e o algoritmo recomendado pelo OWASP pra
+    # senha -- memory-hard, ao contrario de bcrypt/scrypt tradicionais.
+    "argon2-cffi==25.1.0",
 ]
 
 [project.optional-dependencies]

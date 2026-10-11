@@ -15,6 +15,20 @@
         <span class="font-semibold">🏠 Horizonte SDR</span>
         <a href="/dashboard" class="text-sm hover:underline">Dashboard</a>
         <a href="/chat" class="text-sm hover:underline">Chat do lead</a>
+        {# `usuario` so chega nas telas do painel. As publicas (login, registro,
+           chat do lead) nao definem a variavel -- o Jinja resolve como
+           indefinido/falso e o bloco inteiro some. #}
+        {% if usuario %}
+        {% if usuario.papel == 'admin' %}
+        <a href="/dashboard/usuarios" class="text-sm hover:underline">Usuários</a>
+        {% endif %}
+        <span class="ml-auto flex items-center gap-3 text-sm">
+            <span class="text-slate-300">{{ usuario.nome }}</span>
+            <form method="post" action="/logout">
+                <button type="submit" class="hover:underline">Sair</button>
+            </form>
+        </span>
+        {% endif %}
     </nav>
     <main class="p-4 sm:p-6 max-w-6xl mx-auto">
         {% block content %}{% endblock %}

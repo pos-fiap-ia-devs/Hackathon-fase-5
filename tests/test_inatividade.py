@@ -9,6 +9,12 @@ from app.core.turno import processar_turno
 from app.db import repo
 
 
+from tests.conftest import precisa_de_banco
+
+# Cria lead, slots e status direto no Postgres.
+pytestmark = [precisa_de_banco]
+
+
 def _lead_qualificando(chat_id: str) -> dict:
     lead = repo.get_or_create_lead(chat_id=chat_id, canal="telegram")
     repo.salvar_slots(lead["id"], {"intencao": "compra", "faixa_preco_max": 300_000})

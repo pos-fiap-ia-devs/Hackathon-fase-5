@@ -4,6 +4,13 @@ encontrei nada", o agente diz ONDE atende. Roda contra o Postgres real."""
 from app.db import repo
 
 
+from tests.conftest import precisa_de_seed
+
+# `regiao_existe` consulta a tabela `imoveis`: banco vazio devolve
+# False pra tudo e os asserts caem sem que nada esteja quebrado.
+pytestmark = [precisa_de_seed]
+
+
 def test_reconhece_cidade_bairro_e_zona_da_base():
     assert repo.regiao_existe("Campinas")   # cidade
     assert repo.regiao_existe("Moema")      # bairro

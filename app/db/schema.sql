@@ -201,3 +201,52 @@ CREATE INDEX followup_due_idx ON follow_up_jobs (executar_em) WHERE status = 'pe
 -- sao o caminho pelo qual ela chega, sem precisar dropar o volume.
 ALTER TABLE imoveis   ADD COLUMN IF NOT EXISTS fotos  TEXT[] NOT NULL DEFAULT '{}';
 ALTER TABLE mensagens ADD COLUMN IF NOT EXISTS anexos JSONB  NOT NULL DEFAULT '[]';
+-- Tipo da tentativa de prompt injection (core/injecao.py), NULL = limpa.
+-- TEXT e nao BOOLEAN porque o painel mostra a quebra por tipo -- saber
+-- QUE houve tentativa vale menos que saber o que ela tentou fazer.
+ALTER TABLE mensagens ADD COLUMN IF NOT EXISTS suspeita_injecao TEXT;
+
+-- ---------------------------------------------------------------- login do dashboard
+-- `IF NOT EXISTS` (e nao o CREATE TABLE puro la de cima) porque estas tabelas
+-- nasceram depois: num banco que ja existe, elas PRECISAM ser criadas, e o
+-- `|| true` do run.sh engoliria o erro de um CREATE TABLE sem a clausula.
+--
+-- O dashboard expoe telefone e conversa inteira de todo lead. Antes disso
+-- aqui, qualquer um em :8000/dashboard lia tudo.
+CREATE TABLE IF NOT EXISTS usuarios (
+    id         SERIAL PRIMARY KEY,
+    email      TEXT NOT NULL UNIQUE,
+    nome       TEXT NOT NULL,
+    -- Hash argon2id codificado no formato PHC: carrega algoritmo, parametros
+    -- e sal dentro da propria string. Por isso nao ha coluna de sal.
+    senha_hash TEXT NOT NULL,
+    papel      TEXT NOT NULL DEFAULT 'corretor',  -- admin | corretor
+    ativo      BOOLEAN NOT NULL DEFAULT TRUE,
+    criado_em  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Sessao server-side em vez de JWT: desativar um usuario precisa cortar o
+-- acesso NA HORA, e token assinado so expira sozinho. Aqui basta um DELETE.
+CREATE TABLE IF NOT EXISTS sessoes (
+    -- SHA-256 do token, nunca o token cru: quem ler o banco nao consegue se
+    -- passar por ninguem. Hash rapido e o certo aqui (token e aleatorio de
+    -- 256 bits, nao senha) -- argon2 so entra onde ha entropia baixa.
+    token_hash TEXT PRIMARY KEY,
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    expira_em  TIMESTAMPTZ NOT NULL,
+    criado_em  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS sessoes_expira_idx ON sessoes (expira_em);
+
+-- Convite por link, sem SMTP: o admin gera, copia e entrega o link por fora.
+-- Uso unico (`usado_em`) e com prazo (`expira_em`).
+CREATE TABLE IF NOT EXISTS convites (
+    token_hash TEXT PRIMARY KEY,
+    email      TEXT NOT NULL,
+    papel      TEXT NOT NULL DEFAULT 'corretor',
+    criado_por INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+    expira_em  TIMESTAMPTZ NOT NULL,
+    usado_em   TIMESTAMPTZ,
+    criado_em  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

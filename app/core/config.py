@@ -41,6 +41,44 @@ class Settings(BaseSettings):
     rate_limit_msgs_por_min: int = 20
     crm_webhook_url: str = ""
 
+    # ---- login do dashboard -------------------------------------------
+    # 12h: turno de trabalho do corretor. Mais que isso e cookie esquecido
+    # em maquina compartilhada; menos, e relogin no meio do expediente.
+    sessao_horas: int = 12
+    # Prazo do link de convite. Longo o bastante pra entregar por fora
+    # (nao ha SMTP nesta POC), curto o bastante pra nao virar porta aberta.
+    convite_horas: int = 72
+    # True em producao (HTTPS). Em dev o app roda em http://localhost, e
+    # com `secure` o navegador simplesmente nao devolve o cookie -- o login
+    # "funciona" e a proxima pagina volta pro /login, sem erro nenhum.
+    cookie_secure: bool = False
+
+    # ---- observabilidade ----------------------------------------------
+    # A inferencia e local: o custo REAL deste projeto e zero, e o painel
+    # diz isso. Estes precos servem pra calcular o contrafactual -- quanto
+    # a MESMA conversa teria custado numa API paga -- usando os tokens que
+    # `agent_traces` ja mede de verdade. Sao valor de REFERENCIA, nao
+    # cotacao: ajuste no .env pro preco do provedor que voce comparar.
+    preco_ref_usd_por_mi_entrada: float = 0.60
+    preco_ref_usd_por_mi_saida: float = 2.40
+    # Idem -- cotacao fixa de referencia, nao ha chamada a cambio aqui.
+    cotacao_usd_brl: float = 5.40
+    # Janela padrao dos indicadores da aba de observabilidade.
+    traces_janela_horas: int = 24
+
+    # ---- widget embutivel ---------------------------------------------
+    # Dominios autorizados a embutir /embed num iframe, separados por
+    # virgula. Vira `frame-ancestors` no CSP: o NAVEGADOR recusa renderizar
+    # em site fora da lista -- e defesa que nao depende do nosso codigo.
+    # Vazio = qualquer site pode embutir (default de POC, pra demo rodar
+    # sem configuracao). Em producao, liste os dominios.
+    widget_dominios: str = ""
+
+    @property
+    def widget_frame_ancestors(self) -> str:
+        dominios = [d.strip() for d in self.widget_dominios.split(",") if d.strip()]
+        return " ".join(dominios) if dominios else "*"
+
     app_host: str = "0.0.0.0"
     app_port: int = 8000
     log_level: str = "INFO"
