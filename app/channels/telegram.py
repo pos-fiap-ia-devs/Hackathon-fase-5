@@ -84,7 +84,7 @@ async def _enviar_galeria(context: ContextTypes.DEFAULT_TYPE, telegram_chat_id: 
         for item in galeria:
             midias = []
             for url in item["fotos"]:
-                imagem = await _baixar_foto(http, url)
+                imagem = await _carregar_foto(http, url)
                 if imagem:
                     legenda = item["legenda"] if not midias else None
                     midias.append(InputMediaPhoto(media=imagem, caption=legenda))
@@ -99,18 +99,40 @@ async def _enviar_galeria(context: ContextTypes.DEFAULT_TYPE, telegram_chat_id: 
                 )
 
 
-async def _baixar_foto(http: "httpx.AsyncClient", url: str) -> bytes | None:
-    """Baixa a imagem aqui e sobe os bytes, em vez de passar a URL pro
-    Telegram buscar sozinho. O servico de fotos responde com um 302 pro
-    arquivo final (ver app/db/seed.py), e depender do servidor do Telegram
-    seguir esse redirect de terceiro e apostar num comportamento que nao
-    esta no nosso controle -- baixar aqui torna o envio um upload comum."""
+# Raiz dos arquivos servidos em /static (app/web/static/). As fotos dos
+# imoveis moram aqui desde que o loremflickr passou a responder 401 e a
+# galeria sumiu de todos os canais sem ninguem notar.
+_STATIC = Path(__file__).resolve().parent.parent / "web" / "static"
+
+
+async def _carregar_foto(http: "httpx.AsyncClient", referencia: str) -> bytes | None:
+    """Bytes da foto, pra subir como upload comum em vez de passar a URL
+    pro Telegram buscar sozinho (depender do servidor deles seguir
+    redirect de terceiro seria apostar em comportamento fora do nosso
+    controle).
+
+    `referencia` e um caminho local (`/static/imoveis/...`) no caso normal
+    -- a leitura e de disco, sem rede. URL absoluta continua aceita pra
+    quem apontar `imoveis.fotos` pra um CDN de fotos reais depois."""
+    if referencia.startswith("/static/"):
+        caminho = _STATIC / referencia.removeprefix("/static/")
+        try:
+            # `resolve()` + checagem de prefixo: `fotos` vem do banco, e um
+            # caminho com `..` leria arquivo fora de static.
+            caminho = caminho.resolve()
+            if not caminho.is_relative_to(_STATIC.resolve()):
+                logger.warning("caminho de foto fora de /static, ignorado: %r", referencia)
+                return None
+            return await asyncio.to_thread(caminho.read_bytes)
+        except OSError:
+            logger.warning("falha lendo foto %s -- segue sem ela", referencia, exc_info=True)
+            return None
     try:
-        r = await http.get(url)
+        r = await http.get(referencia)
         r.raise_for_status()
         return r.content
     except Exception:
-        logger.warning("falha baixando foto %s -- segue sem ela", url, exc_info=True)
+        logger.warning("falha baixando foto %s -- segue sem ela", referencia, exc_info=True)
         return None
 
 

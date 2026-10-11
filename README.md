@@ -218,6 +218,22 @@ app/
 scripts/    buscar.py  baixar_modelo_stt.sh
 ```
 
+## Código do imóvel
+
+Cada imóvel tem um código público e estável — `CAM-0006`, `SAN-0002` — formado por 3 letras do bairro mais uma sequência. Ele aparece no card, na legenda da foto e na confirmação da visita, e o cliente pode agendar citando ele: *"quero ver o SAN-0002"*.
+
+Não é enfeite. O número do card (1, 2, 3) é **posicional**: só faz sentido dentro da última lista apresentada. Se o cliente voltar amanhã, depois de outra busca, "quero o 2" aponta para outro imóvel. O código não muda.
+
+A resolução tenta, nesta ordem: **código → número → texto livre** (casar bairro). O código vem primeiro por ser o único identificador não ambíguo. É reconhecido como o cliente digitar — `MOE-0001`, `moe 0001`, `CAM0006` — e por regex, não por LLM: formato fixo não se pede para o modelo classificar.
+
+## Fotos dos imóveis
+
+Ficam em `app/web/static/imoveis/`, **versionadas no repositório**, e são servidas pela própria aplicação. O Telegram envia um álbum por imóvel (`send_media_group`, legenda no primeiro, numeração igual à dos cards); o chat web e o widget renderizam a mesma galeria em `<img>`.
+
+Antes as URLs apontavam para o `loremflickr.com` em tempo de execução. O serviço passou a responder **401** e, sem nenhuma linha do nosso código mudar, o Telegram parou de enviar foto (o álbum é pulado em silêncio quando o download falha) e o chat web passou a exibir imagem quebrada. Dependência de terceiro em tempo de execução, numa demonstração ao vivo, é risco sem contrapartida — agora não há nenhuma.
+
+As imagens são genéricas e não correspondem aos imóveis: a base de 200 é simulada. Trocar é `python -m scripts.baixar_fotos --forcar`.
+
 ## Stack
 
 Postgres 16 + pgvector · Ollama nativo (`qwen3.5:9b`, `nomic-embed-text`) · LangGraph (orquestração) · FastAPI + Jinja2 + HTMX (dashboard e chat, zero build step) · `python-telegram-bot` (long polling) · APScheduler (follow-up) · `mlx-whisper` (STT local via Metal, opcional).

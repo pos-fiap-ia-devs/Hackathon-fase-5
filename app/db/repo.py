@@ -853,3 +853,11 @@ def listar_mensagens_suspeitas(limite: int = 20) -> list[dict]:
             (limite,),
         )
         return cur.fetchall()
+
+
+def get_imovel_por_codigo(codigo: str) -> dict | None:
+    """Imovel pelo codigo publico (MOE-0001). `upper()` porque o cliente
+    digita como quiser -- a coluna guarda sempre em maiuscula (seed)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT * FROM imoveis WHERE codigo = %s", (codigo.upper(),))
+        return cur.fetchone()

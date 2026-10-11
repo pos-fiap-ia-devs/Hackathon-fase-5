@@ -385,8 +385,8 @@ def _apresentar_imoveis(lead_id: int, slots: dict, mensagem: str, *, turno: int)
     )
     texto = (
         f"{intro}\n\n{cards}\n\n"
-        "Qual te interessou -- pode dizer o número ou o bairro? E qual dia costuma "
-        "funcionar melhor pra uma visita?"
+        "Qual te interessou -- pode dizer o número, o código ou o bairro? E qual dia "
+        "costuma funcionar melhor pra uma visita?"
     )
     return texto, _galeria_imoveis(resultados)
 
@@ -509,6 +509,10 @@ def _formatar_cards(imoveis: list[dict]) -> str:
         )
         if im.get("rentabilidade_estimada"):
             linha += f"\n   rentabilidade estimada: {im['rentabilidade_estimada']}% a.a."
+        # Codigo por ultimo, como rodape: o numero serve pra responder
+        # AGORA ("quero o 2"), o codigo sobrevive a uma busca nova.
+        if im.get("codigo"):
+            linha += f"\n   Cód. {im['codigo']}"
         linhas.append(linha)
     return "\n\n".join(linhas)
 
@@ -534,7 +538,11 @@ def _galeria_imoveis(imoveis: list[dict]) -> list[dict]:
         galeria.append({
             "imovel_id": im["id"],
             "numero": i,
-            "legenda": f"{i}. {im['titulo']} — {im['bairro']} · {_preco_formatado(im)}",
+            "legenda": (
+                f"{i}. {im['titulo']} — {im['bairro']}\n"
+                f"{_preco_formatado(im)} · {im['quartos']} quarto(s) · {im['area']}m²"
+                + (f"\nCód. {im['codigo']}" if im.get("codigo") else "")
+            ),
             "fotos": fotos,
         })
     return galeria
@@ -639,6 +647,20 @@ def _proxima_pergunta_agendamento(
 # perguntar) mora em core/graph.py como nos de um StateGraph. As funcoes
 # abaixo sao as pecas reutilizaveis.
 
+# Codigo publico do imovel na fala do cliente: "quero ver o MOE-0001".
+# Casado em codigo e nao so pelo LLM porque e formato fixo -- mesma
+# filosofia de agents/router.py: o que casa por string nao se pede pro
+# modelo classificar. Hifen opcional e caixa livre ("moe 0001" conta).
+_CODIGO_IMOVEL = re.compile(r"\b([a-zA-Z]{3})[\s-]?(\d{4})\b")
+
+
+def _codigo_na_mensagem(mensagem: str | None) -> str | None:
+    if not mensagem:
+        return None
+    achado = _CODIGO_IMOVEL.search(mensagem)
+    return f"{achado.group(1).upper()}-{achado.group(2)}" if achado else None
+
+
 def _resolver_escolha(lead: dict, mensagem: str, escolha) -> dict:
     """Parte 100% em codigo do sub-fluxo de agendamento: resolve imovel
     (numero ou bairro), horario, nome e telefone a partir do que ja foi
@@ -649,7 +671,14 @@ def _resolver_escolha(lead: dict, mensagem: str, escolha) -> dict:
     imoveis_apresentados = [im for i in ids_apresentados if (im := repo.get_imovel(i))]
 
     imovel_id = lead.get("visita_imovel_escolhido")
-    if escolha.numero_escolhido and 1 <= escolha.numero_escolhido <= len(ids_apresentados):
+    # Ordem: codigo > numero > texto livre. O codigo vem primeiro porque e
+    # o unico identificador NAO ambiguo -- o numero so faz sentido dentro
+    # da ultima lista apresentada, e o texto depende de casar bairro.
+    codigo = getattr(escolha, "codigo_escolhido", None) or _codigo_na_mensagem(mensagem)
+    por_codigo = repo.get_imovel_por_codigo(codigo) if codigo else None
+    if por_codigo:
+        imovel_id = por_codigo["id"]
+    elif escolha.numero_escolhido and 1 <= escolha.numero_escolhido <= len(ids_apresentados):
         imovel_id = ids_apresentados[escolha.numero_escolhido - 1]
     else:
         imovel_id = _resolver_por_texto(mensagem, imoveis_apresentados) or imovel_id
@@ -718,13 +747,13 @@ def _confirmar_visita(
     )
     if data_resolvida:
         fatos = (
-            f"Marquei sua visita ao {imovel['titulo']} ({imovel['bairro']}) com {corretor}, "
+            f"Marquei sua visita ao {imovel['titulo']} ({imovel['bairro']}, Cód. {imovel['codigo']}) com {corretor}, "
             f'para "{horario_texto}" -- {_formatar_data_extenso(data_resolvida)}. A equipe '
             "confirma o horário exato e te chama no telefone que você passou. 📅"
         )
     else:
         fatos = (
-            f"Marquei sua visita ao {imovel['titulo']} ({imovel['bairro']}) com {corretor}. "
+            f"Marquei sua visita ao {imovel['titulo']} ({imovel['bairro']}, Cód. {imovel['codigo']}) com {corretor}. "
             f'Horário combinado: "{horario_texto}" — a equipe confirma o horário exato e te '
             "chama no telefone que você passou. 📅"
         )

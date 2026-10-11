@@ -75,7 +75,7 @@ def buscar_imoveis(
         params["query_ts"] = texto_livre
         params["limite"] = limite
         sql = f"""
-            SELECT id, titulo, tipo, finalidade, bairro, zona, cidade, preco,
+            SELECT id, codigo, titulo, tipo, finalidade, bairro, zona, cidade, preco,
                    quartos, banheiros, vagas, area, condominio,
                    rentabilidade_estimada, descricao, fotos,
                    0.6 * (1 - (embedding <=> %(vetor)s))
@@ -89,7 +89,7 @@ def buscar_imoveis(
     else:
         params["limite"] = limite
         sql = f"""
-            SELECT id, titulo, tipo, finalidade, bairro, zona, cidade, preco,
+            SELECT id, codigo, titulo, tipo, finalidade, bairro, zona, cidade, preco,
                    quartos, banheiros, vagas, area, condominio,
                    rentabilidade_estimada, descricao, fotos, NULL AS score
             FROM imoveis

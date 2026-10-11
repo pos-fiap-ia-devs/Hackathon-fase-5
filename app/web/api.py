@@ -23,6 +23,7 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.core import auth, custo, injecao, scoring
@@ -75,6 +76,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Agente SDR Imobiliário", lifespan=lifespan)
 templates = Jinja2Templates(directory="app/web/templates")
+
+# Fotos dos imoveis, servidas por nos (app/db/seed.py grava os caminhos em
+# `imoveis.fotos`). Antes eram URLs do loremflickr -- ate o servico
+# responder 401 e a galeria sumir de todos os canais sem aviso.
+app.mount(
+    "/static",
+    StaticFiles(directory=Path(__file__).parent / "static"),
+    name="static",
+)
 
 SESSION_COOKIE = "web_session"
 # 180 dias: o cookie e a UNICA coisa que liga o navegador ao lead no canal

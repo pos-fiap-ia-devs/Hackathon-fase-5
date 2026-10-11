@@ -34,7 +34,7 @@
     <div id="chat-mensagens" class="flex-1 overflow-y-auto p-3 space-y-2">
         {% for m in mensagens %}
         <div class="text-sm {% if m.papel == 'user' %}text-right{% endif %}">
-            <span class="inline-block px-3 py-2 rounded-lg max-w-[85%] text-left break-words {% if m.papel == 'user' %}bg-blue-600 text-white{% else %}bg-slate-100{% endif %}">
+            <span class="inline-block px-3 py-2 rounded-lg max-w-[85%] text-left break-words whitespace-pre-line {% if m.papel == 'user' %}bg-blue-600 text-white{% else %}bg-slate-100{% endif %}">
                 {{ m.conteudo }}
             </span>
             {% with galeria = m.anexos %}{% include "_galeria.html" %}{% endwith %}

@@ -358,9 +358,21 @@ _HORARIO = re.compile(
 )
 
 
+# Codigo publico do imovel (MOE-0001), como em core/turno.py. Formato
+# fixo, entao casa por regex -- o provedor de regras nao tem o que
+# "entender" aqui.
+_CODIGO = re.compile(r"\b([a-zA-Z]{3})[\s-]?(\d{4})\b")
+
+
 def _extrair_escolha_visita(texto: str) -> dict:
     normalizado = _normalizar(texto)
     dados: dict = {}
+
+    # Antes do numero solto: "MOE-0001" tem digitos, e o `_NUMERO_SOLTO`
+    # abaixo casaria o "1" do final como se fosse "quero a opcao 1".
+    if (codigo := _CODIGO.search(texto)) is not None:
+        dados["codigo_escolhido"] = f"{codigo.group(1).upper()}-{codigo.group(2)}"
+        return dados
 
     for ordinal, numero in _ORDINAIS.items():
         if ordinal in normalizado:

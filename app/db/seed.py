@@ -22,6 +22,7 @@ Rodar: python -m app.db.seed
 """
 
 import random
+import unicodedata
 
 from app.core.llm import embed_text
 from app.db.repo import get_conn
@@ -137,21 +138,46 @@ TIPOS = ["apartamento", "casa", "studio", "cobertura"]
 # Limite conhecido: a foto ilustra o TIPO, nao aquele imovel especifico --
 # e dataset sintetico, os 200 imoveis tambem nao existem. Trocar por fotos
 # reais depois e so preencher `imoveis.fotos` com outras URLs.
-FOTOS_POR_TIPO: dict[str, list[str]] = {
-    "apartamento": ["apartment,interior", "apartment,living+room", "apartment,building"],
-    "casa": ["house,facade", "house,living+room", "house,backyard"],
-    "studio": ["studio+apartment,interior", "loft,interior", "small+apartment,kitchen"],
-    "cobertura": ["penthouse,interior", "penthouse,terrace", "luxury+apartment,living+room"],
-}
-FOTOS_PADRAO = FOTOS_POR_TIPO["apartamento"]
+# Fotos SERVIDAS POR NOS, de `app/web/static/imoveis/` (baixadas uma vez
+# por `scripts/baixar_fotos.py`). Antes eram URLs do loremflickr montadas
+# aqui -- ate o servico passar a responder 401 e, sem nada mudar no nosso
+# codigo, o Telegram parar de enviar foto (o album e pulado quando o
+# download falha) e o chat web mostrar imagem quebrada. Dependencia de
+# terceiro em tempo de execucao, numa demo ao vivo, e risco sem
+# contrapartida.
+TIPOS_COM_FOTO = ("apartamento", "casa", "studio", "cobertura", "sala")
+FOTOS_POR_TIPO_DISPONIVEIS = 8  # scripts/baixar_fotos.py::POR_TIPO
+FOTOS_PADRAO = "apartamento"
+
+
+def _codigo_do_imovel(bairro: str, usados: dict[str, int]) -> str:
+    """Codigo publico e estavel: 3 letras do bairro + sequencia (MOE-0001).
+
+    O cliente precisa de um jeito de citar um imovel que sobreviva a uma
+    busca nova. O numero do card e posicional -- "quero o 2" so faz sentido
+    dentro da ultima lista apresentada. O codigo vai na legenda da foto, no
+    card e na confirmacao da visita, e continua valendo semanas depois.
+
+    `usados` conta por prefixo, entao dois bairros que comecam igual
+    ("Vila Mariana"/"Vila Madalena" -> VIL) nao colidem: a sequencia e
+    unica dentro do prefixo, e a coluna tem indice unico pra garantir."""
+    base = unicodedata.normalize("NFKD", bairro).encode("ascii", "ignore").decode("ascii")
+    letras = "".join(c for c in base.upper() if c.isalpha())[:3] or "IMO"
+    usados[letras] = usados.get(letras, 0) + 1
+    return f"{letras}-{usados[letras]:04d}"
 
 
 def _fotos_do_imovel(tipo: str, seq: int) -> list[str]:
-    """URLs das 3 fotos. `seq` (posicao do imovel no dataset) entra no lock
-    pra que dois apartamentos vizinhos na mesma lista nao saiam com
-    exatamente as mesmas 3 fotos."""
-    tags = FOTOS_POR_TIPO.get(tipo, FOTOS_PADRAO)
-    return [f"https://loremflickr.com/800/600/{tag}/all?lock={seq * 10 + i}" for i, tag in enumerate(tags)]
+    """Caminhos das 3 fotos, servidos em /static/imoveis/.
+
+    `seq` (posicao do imovel no dataset) desloca a janela pra que dois
+    imoveis vizinhos na MESMA lista nao saiam com as mesmas 3 fotos -- o
+    pool e pequeno e reaproveitado entre os 200 imoveis."""
+    base = tipo if tipo in TIPOS_COM_FOTO else FOTOS_PADRAO
+    return [
+        f"/static/imoveis/{base}-{(seq * 3 + i) % FOTOS_POR_TIPO_DISPONIVEIS + 1:02d}.jpg"
+        for i in range(3)
+    ]
 # investimento tende a unidade compacta -- e o que de fato se aluga bem
 TIPOS_INVESTIMENTO = ["apartamento", "studio"]
 
@@ -337,21 +363,23 @@ def run() -> None:
         with conn.cursor() as cur:
             cur.execute("TRUNCATE imoveis RESTART IDENTITY CASCADE")
 
+            codigos_usados: dict[str, int] = {}
             for i, im in enumerate(imoveis, start=1):
                 vetor = embed_text(im["descricao"])
                 cur.execute(
                     """
                     INSERT INTO imoveis
-                        (titulo, tipo, finalidade, bairro, zona, cidade, preco,
+                        (codigo, titulo, tipo, finalidade, bairro, zona, cidade, preco,
                          quartos, banheiros, vagas, area, condominio,
                          rentabilidade_estimada, descricao, fotos, embedding)
                     VALUES
-                        (%(titulo)s, %(tipo)s, %(finalidade)s, %(bairro)s, %(zona)s,
+                        (%(codigo)s, %(titulo)s, %(tipo)s, %(finalidade)s, %(bairro)s, %(zona)s,
                          %(cidade)s, %(preco)s, %(quartos)s, %(banheiros)s, %(vagas)s,
                          %(area)s, %(condominio)s, %(rentabilidade_estimada)s,
                          %(descricao)s, %(fotos)s, %(embedding)s)
                     """,
-                    {**im, "fotos": _fotos_do_imovel(im["tipo"], i), "embedding": vetor},
+                    {**im, "codigo": _codigo_do_imovel(im["bairro"], codigos_usados),
+                     "fotos": _fotos_do_imovel(im["tipo"], i), "embedding": vetor},
                 )
                 if i % 25 == 0:
                     print(f"  {i}/{len(imoveis)}")

@@ -205,6 +205,12 @@ ALTER TABLE mensagens ADD COLUMN IF NOT EXISTS anexos JSONB  NOT NULL DEFAULT '[
 -- TEXT e nao BOOLEAN porque o painel mostra a quebra por tipo -- saber
 -- QUE houve tentativa vale menos que saber o que ela tentou fazer.
 ALTER TABLE mensagens ADD COLUMN IF NOT EXISTS suspeita_injecao TEXT;
+-- Codigo publico do imovel (MOE-0001). Identificador ESTAVEL pro cliente
+-- citar: o numero do card (1, 2, 3) e posicional e muda a cada busca --
+-- "quero o 2" amanha, depois de outra busca, aponta pra outro imovel. O
+-- codigo nao muda, aparece na foto, no card e na confirmacao da visita.
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS codigo TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS imoveis_codigo_idx ON imoveis (codigo);
 
 -- ---------------------------------------------------------------- login do dashboard
 -- `IF NOT EXISTS` (e nao o CREATE TABLE puro la de cima) porque estas tabelas

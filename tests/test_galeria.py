@@ -13,8 +13,9 @@ FOTOS = ["https://fotos/1.jpg", "https://fotos/2.jpg", "https://fotos/3.jpg"]
 
 def _imovel(**kw) -> dict:
     base = {
-        "id": 7, "titulo": "Apartamento reformado", "bairro": "Moema",
-        "preco": 650_000, "finalidade": "venda", "fotos": FOTOS,
+        "id": 7, "codigo": "MOE-0007", "titulo": "Apartamento reformado",
+        "bairro": "Moema", "preco": 650_000, "finalidade": "venda",
+        "quartos": 2, "area": 72, "fotos": FOTOS,
     }
     return {**base, **kw}
 
@@ -28,13 +29,26 @@ def test_galeria_segue_a_numeracao_dos_cards():
 
 
 def test_legenda_traz_preco_formatado_em_codigo():
-    galeria = _galeria_imoveis([_imovel()])
-    assert galeria[0]["legenda"] == "1. Apartamento reformado — Moema · R$ 650.000"
+    """A legenda e o que aparece colado na foto no Telegram -- precisa ser
+    tao informativa quanto o card de texto, nao menos."""
+    legenda = _galeria_imoveis([_imovel()])[0]["legenda"]
+    assert legenda == (
+        "1. Apartamento reformado — Moema\n"
+        "R$ 650.000 · 2 quarto(s) · 72m²\n"
+        "Cód. MOE-0007"
+    )
+
+
+def test_legenda_sem_codigo_nao_quebra():
+    """Imovel de base antiga, antes da coluna `codigo` existir."""
+    legenda = _galeria_imoveis([_imovel(codigo=None)])[0]["legenda"]
+    assert "Cód." not in legenda
+    assert "R$ 650.000" in legenda
 
 
 def test_aluguel_marca_por_mes():
     galeria = _galeria_imoveis([_imovel(finalidade="aluguel", preco=3_200)])
-    assert galeria[0]["legenda"].endswith("R$ 3.200/mês")
+    assert "R$ 3.200/mês" in galeria[0]["legenda"]
 
 
 def test_imovel_sem_foto_fica_de_fora_mas_nao_desloca_a_numeracao():
