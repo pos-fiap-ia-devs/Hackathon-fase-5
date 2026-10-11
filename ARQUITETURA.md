@@ -79,6 +79,8 @@ graph TD
 	decidir_proximo(decidir_proximo)
 	apresentar_imoveis(apresentar_imoveis)
 	encaminhar_especialista(encaminhar_especialista)
+	listar_regioes(listar_regioes)
+	cidade_nao_atendida(cidade_nao_atendida)
 	finalizar_qualificacao(finalizar_qualificacao)
 	extrair_escolha(extrair_escolha)
 	resolver_escolha(resolver_escolha)
@@ -86,33 +88,40 @@ graph TD
 	proxima_pergunta_agendamento(proxima_pergunta_agendamento)
 	checar_reagendamento(checar_reagendamento)
 	responder_generico(responder_generico)
+	despedir(despedir)
 	finalizar(finalizar)
 	__end__([end]):::last
 	__start__ -.-> checar_reagendamento
+	__start__ -.-> despedir
 	__start__ -.-> extrair_escolha
 	__start__ -.-> extrair_slots
+	apresentar_imoveis --> finalizar
 	checar_reagendamento -. fim .-> finalizar
 	checar_reagendamento -.-> responder_generico
+	cidade_nao_atendida --> finalizar
+	confirmar_visita --> finalizar
 	decidir_proximo -.-> apresentar_imoveis
+	decidir_proximo -.-> cidade_nao_atendida
 	decidir_proximo -.-> encaminhar_especialista
 	decidir_proximo -.-> finalizar_qualificacao
+	decidir_proximo -.-> listar_regioes
+	despedir --> finalizar
+	encaminhar_especialista --> finalizar
 	extrair_escolha -. fim .-> finalizar
 	extrair_escolha -.-> resolver_escolha
 	extrair_slots --> decidir_proximo
+	finalizar_qualificacao --> finalizar
+	listar_regioes --> finalizar
+	proxima_pergunta_agendamento --> finalizar
 	resolver_escolha -.-> confirmar_visita
 	resolver_escolha -.-> proxima_pergunta_agendamento
-	apresentar_imoveis --> finalizar
-	confirmar_visita --> finalizar
-	encaminhar_especialista --> finalizar
-	finalizar_qualificacao --> finalizar
-	proxima_pergunta_agendamento --> finalizar
 	responder_generico --> finalizar
 	finalizar --> __end__
 ```
 
-**Entrada única, 3 ramos**, roteados pela aresta de entrada condicional em `lead["status"]`:
+**Entrada única, 3 ramos + 1 atalho**, roteados pela aresta de entrada condicional em `lead["status"]` — com uma exceção que vem antes do status: pedido explícito de encerramento (`router.py::pediu_para_encerrar`) cai direto em `despedir`, valha qual for o ramo. Sem isso, um "obrigado" com a visita já marcada fazia o ramo C repetir a confirmação inteira.
 
-- **A — qualificação** (`novo`/`qualificando`): `extrair_slots` → `decidir_proximo` → um dos três nós terminais (`apresentar_imoveis`, `encaminhar_especialista`, `finalizar_qualificacao`).
+- **A — qualificação** (`novo`/`qualificando`): `extrair_slots` → `decidir_proximo` → um dos cinco nós terminais (`apresentar_imoveis`, `encaminhar_especialista`, `listar_regioes`, `cidade_nao_atendida`, `finalizar_qualificacao`). Os dois do meio existem porque "onde vocês têm imóvel?" e "quero em Bauru" se respondem com dado do banco, não com mais uma pergunta do roteiro.
 - **B — escolha de visita** (`aguardando_escolha`): `extrair_escolha` → `resolver_escolha` (guardrail bairro-vs-nome) → `confirmar_visita` ou `proxima_pergunta_agendamento`.
 - **C — pós-desfecho** (`visita_agendada`/`encaminhado`): `checar_reagendamento` → se não reagendou, `responder_generico`.
 
