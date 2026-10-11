@@ -1113,3 +1113,121 @@ def _responder_generico_pos_desfecho(lead: dict, mensagem: str, *, turno: int) -
     except LLMError as e:
         registrar_trace(e.trace, lead_id=lead_id, turno=turno)
         return RESPOSTA_FALLBACK
+
+
+# ---------------------------------------------------------------- saidas de impasse
+#
+# Chamadas quando a MESMA decisao se repete 3 turnos seguidos
+# (core/graph.py::REPETICOES_ATE_ESCALAR). Nenhuma delas repergunta: ou
+# entrega o que da pra entregar com o que ja se sabe, ou passa pra um
+# humano. Insistir pela quarta vez e o que o cliente percebe como robo
+# quebrado -- e foi o que o print do Telegram mostrou.
+
+
+def _impasse_faixa(lead_id: int, slots: dict, *, turno: int) -> str:
+    """Cliente nao informa orcamento. Em vez de perguntar de novo, mostra
+    a faixa REAL da base e segue -- o numero sai do banco, nunca do LLM
+    (mesmo guardrail do card)."""
+    finalidade = "aluguel" if slots.get("intencao") == "aluguel" else "venda"
+    faixa = repo.faixa_de_precos(finalidade)
+    sufixo = "/mês" if finalidade == "aluguel" else ""
+
+    if not faixa or faixa["minimo"] is None:
+        return (
+            "Sem problema, não precisa cravar um valor agora. "
+            "Vou te mostrar o que tenho e a gente ajusta a partir daí."
+        )
+
+    minimo = f"R$ {int(faixa['minimo']):,}".replace(",", ".")
+    maximo = f"R$ {int(faixa['maximo']):,}".replace(",", ".")
+    return (
+        f"Sem problema, não precisa cravar um valor agora. Pra você se situar, "
+        f"o que tenho vai de {minimo}{sufixo} a {maximo}{sufixo}. "
+        "Me diz a região que te interessa que eu já te mostro algumas opções."
+    )
+
+
+def _impasse_sem_resultado(lead_id: int, slots: dict, *, turno: int) -> tuple[str, list[dict]]:
+    """A busca voltou vazia varias vezes com os mesmos criterios.
+
+    Repetir "nao encontrei nada, quer ajustar?" nao leva a lugar nenhum se
+    o cliente nao sabe O QUE ajustar. Aqui o filtro e afrouxado em ordem
+    de importancia -- primeiro o preco (o mais comum de estar irreal),
+    depois a regiao -- e a resposta DIZ o que foi afrouxado, pra nao
+    parecer que o sistema ignorou o pedido."""
+    finalidade = "aluguel" if slots.get("intencao") == "aluguel" else "venda"
+    base = {
+        "finalidade": finalidade,
+        "zona": slots.get("regiao"),
+        "quartos_min": slots.get("quartos"),
+        "limite": 3,
+    }
+
+    tentativas = [
+        ("sem o teto de preço", {**base}),
+        ("sem o teto de preço e em outras regiões", {**base, "zona": None}),
+        ("com menos quartos", {**base, "zona": None, "quartos_min": None}),
+    ]
+    for explicacao, filtros in tentativas:
+        resultados = buscar_imoveis(**filtros)
+        if resultados:
+            repo.salvar_imoveis_apresentados(lead_id, [im["id"] for im in resultados])
+            repo.atualizar_status_score(
+                lead_id, score=calcular_score(slots), status="aguardando_escolha"
+            )
+            return (
+                f"Com exatamente esses critérios eu não tenho nada. Ampliei a busca "
+                f"{explicacao} e achei estas:\n\n{_formatar_cards(resultados)}\n\n"
+                "Alguma te serve? Se não, me diz o que é inegociável pra você."
+            ), _galeria_imoveis(resultados)
+
+    return (
+        "Procurei de várias formas e realmente não tenho nada parecido com o que "
+        "você precisa no momento. Posso pedir pra um corretor te chamar quando "
+        "entrar algo no perfil?"
+    ), []
+
+
+def _impasse_humano(lead_id: int, slots: dict, *, turno: int) -> str:
+    """Nem a intencao saiu depois de 3 tentativas. E o unico campo sem o
+    qual nao da pra fazer nada -- entao para de tentar e passa adiante."""
+    repo.atualizar_status_score(lead_id, score=calcular_score(slots), status="encaminhado")
+    return (
+        "Acho que vou te atrapalhar mais do que ajudar por aqui. 😅 "
+        "Vou pedir pra um corretor da equipe te chamar pessoalmente — "
+        "aí você explica do seu jeito o que procura."
+    )
+
+
+def _impasse_agendamento(lead_id: int, falta: str, *, turno: int) -> str:
+    """O cliente nao consegue (ou nao quer) fechar o agendamento.
+
+    Repetir "qual das opcoes te interessou?" pela quarta vez nao ajuda
+    quem ja respondeu "esse" e "aquele" -- ele acha que respondeu. Aqui a
+    lista volta COM OS CODIGOS, que e a forma nao ambigua de escolher, e
+    se nem isso resolver o lead vai pra um humano."""
+    if falta != "imovel":
+        repo.atualizar_status(lead_id, "encaminhado")
+        return (
+            "Vou deixar um corretor da equipe fechar isso com você por telefone, "
+            "fica mais rápido do que por aqui. Ele já tem o imóvel que te interessou. 👍"
+        )
+
+    lead = repo.get_lead(lead_id)
+    apresentados = [im for i in (lead.get("imoveis_apresentados") or []) if (im := repo.get_imovel(i))]
+    if not apresentados:
+        repo.atualizar_status(lead_id, "encaminhado")
+        return (
+            "Acho melhor um corretor te ajudar a escolher — vou pedir pra ele te chamar. 👍"
+        )
+
+    opcoes = "\n".join(
+        f"{i}. {im['titulo']} — {im['bairro']} · Cód. {im['codigo']}"
+        for i, im in enumerate(apresentados, start=1)
+    )
+    return (
+        "Desculpa, acho que me perdi. Pra não ter erro, me diz o CÓDIGO do que "
+        f"você quer ver:\n\n{opcoes}\n\n"
+        "É só mandar o código (ex: " + apresentados[0]["codigo"] + "). "
+        "Se preferir, peço pra um corretor te ligar."
+    )

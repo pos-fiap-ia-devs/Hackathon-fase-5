@@ -49,6 +49,10 @@ from app.core.turno import (
     _encaminhar_especialista,
     _extrair_e_mesclar,
     _finalizar_qualificacao,
+    _impasse_agendamento,
+    _impasse_faixa,
+    _impasse_humano,
+    _impasse_sem_resultado,
     _listar_regioes,
     _proxima_pergunta_agendamento,
     _resolver_escolha,
@@ -70,6 +74,7 @@ class TurnState(TypedDict, total=False):
     turno: int
     slots: dict
     proxima_acao: str
+    repeticoes: int
     escolha: object  # LeadQualification/EscolhaVisita do agente -- tipo dinamico de proposito
     resolvido: dict
     resposta: str
@@ -95,11 +100,45 @@ def _no_extrair_slots(state: TurnState) -> dict:
     return {"slots": slots_novos}
 
 
+# Na 3a vez seguida na mesma decisão, para de insistir e muda de rota.
+# Duas é tolerância normal (o cliente pode ter se distraído); três é
+# teimosia do sistema, e quem paga é quem está do outro lado.
+REPETICOES_ATE_ESCALAR = 3
+
+# Saída por família de impasse. Cada campo tem um jeito diferente de
+# destravar, e nenhum deles é "pergunta de novo":
+#
+#   - região    -> mostra ONDE existe imóvel, em vez de pedir de novo
+#   - preço     -> mostra a faixa real da base e segue sem o campo
+#   - os demais -> segue o roteiro sem o campo, com o que já se sabe
+#   - busca vazia -> afrouxa o filtro e diz o que afrouxou
+#   - intenção  -> é o único obrigatório: passa pra um humano
+_ESCALADA = {
+    "perguntar_regiao": "listar_regioes",
+    "perguntar_preco": "impasse_faixa",
+    "perguntar_ticket": "impasse_faixa",
+    "perguntar_quartos": "buscar_imoveis",
+    "perguntar_urgencia": "buscar_imoveis",
+    "perguntar_perfil_investidor": "perguntar_ticket",
+    "perguntar_expectativa_retorno": "encaminhar_especialista",
+    "perguntar_intencao": "impasse_humano",
+    "buscar_imoveis": "impasse_sem_resultado",
+    "cidade_nao_atendida": "listar_regioes",
+}
+
+
+def _escalar(acao: str, slots: dict) -> str:
+    """Rota alternativa pra uma decisão que já se repetiu demais."""
+    return _ESCALADA.get(acao, acao)
+
+
 def _no_decidir_proximo(state: TurnState) -> dict:
     # A mensagem entra aqui (e nao em `_no_extrair_slots`, que usa
     # `decidir_proximo` so pra saber que pergunta FOI feita antes) porque o
     # atalho de "mostra o que tem" e decisao do turno atual.
-    acao = decidir_proximo(state["slots"], state["mensagem"])
+    lead_id = state["lead"]["id"]
+    dispensados = repo.get_campos_dispensados(lead_id)
+    acao = decidir_proximo(state["slots"], state["mensagem"], dispensados)
 
     # Cidade fora da area de atuacao e avisada AGORA, nao la na busca
     # (pedido do usuario). Achado testando: "Bauru" era aceita como regiao
@@ -111,7 +150,23 @@ def _no_decidir_proximo(state: TurnState) -> dict:
     if regiao and acao != "listar_regioes" and not repo.regiao_existe(regiao):
         acao = "cidade_nao_atendida"
 
-    return {"proxima_acao": acao}
+    # Quantas vezes SEGUIDAS caímos na mesma decisão. `decidir_proximo` é
+    # função pura dos slots: cliente que não responde o que foi perguntado
+    # não muda slot nenhum, a ação não muda, e o agente repete a mesma
+    # frase pra sempre. Uma sonda achou isso em 6 de 6 cenários de cliente
+    # pouco cooperativo -- não era um bug, era a ausência de um mecanismo.
+    repeticoes = repo.registrar_acao(lead_id, acao)
+    if repeticoes >= REPETICOES_ATE_ESCALAR:
+        # Dispensar ANTES de escalar: a escalada responde este turno, e o
+        # campo dispensado garante que o roteiro nao volte aqui no
+        # proximo. Sem isso a escalada vira o novo laco -- a pergunta para
+        # de ser feita, mas o campo continua faltando e a MESMA saida de
+        # impasse dispara pra sempre. Foi o que a sonda pegou na 2a rodada.
+        if acao.startswith("perguntar_"):
+            repo.dispensar_campo(lead_id, acao)
+        acao = _escalar(acao, state["slots"])
+
+    return {"proxima_acao": acao, "repeticoes": repeticoes}
 
 
 def _rota_pos_decisao(state: TurnState) -> str:
@@ -120,6 +175,9 @@ def _rota_pos_decisao(state: TurnState) -> str:
         "encaminhar_especialista": "encaminhar_especialista",
         "listar_regioes": "listar_regioes",
         "cidade_nao_atendida": "cidade_nao_atendida",
+        "impasse_faixa": "impasse_faixa",
+        "impasse_sem_resultado": "impasse_sem_resultado",
+        "impasse_humano": "impasse_humano",
     }.get(state["proxima_acao"], "finalizar_qualificacao")
 
 
@@ -136,13 +194,48 @@ def _no_listar_regioes(state: TurnState) -> dict:
 
 
 def _no_cidade_nao_atendida(state: TurnState) -> dict:
+    """Avisa que a cidade nao e atendida E LIMPA a regiao.
+
+    Limpar e o ponto. Sem isso o slot fica gravado com um valor que nunca
+    vai casar com a base, e TODA mensagem seguinte volta a cair aqui: o
+    cliente ouvia "ainda nao atendemos nessa cidade" indefinidamente, sem
+    nenhuma forma de corrigir, porque a proxima resposta dele era
+    processada depois deste no e a acao ja estava decidida.
+
+    Visto no Telegram real: o extrator devolveu `regiao` com qualificador
+    ("Sao Paulo (Capital)"), o match falhou, e o lead ficou travado ouvindo
+    que a capital nao era atendida -- numa base com 200 imoveis em Sao
+    Paulo. O match foi corrigido (`repo.regiao_existe`), mas o laco era um
+    defeito separado: mesmo com uma cidade de verdade fora da area, dizer
+    a mesma coisa pra sempre e um beco sem saida.
+
+    Com a regiao limpa, o roteiro volta a `perguntar_regiao` e a proxima
+    mensagem do cliente pode gravar outra."""
     slots = state["slots"]
     finalidade = "aluguel" if slots.get("intencao") == "aluguel" else "venda"
+    lead_id = state["lead"]["id"]
     resposta = _cidades_atendidas(
-        slots["regiao"], finalidade=finalidade,
-        lead_id=state["lead"]["id"], turno=state["turno"],
+        slots["regiao"], finalidade=finalidade, lead_id=lead_id, turno=state["turno"],
     )
-    return {"resposta": resposta}
+
+    slots_limpos = {**slots, "regiao": None}
+    repo.salvar_slots(lead_id, slots_limpos)
+    return {"resposta": resposta, "slots": slots_limpos}
+
+
+def _no_impasse_faixa(state: TurnState) -> dict:
+    return {"resposta": _impasse_faixa(state["lead"]["id"], state["slots"], turno=state["turno"])}
+
+
+def _no_impasse_sem_resultado(state: TurnState) -> dict:
+    resposta, galeria = _impasse_sem_resultado(
+        state["lead"]["id"], state["slots"], turno=state["turno"]
+    )
+    return {"resposta": resposta, "galeria": galeria}
+
+
+def _no_impasse_humano(state: TurnState) -> dict:
+    return {"resposta": _impasse_humano(state["lead"]["id"], state["slots"], turno=state["turno"])}
 
 
 def _no_encaminhar_especialista(state: TurnState) -> dict:
@@ -200,11 +293,26 @@ def _no_confirmar_visita(state: TurnState) -> dict:
 
 
 def _no_proxima_pergunta_agendamento(state: TurnState) -> dict:
+    """O ramo B não passa por `decidir_proximo`, então o contador de
+    repetição precisa ser aplicado aqui também -- e precisa, porque este
+    foi o último laço que sobrou na sonda: cliente respondendo "esse",
+    "aquele", "o bom" recebia a mesma pergunta 4 vezes seguidas, já que
+    nada disso resolve pra um imóvel."""
     lead_id = state["lead"]["id"]
     r = state["resolvido"]
     repo.salvar_escolha_visita_parcial(
         lead_id, imovel_id=r["imovel_id"], horario_texto=r["horario"], nome=r["nome"], telefone=r["telefone"]
     )
+
+    falta = (
+        "imovel" if not r["imovel_id"] else
+        "horario" if not r["horario"] else
+        "contato"
+    )
+    repeticoes = repo.registrar_acao(lead_id, f"agendamento_{falta}")
+    if repeticoes >= REPETICOES_ATE_ESCALAR:
+        return {"resposta": _impasse_agendamento(lead_id, falta, turno=state["turno"])}
+
     resposta = _proxima_pergunta_agendamento(
         tem_imovel=bool(r["imovel_id"]), tem_horario=bool(r["horario"]),
         tem_nome=bool(r["nome"]), tem_telefone=bool(r["telefone"]),
@@ -301,6 +409,9 @@ def _construir_grafo():
     g.add_node("encaminhar_especialista", _no_encaminhar_especialista)
     g.add_node("listar_regioes", _no_listar_regioes)
     g.add_node("cidade_nao_atendida", _no_cidade_nao_atendida)
+    g.add_node("impasse_faixa", _no_impasse_faixa)
+    g.add_node("impasse_sem_resultado", _no_impasse_sem_resultado)
+    g.add_node("impasse_humano", _no_impasse_humano)
     g.add_node("finalizar_qualificacao", _no_finalizar_qualificacao)
 
     g.add_node("extrair_escolha", _no_extrair_escolha)
@@ -334,6 +445,9 @@ def _construir_grafo():
             "encaminhar_especialista": "encaminhar_especialista",
             "listar_regioes": "listar_regioes",
             "cidade_nao_atendida": "cidade_nao_atendida",
+            "impasse_faixa": "impasse_faixa",
+            "impasse_sem_resultado": "impasse_sem_resultado",
+            "impasse_humano": "impasse_humano",
             "finalizar_qualificacao": "finalizar_qualificacao",
         },
     )
@@ -341,6 +455,9 @@ def _construir_grafo():
     g.add_edge("encaminhar_especialista", "finalizar")
     g.add_edge("listar_regioes", "finalizar")
     g.add_edge("cidade_nao_atendida", "finalizar")
+    g.add_edge("impasse_faixa", "finalizar")
+    g.add_edge("impasse_sem_resultado", "finalizar")
+    g.add_edge("impasse_humano", "finalizar")
     g.add_edge("finalizar_qualificacao", "finalizar")
 
     # ramo B

@@ -218,6 +218,32 @@ app/
 scripts/    buscar.py  baixar_modelo_stt.sh
 ```
 
+## O agente nunca repete a mesma coisa
+
+`decidir_proximo` é função pura dos slots. Cliente que não responde o que foi perguntado não muda slot nenhum — a decisão não muda, e a mesma frase sai de novo. Era o caso em **6 de 6** cenários de cliente pouco cooperativo, medido por uma sonda que dirige conversas com respostas inúteis ("sim", "esse", "sei lá") e conta respostas consecutivas idênticas.
+
+Não era um bug: era a ausência de um mecanismo. O agente não tinha noção de insistência.
+
+Duas metades, as duas necessárias:
+
+1. **`leads.acao_repeticoes`** conta quantas vezes **seguidas** o roteador decidiu a mesma coisa (decisão diferente zera).
+2. **`leads.campos_dispensados`** tira a pergunta do roteiro na 3ª vez.
+
+Só a primeira trocava um laço por outro: a pergunta parava, mas o campo continuava faltando e a mesma escalada disparava para sempre.
+
+Na 3ª repetição, cada família de impasse tem uma saída — e nenhuma delas é perguntar de novo:
+
+| Impasse | Saída |
+|---|---|
+| Região não sai | mostra **onde** existe imóvel |
+| Orçamento não sai | mostra a faixa real da base e segue sem o campo |
+| Quartos, urgência, perfil | segue o roteiro com o que já se sabe |
+| Busca sempre vazia | afrouxa o filtro em ordem (preço → região → quartos) e **diz o que afrouxou** |
+| Escolha da visita não resolve | reapresenta a lista **com os códigos** |
+| Intenção nunca sai | passa para um corretor humano |
+
+Hoje: **0 de 6**. A sonda virou [`tests/test_sem_loop.py`](tests/test_sem_loop.py), que roda os 6 cenários contra o Ollama real.
+
 ## Código do imóvel
 
 Cada imóvel tem um código público e estável — `CAM-0006`, `SAN-0002` — formado por 3 letras do bairro mais uma sequência. Ele aparece no card, na legenda da foto e na confirmação da visita, e o cliente pode agendar citando ele: *"quero ver o SAN-0002"*.

@@ -148,6 +148,40 @@ def atualizar_status(lead_id: int, status: str) -> None:
         conn.commit()
 
 
+# Criterio de "a regiao que o cliente disse casa com este imovel".
+#
+# UMA definicao, usada pela validacao (`regiao_existe`) e pela busca
+# (`agents/search.py`). Elas ja divergiram: a validacao passou a aceitar
+# "Sao Paulo (Capital)" e a busca continuou recusando, entao o agente
+# dizia "nao encontrei nada" pra uma regiao que ele mesmo tinha acabado
+# de aceitar. Duas copias da mesma regra e como isso acontece.
+#
+# Casa nos DOIS sentidos:
+#   - o termo do cliente dentro do dado   ("Moem" -> bairro "Moema")
+#   - o dado dentro do termo do cliente   ("Sao Paulo (Capital)" -> cidade
+#     "Sao Paulo"), porque o extrator devolve a regiao com qualificador
+#
+# `length >= 4` no segundo sentido evita o falso positivo barato: nome
+# curto casaria dentro de qualquer frase.
+#
+# Sem sinal de porcentagem aqui dentro, nem em comentario: o psycopg varre
+# a query inteira procurando placeholder e recusa a consulta.
+SQL_REGIAO_CASA = """(
+    zona = {termo}
+    OR unaccent(bairro) ILIKE unaccent({like})
+    OR unaccent(cidade) ILIKE unaccent({like})
+    OR (length(cidade) >= 4 AND strpos(lower(unaccent({termo})), lower(unaccent(cidade))) > 0)
+    OR (length(bairro) >= 4 AND strpos(lower(unaccent({termo})), lower(unaccent(bairro))) > 0)
+)"""
+
+
+def sql_regiao_casa(nome_termo: str, nome_like: str) -> str:
+    """Monta o criterio com os nomes de parametro que o chamador usa."""
+    return SQL_REGIAO_CASA.format(
+        termo=f"%({nome_termo})s", like=f"%({nome_like})s"
+    )
+
+
 def regiao_existe(termo: str) -> bool:
     """A regiao que o cliente citou existe na base, em qualquer preco?
 
@@ -158,13 +192,7 @@ def regiao_existe(termo: str) -> bool:
     mostrar onde atendemos."""
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
-            """
-            SELECT 1 FROM imoveis
-            WHERE zona = %(termo)s
-               OR unaccent(bairro) ILIKE unaccent(%(like)s)
-               OR unaccent(cidade) ILIKE unaccent(%(like)s)
-            LIMIT 1
-            """,
+            f"SELECT 1 FROM imoveis WHERE {sql_regiao_casa('termo', 'like')} LIMIT 1",
             {"termo": termo, "like": f"%{termo}%"},
         )
         return cur.fetchone() is not None
@@ -861,3 +889,67 @@ def get_imovel_por_codigo(codigo: str) -> dict | None:
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("SELECT * FROM imoveis WHERE codigo = %s", (codigo.upper(),))
         return cur.fetchone()
+
+
+def registrar_acao(lead_id: int, acao: str) -> int:
+    """Conta quantas vezes SEGUIDAS o roteador decidiu a mesma coisa.
+
+    Devolve a contagem ja atualizada (1 = primeira vez). Acao diferente
+    zera o contador -- o que importa e a insistencia consecutiva, nao o
+    total historico.
+
+    Existe porque `decidir_proximo` e funcao pura dos slots: cliente que
+    nao responde o que foi perguntado nao muda slot nenhum, e o agente
+    repetia a mesma pergunta indefinidamente."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE leads
+               SET acao_repeticoes = CASE WHEN ultima_acao = %(acao)s
+                                          THEN acao_repeticoes + 1 ELSE 1 END,
+                   ultima_acao = %(acao)s
+             WHERE id = %(lead_id)s
+            RETURNING acao_repeticoes
+            """,
+            {"acao": acao, "lead_id": lead_id},
+        )
+        linha = cur.fetchone()
+        conn.commit()
+        return linha["acao_repeticoes"] if linha else 1
+
+
+def faixa_de_precos(finalidade: str) -> dict | None:
+    """Menor e maior preco da base, pra situar o cliente que nao sabe
+    informar orcamento. Numero vem do banco, nunca do LLM (secao 5.6)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT min(preco) AS minimo, max(preco) AS maximo FROM imoveis WHERE finalidade = %s",
+            (finalidade,),
+        )
+        return cur.fetchone()
+
+
+def dispensar_campo(lead_id: int, pergunta: str) -> None:
+    """Marca que o cliente nao vai informar este campo. O roteiro para de
+    perguntar (agents/router.py::decidir_proximo) e segue com o que tem.
+
+    `array_append` condicionado ao `NOT ... = ANY(...)` pra nao duplicar:
+    o mesmo campo pode ser dispensado mais de uma vez numa corrida."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE leads
+               SET campos_dispensados = array_append(campos_dispensados, %(p)s)
+             WHERE id = %(lead_id)s
+               AND NOT (%(p)s = ANY(campos_dispensados))
+            """,
+            {"p": pergunta, "lead_id": lead_id},
+        )
+        conn.commit()
+
+
+def get_campos_dispensados(lead_id: int) -> tuple[str, ...]:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT campos_dispensados FROM leads WHERE id = %s", (lead_id,))
+        linha = cur.fetchone()
+        return tuple(linha["campos_dispensados"] or ()) if linha else ()

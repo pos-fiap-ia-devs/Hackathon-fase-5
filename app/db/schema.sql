@@ -212,6 +212,21 @@ ALTER TABLE mensagens ADD COLUMN IF NOT EXISTS suspeita_injecao TEXT;
 ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS codigo TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS imoveis_codigo_idx ON imoveis (codigo);
 
+-- Quantas vezes seguidas o roteador decidiu a MESMA coisa. `decidir_proximo`
+-- e funcao pura dos slots: se o cliente nao responde o que foi perguntado,
+-- os slots nao mudam, a acao nao muda, e o agente repete a mesma pergunta
+-- pra sempre. Medido com uma sonda: 6 de 6 cenarios de cliente pouco
+-- cooperativo travavam. Contar aqui e o que permite ESCALAR em vez de
+-- insistir (core/graph.py::_no_decidir_proximo).
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS ultima_acao TEXT;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS acao_repeticoes INT NOT NULL DEFAULT 0;
+-- Campos que o cliente NAO quis (ou nao soube) informar depois de 3
+-- tentativas. Sem isso, escalar so trocava um laco por outro: a pergunta
+-- parava de ser feita, mas o campo continuava faltando, entao a MESMA
+-- escalada disparava em todo turno seguinte. Dispensar e o que faz o
+-- roteiro seguir em frente de verdade (agents/router.py::decidir_proximo).
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS campos_dispensados TEXT[] NOT NULL DEFAULT '{}';
+
 -- ---------------------------------------------------------------- login do dashboard
 -- `IF NOT EXISTS` (e nao o CREATE TABLE puro la de cima) porque estas tabelas
 -- nasceram depois: num banco que ja existe, elas PRECISAM ser criadas, e o

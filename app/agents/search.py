@@ -13,7 +13,7 @@ Sem indice vetorial de proposito -- 120 linhas nao justificam ivfflat/hnsw
 from pgvector.psycopg import Vector
 
 from app.core.llm import embed_text
-from app.db.repo import get_conn
+from app.db.repo import get_conn, sql_regiao_casa
 
 
 def buscar_imoveis(
@@ -50,11 +50,11 @@ def buscar_imoveis(
         # do bairro fazia a busca voltar vazia PRA SEMPRE, e a mensagem de
         # "nao encontrei nada" (fixa, guardrail da secao 5.6) se repetia
         # identica em todo turno seguinte, mesmo mudando preco/quartos.
-        where.append(
-            "(zona = %(zona)s"
-            " OR unaccent(bairro) ILIKE unaccent(%(zona_like)s)"
-            " OR unaccent(cidade) ILIKE unaccent(%(zona_like)s))"
-        )
+        # Mesmo criterio da validacao (`repo.regiao_existe`), de uma
+        # definicao so -- as duas ja divergiram: a validacao aceitava
+        # "Sao Paulo (Capital)" e a busca recusava, entao o agente dizia
+        # "nao encontrei nada" pra uma regiao que acabara de aceitar.
+        where.append(sql_regiao_casa("zona", "zona_like"))
         params["zona"] = zona
         params["zona_like"] = f"%{zona}%"
     if preco_min is not None:

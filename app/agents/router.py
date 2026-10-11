@@ -318,8 +318,21 @@ def pediu_para_ver_opcoes(mensagem: str | None) -> bool:
     return any(pedido in normalizada for pedido in _PEDIDOS_VER_OPCOES)
 
 
-def decidir_proximo(slots: dict, mensagem: str | None = None) -> str:
+def decidir_proximo(
+    slots: dict, mensagem: str | None = None, dispensados: tuple[str, ...] = ()
+) -> str:
+    """`dispensados`: campos que o cliente ja se recusou (ou nao soube)
+    informar depois de 3 tentativas -- `core/graph.py` os acumula em
+    `leads.campos_dispensados`.
+
+    Continua funcao pura: a lista entra por parametro, nao por consulta ao
+    banco, entao o roteador segue testavel sem Postgres."""
     intencao = slots.get("intencao") or "indefinido"
+
+    def falta(campo: str, pergunta: str) -> bool:
+        """Campo pendente E ainda perguntavel. Sem a segunda metade, o
+        roteiro voltava pra mesma pergunta pra sempre."""
+        return slots.get(campo) is None and pergunta not in dispensados
 
     if intencao == "indefinido":
         return "perguntar_intencao"
@@ -334,9 +347,9 @@ def decidir_proximo(slots: dict, mensagem: str | None = None) -> str:
         # preco e quartos continuam obrigatorios antes de mostrar qualquer
         # coisa: sao os dois filtros que impedem a lista de sair generica
         # demais, e o PDF pede os dois explicitamente no Cenario 1.
-        if slots.get("faixa_preco_max") is None:
+        if falta("faixa_preco_max", "perguntar_preco"):
             return "perguntar_preco"
-        if slots.get("quartos") is None:
+        if falta("quartos", "perguntar_quartos"):
             return "perguntar_quartos"
         # Atalho: com preco e quartos na mao, um pedido explicito de ver o
         # portfolio vale mais que terminar o questionario. Regiao/urgencia
@@ -345,20 +358,20 @@ def decidir_proximo(slots: dict, mensagem: str | None = None) -> str:
         # (core/turno.py::_apresentar_imoveis).
         if pediu_para_ver_opcoes(mensagem):
             return "buscar_imoveis"
-        if slots.get("regiao") is None:
+        if falta("regiao", "perguntar_regiao"):
             return "perguntar_regiao"
-        if slots.get("urgencia") is None:
+        if falta("urgencia", "perguntar_urgencia"):
             return "perguntar_urgencia"
         return "buscar_imoveis"
 
     if intencao == "investimento":
         # Sem atalho aqui de proposito: o desfecho do Cenario 2 do PDF e
         # encaminhar pra especialista, nao mostrar portfolio.
-        if slots.get("perfil_investidor") is None:
+        if falta("perfil_investidor", "perguntar_perfil_investidor"):
             return "perguntar_perfil_investidor"
-        if slots.get("ticket") is None:
+        if falta("ticket", "perguntar_ticket"):
             return "perguntar_ticket"
-        if slots.get("expectativa_retorno") is None:
+        if falta("expectativa_retorno", "perguntar_expectativa_retorno"):
             return "perguntar_expectativa_retorno"
         return "encaminhar_especialista"
 

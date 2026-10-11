@@ -81,6 +81,9 @@ graph TD
 	encaminhar_especialista(encaminhar_especialista)
 	listar_regioes(listar_regioes)
 	cidade_nao_atendida(cidade_nao_atendida)
+	impasse_faixa(impasse_faixa)
+	impasse_sem_resultado(impasse_sem_resultado)
+	impasse_humano(impasse_humano)
 	finalizar_qualificacao(finalizar_qualificacao)
 	extrair_escolha(extrair_escolha)
 	resolver_escolha(resolver_escolha)
@@ -104,6 +107,9 @@ graph TD
 	decidir_proximo -.-> cidade_nao_atendida
 	decidir_proximo -.-> encaminhar_especialista
 	decidir_proximo -.-> finalizar_qualificacao
+	decidir_proximo -.-> impasse_faixa
+	decidir_proximo -.-> impasse_humano
+	decidir_proximo -.-> impasse_sem_resultado
 	decidir_proximo -.-> listar_regioes
 	despedir --> finalizar
 	encaminhar_especialista --> finalizar
@@ -111,6 +117,9 @@ graph TD
 	extrair_escolha -.-> resolver_escolha
 	extrair_slots --> decidir_proximo
 	finalizar_qualificacao --> finalizar
+	impasse_faixa --> finalizar
+	impasse_humano --> finalizar
+	impasse_sem_resultado --> finalizar
 	listar_regioes --> finalizar
 	proxima_pergunta_agendamento --> finalizar
 	resolver_escolha -.-> confirmar_visita
@@ -121,7 +130,7 @@ graph TD
 
 **Entrada única, 3 ramos + 1 atalho**, roteados pela aresta de entrada condicional em `lead["status"]` — com uma exceção que vem antes do status: pedido explícito de encerramento (`router.py::pediu_para_encerrar`) cai direto em `despedir`, valha qual for o ramo. Sem isso, um "obrigado" com a visita já marcada fazia o ramo C repetir a confirmação inteira.
 
-- **A — qualificação** (`novo`/`qualificando`): `extrair_slots` → `decidir_proximo` → um dos cinco nós terminais (`apresentar_imoveis`, `encaminhar_especialista`, `listar_regioes`, `cidade_nao_atendida`, `finalizar_qualificacao`). Os dois do meio existem porque "onde vocês têm imóvel?" e "quero em Bauru" se respondem com dado do banco, não com mais uma pergunta do roteiro.
+- **A — qualificação** (`novo`/`qualificando`): `extrair_slots` → `decidir_proximo` → um dos oito nós terminais. `listar_regioes` e `cidade_nao_atendida` existem porque "onde vocês têm imóvel?" e "quero em Bauru" se respondem com dado do banco, não com mais uma pergunta do roteiro. Os três `impasse_*` são as **saídas anti-laço**: quando a mesma decisão se repete 3 turnos seguidos, `decidir_proximo` deixa de ser consultado e a conversa muda de rota — mostra a faixa de preços real, afrouxa o filtro da busca dizendo o que afrouxou, ou passa o lead a um humano. Sem isso o agente repetia a mesma frase indefinidamente (ver [`tests/test_sem_loop.py`](tests/test_sem_loop.py)).
 - **B — escolha de visita** (`aguardando_escolha`): `extrair_escolha` → `resolver_escolha` (guardrail bairro-vs-nome) → `confirmar_visita` ou `proxima_pergunta_agendamento`.
 - **C — pós-desfecho** (`visita_agendada`/`encaminhado`): `checar_reagendamento` → se não reagendou, `responder_generico`.
 
