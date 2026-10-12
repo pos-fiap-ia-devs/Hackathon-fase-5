@@ -81,6 +81,7 @@ class TurnState(TypedDict, total=False):
     # fotos dos imoveis apresentados neste turno -- so o no de apresentacao
     # preenche; formato em core/turno.py::RespostaTurno
     galeria: list[dict]
+    texto_sem_cards: str
 
 
 # ---------------------------------------------------------------- ramo A: qualificacao (cenarios 1 e 2)
@@ -183,8 +184,10 @@ def _rota_pos_decisao(state: TurnState) -> str:
 
 def _no_apresentar_imoveis(state: TurnState) -> dict:
     lead_id = state["lead"]["id"]
-    resposta, galeria = _apresentar_imoveis(lead_id, state["slots"], state["mensagem"], turno=state["turno"])
-    return {"resposta": resposta, "galeria": galeria}
+    resposta, galeria, sem_cards = _apresentar_imoveis(
+        lead_id, state["slots"], state["mensagem"], turno=state["turno"]
+    )
+    return {"resposta": resposta, "galeria": galeria, "texto_sem_cards": sem_cards}
 
 
 def _no_listar_regioes(state: TurnState) -> dict:
@@ -487,7 +490,9 @@ def _construir_grafo():
 _GRAFO = _construir_grafo()
 
 
-def processar_turno_grafo(lead: dict, mensagem: str, *, turno: int) -> tuple[str, list[dict]]:
+def processar_turno_grafo(
+    lead: dict, mensagem: str, *, turno: int
+) -> tuple[str, list[dict], str]:
     """Ponto de entrada usado por `core/turno.py::processar_turno` no lugar
     do `match`/`if` aninhado. Mesma assinatura de efeito (le e grava no
     Postgres via os nos), so a orquestracao muda.
@@ -495,7 +500,11 @@ def processar_turno_grafo(lead: dict, mensagem: str, *, turno: int) -> tuple[str
     Devolve (texto, galeria de fotos). So o no de apresentacao de imoveis
     preenche a galeria -- nos demais ela volta vazia."""
     resultado = _GRAFO.invoke({"lead": lead, "mensagem": mensagem, "turno": turno})
-    return resultado["resposta"], resultado.get("galeria") or []
+    return (
+        resultado["resposta"],
+        resultado.get("galeria") or [],
+        resultado.get("texto_sem_cards") or resultado["resposta"],
+    )
 
 
 def exportar_mermaid() -> str:

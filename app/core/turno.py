@@ -69,13 +69,28 @@ class RespostaTurno(str):
 
     Formato de `galeria`: [{imovel_id, numero, legenda, fotos: [url, ...]}],
     na mesma ordem e com a mesma numeracao dos cards.
+
+    `texto_sem_cards`: a MESMA resposta sem o bloco de cards -- so a frase
+    de abertura e a pergunta final. Existe porque canal que renderiza
+    imagem ja mostra titulo, preco, metragem e codigo DENTRO do cartao
+    (chat web/widget) ou na legenda do album (Telegram): repetir tudo em
+    texto logo acima e a mesma informacao duas vezes na tela. O CLI, que
+    nao tem imagem, continua usando o texto completo -- e por isso a
+    escolha e do canal, nao do orquestrador.
+
+    Vazio quando o turno nao apresenta imovel: ai nao ha card nenhum pra
+    tirar e os dois textos seriam iguais.
     """
 
     galeria: list[dict]
+    texto_sem_cards: str
 
-    def __new__(cls, texto: str, galeria: list[dict] | None = None) -> "RespostaTurno":
+    def __new__(
+        cls, texto: str, galeria: list[dict] | None = None, texto_sem_cards: str = "",
+    ) -> "RespostaTurno":
         obj = super().__new__(cls, texto)
         obj.galeria = galeria or []
+        obj.texto_sem_cards = texto_sem_cards or texto
         return obj
 
 
@@ -157,13 +172,22 @@ def processar_turno(*, chat_id: str, canal: str, mensagem: str, origem: str = "t
         lead_id, papel="user", conteudo=mensagem, origem=origem, suspeita_injecao=suspeita
     )
 
-    resposta, galeria = processar_turno_grafo(lead, mensagem, turno=turno)
+    resposta, galeria, texto_sem_cards = processar_turno_grafo(lead, mensagem, turno=turno)
 
     # Galeria gravada NA mensagem, nao so devolvida ao canal: sem isso,
     # recarregar o chat web mostraria a apresentacao de imoveis sem as
     # fotos que o cliente recebeu, e o dashboard idem.
-    repo.salvar_mensagem(lead_id, papel="assistant", conteudo=resposta, origem="texto", anexos=galeria)
-    return RespostaTurno(resposta, galeria)
+    # Grava a versao SEM os cards quando ha galeria: os cards vao em
+    # `anexos`, e todo leitor do historico (chat web, widget, detalhe do
+    # lead no painel) renderiza `_galeria.html` junto. Guardar o texto
+    # completo faria a duplicacao voltar no reload da pagina -- a bolha
+    # repetiria o que o cartao logo abaixo ja mostra.
+    repo.salvar_mensagem(
+        lead_id, papel="assistant",
+        conteudo=texto_sem_cards if galeria else resposta,
+        origem="texto", anexos=galeria,
+    )
+    return RespostaTurno(resposta, galeria, texto_sem_cards)
 
 
 # ---------------------------------------------------------------- qualificacao (cenarios 1 e 2, antes do desfecho)
@@ -338,7 +362,9 @@ def _gerar_frase(instrucao: str, *, lead_id: int, turno: int, fallback: str, slo
 
 # ---------------------------------------------------------------- cenario 1: busca + apresentacao (RAG, secao 5.4)
 
-def _apresentar_imoveis(lead_id: int, slots: dict, mensagem: str, *, turno: int) -> tuple[str, list[dict]]:
+def _apresentar_imoveis(
+    lead_id: int, slots: dict, mensagem: str, *, turno: int
+) -> tuple[str, list[dict], str]:
     """Devolve (texto, galeria). A galeria vem separada do texto porque
     cada canal renderiza imagem do seu jeito (album no Telegram, <img> no
     chat web, URL crua no CLI) -- o orquestrador nao sabe nada disso."""
@@ -361,11 +387,11 @@ def _apresentar_imoveis(lead_id: int, slots: dict, mensagem: str, *, turno: int)
         # _no_decidir_proximo` intercepta assim que a regiao e informada,
         # pra nao deixar o cliente responder mais perguntas achando que a
         # cidade dele esta ok. Aqui e sempre "existe, mas nao nessa faixa".
-        return (
+        vazio = (
             "Poxa, não encontrei nada com exatamente esses critérios agora. "
-            "Quer tentar ajustar a faixa de preço ou a região?",
-            [],
+            "Quer tentar ajustar a faixa de preço ou a região?"
         )
+        return vazio, [], vazio
 
     repo.salvar_imoveis_apresentados(lead_id, [im["id"] for im in resultados])
     repo.atualizar_status_score(lead_id, score=score, status="aguardando_escolha")
@@ -383,12 +409,16 @@ def _apresentar_imoveis(lead_id: int, slots: dict, mensagem: str, *, turno: int)
         lead_id=lead_id, turno=turno, slots=slots,
         fallback="Encontrei essas opções pra você:",
     )
-    texto = (
-        f"{intro}\n\n{cards}\n\n"
+    fechamento = (
         "Qual te interessou -- pode dizer o número, o código ou o bairro? E qual dia "
         "costuma funcionar melhor pra uma visita?"
     )
-    return texto, _galeria_imoveis(resultados)
+    texto = f"{intro}\n\n{cards}\n\n{fechamento}"
+    # Sem o bloco de cards, pro canal que mostra o imovel como imagem --
+    # senao o cliente le titulo/preco/codigo em texto e ve tudo de novo
+    # logo abaixo, no cartao.
+    texto_sem_cards = f"{intro}\n\n{fechamento}"
+    return texto, _galeria_imoveis(resultados), texto_sem_cards
 
 
 def _cidades_atendidas(regiao_pedida: str, *, finalidade: str, lead_id: int, turno: int) -> str:
@@ -538,6 +568,18 @@ def _galeria_imoveis(imoveis: list[dict]) -> list[dict]:
         galeria.append({
             "imovel_id": im["id"],
             "numero": i,
+            # Campos SEPARADOS, nao so a legenda pronta: canal que
+            # renderiza HTML (chat web, widget, painel) monta um cartao de
+            # verdade -- miniatura, titulo, preco em destaque, metragem e
+            # codigo -- em vez de imprimir uma linha de texto. O Telegram
+            # continua usando `legenda`, que e o que cabe numa foto.
+            "titulo": im["titulo"],
+            "preco": _preco_formatado(im),
+            "quartos": im["quartos"],
+            "area": im["area"],
+            "bairro": im["bairro"],
+            "cidade": im.get("cidade"),
+            "codigo": im.get("codigo"),
             "legenda": (
                 f"{i}. {im['titulo']} — {im['bairro']}\n"
                 f"{_preco_formatado(im)} · {im['quartos']} quarto(s) · {im['area']}m²"

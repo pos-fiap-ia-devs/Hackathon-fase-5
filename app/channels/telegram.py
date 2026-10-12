@@ -64,7 +64,10 @@ async def _on_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     finally:
         digitando.cancel()
 
-    await update.message.reply_text(resposta)
+    # Texto SEM o bloco de cards: a legenda de cada album ja traz titulo,
+    # preco, metragem e codigo do imovel. Mandar os dois e a mesma
+    # informacao duas vezes na tela do cliente.
+    await update.message.reply_text(getattr(resposta, "texto_sem_cards", resposta))
     # Fotos depois do texto: o cliente le a lista numerada e ve os albuns na
     # mesma ordem logo abaixo. `getattr` porque o fallback de excecao acima
     # e uma string comum, sem galeria.

@@ -556,7 +556,9 @@ def embed_send(request: Request, sid: str = Form(...), mensagem: str = Form(...)
             {
                 "request": request,
                 "mensagem_usuario": mensagem,
-                "resposta": resposta,
+                # Sem o bloco de cards: o cartao HTML (_galeria.html) ja
+                # mostra titulo, preco, metragem e codigo.
+                "resposta": getattr(resposta, "texto_sem_cards", resposta),
                 "galeria": getattr(resposta, "galeria", []),
             },
         )
@@ -581,7 +583,9 @@ def chat_send(request: Request, mensagem: str = Form(...)):
         {
             "request": request,
             "mensagem_usuario": mensagem,
-            "resposta": resposta,
+            # Sem o bloco de cards: o cartao HTML (_galeria.html) ja
+                # mostra titulo, preco, metragem e codigo.
+                "resposta": getattr(resposta, "texto_sem_cards", resposta),
             # fotos dos imoveis apresentados neste turno (core/turno.py::
             # RespostaTurno) -- vazio em todo turno que nao apresenta imovel,
             # e ausente no fallback de excecao acima, que e string comum.

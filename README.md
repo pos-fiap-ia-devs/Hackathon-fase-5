@@ -11,6 +11,7 @@ A Bia atende por Telegram (texto e áudio), chat web, widget embutido no site da
 | Pergunta | Onde está a resposta |
 |---|---|
 | Quais requisitos do desafio foram atendidos, e como? | [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md) — requisito → código → teste que comprova |
+| Como instalo? | [INSTALL.md](INSTALL.md) — passo a passo por tipo de máquina, portas e problemas comuns |
 | Como rodo isso sem um Mac com GPU? | [Modo demonstração](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração), aqui embaixo |
 | Qual é a arquitetura? | [ARQUITETURA.md](ARQUITETURA.md) — camadas, grafo e fluxos · [docs/SOLID.md](docs/SOLID.md) — princípios mapeados a arquivo e função |
 | Que IA é usada, e por quê? | [IA.md](IA.md) — inclusive os achados que mudaram decisões |
