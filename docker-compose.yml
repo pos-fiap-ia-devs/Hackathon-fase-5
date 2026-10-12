@@ -13,7 +13,11 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./app/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sdr -d sdr"]
+      # -h 127.0.0.1: num volume novo a imagem sobe um servidor TEMPORARIO
+      # so no socket unix pra rodar o initdb, derruba e sobe o definitivo.
+      # pg_isready pelo socket dava "healthy" nessa janela e a conexao TCP
+      # do host (porta 5433) caia com "server closed the connection".
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U sdr -d sdr"]
       interval: 3s
       timeout: 3s
       retries: 20

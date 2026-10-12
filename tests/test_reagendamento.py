@@ -24,3 +24,17 @@ def test_dia_e_periodo_juntos_substitui_tudo():
 
 def test_dia_e_hora_juntos_substitui_tudo():
     assert _combinar_horario("dia 22 as 16h", "sabado as 10h") == "sabado as 10h"
+
+
+def test_dia_novo_substitui_dia_antigo():
+    # bug real (Telegram): "pode alterar para sexta" virava
+    # "na quinta-feira, sexta-feira" e a data gravada continuava a quinta.
+    assert _combinar_horario("na quinta-feira", "sexta-feira") == "sexta-feira"
+
+
+def test_dia_novo_mantem_hora_antiga():
+    assert _combinar_horario("quinta às 10h", "sexta") == "às 10h, sexta"
+
+
+def test_hora_nova_substitui_hora_antiga_e_mantem_dia():
+    assert _combinar_horario("dia 22 as 16h", "18h") == "dia 22, 18h"

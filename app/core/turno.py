@@ -935,39 +935,56 @@ def _formatar_data_falada(d: date) -> str:
     return f"{dia_semana}, {d.day} de {_NOMES_MES[d.month]} de {d.year}"
 
 
-_PALAVRAS_DIA = (
-    "segunda", "terca", "terça", "quarta", "quinta", "sexta", "sabado", "sábado",
-    "domingo", "amanha", "amanhã", "hoje",
+# \b (word boundary) em vez de substring nua -- achado no Telegram real:
+# "manha" (periodo) e substring de "amanha" (dia), entao "amanha" sozinho
+# batia como tendo dia E periodo juntos.
+_RE_DIA = re.compile(
+    r"\b(?:(?:pr[óo]xim[ao]\s+)?"
+    r"(?:(?:segunda|ter[çc]a|quarta|quinta|sexta)(?:[\s-]*feira)?|s[áa]bado|domingo)"
+    r"(?:\s+que\s+vem)?"
+    r"|amanh[ãa]|hoje|dia\s*\d{1,2}(?:/\d{1,2})?)\b",
+    re.IGNORECASE,
+)
+# hora explicita ("16h", "16h30", "as 16", "horario 16") ou periodo ("de manha")
+_RE_HORA = re.compile(
+    r"\b(?:(?:(?:[àa]s|hor[áa]rio)\s*)?\d{1,2}\s*h(?:\s*\d{2})?"
+    r"|(?:[àa]s|hor[áa]rio)\s*\d{1,2}(?::\d{2})?"
+    r"|(?:(?:de|pela|na|no|[àa])\s+)?(?:manh[ãa]|tarde|noite))\b",
+    re.IGNORECASE,
 )
 
 
 def _combinar_horario(atual: str | None, novo: str) -> str:
-    """Decide se `novo` complementa `atual` (fragmento curto -- so a hora,
-    ou so o dia) ou substitui tudo (o cliente ja deu dia + horario numa
-    tacada, entao "tarde" antigo esta obsoleto). Em CODIGO, nao pedindo
-    pro LLM julgar -- ver docstring de extrair_reagendamento pra o motivo.
+    """Mescla a preferencia nova com a antiga POR COMPONENTE: dia novo
+    substitui o dia antigo, horario/periodo novo substitui o antigo, e o
+    que o cliente nao mencionou agora fica. Em CODIGO, nao pedindo pro LLM
+    julgar -- ver docstring de extrair_reagendamento pra o motivo.
 
-    "completo" = a mensagem tem referencia de QUE DIA e de QUE HORARIO
-    juntas -- so entao ela se basta e pode substituir o que tinha antes.
-    "dia 22" sozinho (sem periodo/hora) so complementa "tarde"; "sexta de
-    manha" (dia + periodo) substitui "tarde" inteiro."""
+    "dia 22" sozinho mantem o "tarde" de antes; "sexta de manha" (dia +
+    periodo) substitui tudo.
+
+    Achado no Telegram real: a versao anterior so SUBSTITUIA quando a
+    mensagem trazia dia E horario juntos -- "pode alterar para sexta" com
+    visita "na quinta-feira" virava "na quinta-feira, sexta-feira", e
+    _resolver_data achava a quinta primeiro: o bot confirmava a mudanca
+    e gravava a data antiga."""
     if not atual:
         return novo
 
-    baixo = novo.lower()
-    # \b (word boundary) em vez de substring nua -- achado no Telegram real:
-    # "manha" (periodo) e substring de "amanha" (dia), entao "amanha"
-    # sozinho batia como tendo dia E periodo juntos, virando substituicao
-    # total quando deveria so mesclar.
-    tem_dia = bool(re.search(r"\b(" + "|".join(_PALAVRAS_DIA) + r")\b", baixo)) or bool(
-        re.search(r"\bdia\s*\d{1,2}\b", baixo)
-    )
-    tem_hora = bool(re.search(r"\b\d{1,2}\s*h\b", baixo)) or bool(re.search(r"\b(as|às|horario|hor[áa]rio)\s*\d{1,2}\b", baixo))
-    tem_periodo = bool(re.search(r"\b(manha|manhã|tarde|noite)\b", baixo))
+    novo_tem_dia = bool(_RE_DIA.search(novo))
+    novo_tem_hora = bool(_RE_HORA.search(novo))
+    if not (novo_tem_dia or novo_tem_hora):
+        return f"{atual}, {novo}"
 
-    if tem_dia and (tem_hora or tem_periodo):
-        return novo
-    return f"{atual}, {novo}"
+    # o que sobrevive do antigo: so os componentes que a mensagem nova NAO
+    # trouxe, na ordem em que apareciam
+    mantidos = []
+    if not novo_tem_dia:
+        mantidos += list(_RE_DIA.finditer(atual))
+    if not novo_tem_hora:
+        mantidos += list(_RE_HORA.finditer(atual))
+    mantidos.sort(key=lambda m: m.start())
+    return ", ".join([m.group(0) for m in mantidos] + [novo])
 
 
 def _parece_pergunta_sobre_data(mensagem: str) -> bool:

@@ -20,6 +20,7 @@ Duas diferenças que importam em relação a chamar o seed direto:
 import argparse
 import logging
 import sys
+import time
 from pathlib import Path
 
 import psycopg
@@ -74,6 +75,22 @@ def imoveis_no_banco(url: str) -> int:
         return conn.execute("SELECT count(*) FROM imoveis").fetchone()[0]
 
 
+def aguardar_banco(url: str, tentativas: int = 30) -> None:
+    """Logo depois do `docker compose up -d` a porta 5433 ja aceita conexao
+    (e o proxy do Docker), mas o Postgres pode estar no meio do initdb e
+    derruba a conexao. O INSTALL.md chama este script direto, sem esperar
+    o healthcheck -- entao a espera mora aqui."""
+    for i in range(1, tentativas + 1):
+        try:
+            with psycopg.connect(url, connect_timeout=3):
+                return
+        except psycopg.OperationalError:
+            if i == tentativas:
+                raise
+            logger.info("banco ainda subindo, tentando de novo (%s/%s)", i, tentativas)
+            time.sleep(1)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -83,6 +100,7 @@ def main() -> int:
     args = parser.parse_args()
 
     url = get_settings().database_url
+    aguardar_banco(url)
     aplicar_schema(url)
 
     existentes = imoveis_no_banco(url)
