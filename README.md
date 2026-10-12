@@ -141,6 +141,27 @@ Duas coisas que **não** mudam de lugar:
 
 > ⚠️ **Um bot, uma instância.** O Telegram só aceita um `getUpdates` por token: rodar `./run.sh` e o container ao mesmo tempo faz os dois brigarem (`Conflict: terminated by other getUpdates request`). Escolha um.
 
+### Voz: a Bia ouve e responde falando (opcional)
+
+**Transcrição** (entrada) e **síntese** (saída) são as duas metades do Voice AI, e as duas rodam locais — nenhuma API paga, nenhum áudio do cliente saindo da máquina.
+
+```bash
+# no .env
+STT_ENABLED=true     # transcreve o áudio do cliente (Apple Silicon)
+TTS_ENABLED=true     # responde em áudio
+```
+
+Por padrão a Bia só **responde em áudio para quem mandou áudio** — responder na mesma modalidade é o que um humano faz, e mandar voz para quem digitou é intrusivo. `TTS_SEMPRE=true` força o contrário. O texto vai sempre junto: voz é complemento, não substituição, porque quem está no metrô sem fone precisa poder ler.
+
+O backend é escolhido pelo que existe na máquina ([`core/tts.py`](app/core/tts.py)):
+
+| Onde | Backend | Instalação |
+|---|---|---|
+| macOS | `say`, voz pt-BR nativa | nenhuma |
+| Linux / container | `piper`, rede neural local | o Dockerfile já faz |
+
+Aqui a assimetria com o STT se inverte: `mlx-whisper` é Apple Silicon e não entra no container, mas o `piper` entra — então **o container fala, mesmo sem ouvir**.
+
 ### Transcrição de áudio (opcional)
 
 ```bash

@@ -33,6 +33,22 @@ class Settings(BaseSettings):
     stt_max_audio_s: int = 60
     stt_timeout_s: int = 45
 
+    # ---- sintese de voz (a outra metade do Voice AI) -------------------
+    # Backend escolhido pelo que existe na maquina (core/tts.py): `say` no
+    # macOS, `piper` no Linux/container. Zero API paga -- nenhum audio do
+    # cliente sai da maquina, igual ao resto.
+    tts_enabled: bool = False
+    # Voz do `say`. `say -v '?'` lista as instaladas.
+    tts_voz: str = "Luciana"
+    # Modelo do piper (so no Linux). O Dockerfile baixa pra ca.
+    tts_modelo_piper: str = "/opt/piper/pt_BR-faber-medium.onnx"
+    # Audio longo ninguem ouve; corta na fronteira de frase.
+    tts_max_caracteres: int = 600
+    tts_timeout_s: int = 30
+    # false = responde em audio so pra quem mandou audio (o padrao, e o que
+    # um humano faz). true = sempre, inclusive pra quem digitou.
+    tts_sempre: bool = False
+
     demo_mode: bool = True
     followup_intervalos_min: str = "30,120,1440"
     followup_intervalos_demo_s: str = "90,180,300"

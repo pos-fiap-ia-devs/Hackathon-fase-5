@@ -23,6 +23,7 @@ from telegram.ext import Application, ContextTypes, MessageHandler, filters
 
 from app.core import followup, stt
 from app.core.config import get_settings
+from app.core import tts
 from app.core.turno import RESPOSTA_FALLBACK, processar_turno
 from app.db import repo
 
@@ -68,10 +69,33 @@ async def _on_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     # preco, metragem e codigo do imovel. Mandar os dois e a mesma
     # informacao duas vezes na tela do cliente.
     await update.message.reply_text(getattr(resposta, "texto_sem_cards", resposta))
+    # Responde TAMBEM em audio pra quem mandou audio (core/tts.py). O texto
+    # vai sempre: voz e complemento, nao substituicao -- quem esta no metro
+    # sem fone precisa poder ler. Falha aqui nunca derruba o turno.
+    await _enviar_voz(context, telegram_chat_id, str(resposta), origem)
     # Fotos depois do texto: o cliente le a lista numerada e ve os albuns na
     # mesma ordem logo abaixo. `getattr` porque o fallback de excecao acima
     # e uma string comum, sem galeria.
     await _enviar_galeria(context, telegram_chat_id, getattr(resposta, "galeria", []))
+
+
+async def _enviar_voz(
+    context: ContextTypes.DEFAULT_TYPE, telegram_chat_id: int, texto: str, origem: str
+) -> None:
+    """Manda a resposta como mensagem de voz, quando faz sentido.
+
+    `to_thread` porque a sintese e subprocess bloqueante (say/piper +
+    ffmpeg) e seguraria o loop de eventos do bot -- mesmo motivo de
+    `_processar_em_thread`."""
+    if not tts.deve_falar(origem):
+        return
+    try:
+        audio = await asyncio.to_thread(tts.sintetizar, texto)
+        if audio:
+            await context.bot.send_voice(chat_id=telegram_chat_id, voice=audio)
+    except Exception:
+        logger.warning("falha enviando audio (chat=%s) -- segue so com texto",
+                       telegram_chat_id, exc_info=True)
 
 
 async def _enviar_galeria(context: ContextTypes.DEFAULT_TYPE, telegram_chat_id: int, galeria: list[dict]) -> None:

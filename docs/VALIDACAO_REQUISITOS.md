@@ -70,7 +70,7 @@ Legenda: ✅ feito · ⚠️ parcial, com a limitação escrita · ❌ não feit
 | Observabilidade | ✅ | `agent_traces`: 1 linha por chamada de LLM, com tokens e latência **medidos** (`eval_count`/`eval_duration` da resposta do Ollama), não estimados. Painel com p50/p95/pior, tokens/s e quebra por agente |
 | Segurança | ✅ | Login argon2id com convite de uso único; sessão server-side; PII mascarada antes de persistir; rate limit; token do bot suprimido do log; detecção e classificação de prompt injection em 4 tipos | 
 | Integração com CRM | ✅ | `POST /crm/leads` e `GET /crm/leads.csv` |
-| Voice AI | ⚠️ | **STT apenas** — áudio do Telegram transcrito local com `mlx-whisper` via Metal. Sem TTS. Desligado no container (MLX não instala em Linux) |
+| Voice AI | ✅ | **As duas metades, locais.** Entrada: áudio do Telegram transcrito com `mlx-whisper` via Metal. Saída: a Bia responde falando ([`core/tts.py`](../app/core/tts.py)) — `say` no macOS, `piper` no container, sem API paga. Responde em áudio para quem mandou áudio |
 | Deploy em cloud | ⚠️ | Dockerfile e compose prontos, app sobe containerizado. **Não há deploy publicado**: o Ollama precisa rodar nativo para ter Metal, e hospedar um 9B com GPU não cabe no escopo de uma POC |
 | Integração com WhatsApp | ❌ | Aprovação de número de negócio não cabe no prazo. O Telegram cobre o mesmo padrão de canal |
 
