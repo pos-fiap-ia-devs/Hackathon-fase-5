@@ -19,6 +19,8 @@ as duas coisas divergirem) -- ela E o calculo.
 
 from dataclasses import dataclass
 
+from app.agents.router import tipo_sem_quarto
+
 # intencao fica de fora -- e sempre preenchida pelo schema (Literal obrigatorio),
 # nao mede progresso de qualificacao.
 CAMPOS_QUALIFICACAO = [
@@ -87,10 +89,19 @@ CAMPOS_POR_INTENCAO: dict[str, dict[str, str]] = {
 
 def _campos_relevantes(slots: dict) -> dict[str, str]:
     """Sem intenção declarada ainda não dá pra saber qual fluxo é: cai na
-    lista completa, que é o comportamento antigo."""
+    lista completa, que é o comportamento antigo.
+
+    Quem quer terreno, galpão, loja ou sala não é perguntado sobre quartos
+    (agents/router.py::TIPOS_SEM_QUARTO). Se `quartos` continuasse na conta,
+    esse lead nasceria com a qualificação incompleta por um campo que o
+    agente nunca vai pedir -- o mesmo defeito que `CAMPOS_POR_INTENCAO` já
+    corrigiu para investimento."""
     intencao = slots.get("intencao")
     if intencao in CAMPOS_POR_INTENCAO:
-        return CAMPOS_POR_INTENCAO[intencao]
+        campos = CAMPOS_POR_INTENCAO[intencao]
+        if tipo_sem_quarto(slots.get("tipo_imovel")):
+            campos = {c: n for c, n in campos.items() if c != "quartos"}
+        return campos
     return {campo: campo for campo in CAMPOS_QUALIFICACAO}
 
 

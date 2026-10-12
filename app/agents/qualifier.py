@@ -43,6 +43,15 @@ class LeadQualification(BaseModel):
     intencao: Literal["compra", "aluguel", "investimento", "indefinido"] = "indefinido"
     regiao: str | None = None
     quartos: int | None = None
+    # Logo depois de `quartos` e antes dos precos, pelo mesmo motivo da ordem
+    # documentada acima: campo que aparece em frase curta ("quero um
+    # terreno") precisa vir cedo. Literal fechado, nao str livre -- o
+    # decodificador restrito so consegue emitir um destes valores, e o tipo
+    # vira chave de filtro SQL.
+    tipo_imovel: Literal[
+        "apartamento", "casa", "terreno", "studio", "cobertura",
+        "sala", "galpao", "loja", "predio", "chacara",
+    ] | None = None
     faixa_preco_min: int | None = None
     faixa_preco_max: int | None = None
     urgencia: Literal["alta", "media", "baixa"] | None = None
@@ -64,7 +73,8 @@ falar em alugar -> compra
 Outras regras:
 - Leia o estado atual dos dados ja coletados e a ultima mensagem do cliente.
 - Devolva so os campos que a ultima mensagem confirma ou corrige.
-- Nunca invente valor que o cliente nao disse. Campo nao mencionado = null.
+- Nunca invente valor que o cliente nao disse. Campo nao mencionado = null. \
+tipo_imovel so quando o cliente nomeia o tipo (sobrado = casa, lote = terreno).
 - faixa_preco_min/max e ticket sao valores em reais (numero inteiro, sem "R$"). \
 Se intencao for compra/aluguel, um valor de preco unico vai em faixa_preco_max \
 (faixa_preco_min so com piso explicito, tipo "a partir de"). Se intencao for \

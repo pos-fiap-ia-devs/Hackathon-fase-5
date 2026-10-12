@@ -9,12 +9,13 @@ CREATE EXTENSION IF NOT EXISTS unaccent;
 CREATE TABLE imoveis (
     id              SERIAL PRIMARY KEY,
     titulo          TEXT        NOT NULL,
-    tipo            TEXT        NOT NULL,   -- apartamento, casa, studio, cobertura, sala
+    tipo            TEXT        NOT NULL,   -- apartamento, casa, studio, cobertura, sala, terreno, galpao, loja, predio, chacara, resort
     finalidade      TEXT        NOT NULL,   -- venda | aluguel
     bairro          TEXT        NOT NULL,
     zona            TEXT        NOT NULL,   -- como o lead fala da regiao: na capital e
                                                 -- zona sul/norte/leste/oeste/centro; fora dela
-                                                -- e 'grande sao paulo' / 'interior' (app/db/seed.py)
+                                                -- e 'grande sao paulo' / 'interior' / 'litoral'
+                                                -- (app/db/seed.py e scripts/carregar_catalogo.py)
     cidade          TEXT        NOT NULL DEFAULT 'Sao Paulo',
     preco           NUMERIC(12,2) NOT NULL, -- venda: valor total | aluguel: mensal
     quartos         INT         NOT NULL,
@@ -211,6 +212,28 @@ ALTER TABLE mensagens ADD COLUMN IF NOT EXISTS suspeita_injecao TEXT;
 -- codigo nao muda, aparece na foto, no card e na confirmacao da visita.
 ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS codigo TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS imoveis_codigo_idx ON imoveis (codigo);
+
+-- De onde veio cada imovel. `orion` = catalogo REAL de uma imobiliaria
+-- parceira (scripts/importar_orion.py): preco, area, descricao, fotos e
+-- endereco existem de verdade. `sintetico` = gerado por app/db/seed.py, em
+-- bairros reais mas com dado inventado. Os dois convivem porque o cenario
+-- canonico do enunciado ("apartamento na zona sul") nao existe no catalogo
+-- real -- e a mistura so e honesta se cada linha disser o que e.
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS origem TEXT NOT NULL DEFAULT 'sintetico';
+-- Campos que o catalogo real publica e o sintetico nao tinha.
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS suites INT;
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS iptu NUMERIC(10,2);
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS comodidades TEXT[] NOT NULL DEFAULT '{}';
+-- Campos que NAO vieram do cadastro e foram estimados (hoje: banheiros,
+-- que a imobiliaria deixa em zero na maior parte dos anuncios). O agente
+-- nao pode afirmar um destes como fato -- core/turno.py consulta esta
+-- coluna antes de citar o numero.
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS campos_estimados TEXT[] NOT NULL DEFAULT '{}';
+CREATE INDEX IF NOT EXISTS imoveis_origem_idx ON imoveis (origem);
+-- Tipo que o cliente pediu (apartamento, casa, terreno...). NAO e perguntado:
+-- so se guarda quando ele diz. Serve a duas coisas -- filtrar a busca e
+-- saber que quarto nao se aplica (terreno, galpao, loja, sala, predio).
+ALTER TABLE slots ADD COLUMN IF NOT EXISTS tipo_imovel TEXT;
 
 -- Quantas vezes seguidas o roteador decidiu a MESMA coisa. `decidir_proximo`
 -- e funcao pura dos slots: se o cliente nao responde o que foi perguntado,

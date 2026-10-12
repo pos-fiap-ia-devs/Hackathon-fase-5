@@ -378,7 +378,8 @@ def _apresentar_imoveis(
         finalidade=finalidade,
         zona=slots.get("regiao"),
         preco_max=slots.get("faixa_preco_max"),
-        quartos_min=slots.get("quartos"),
+        quartos_min=quartos_do_filtro(slots),
+        tipo=slots.get("tipo_imovel"),
         limite=3,
     )
     score = calcular_score(slots)
@@ -475,7 +476,7 @@ def _listar_regioes(lead_id: int, slots: dict, *, turno: int) -> str:
     regioes = repo.regioes_disponiveis(
         finalidade=finalidade,
         preco_max=slots.get("faixa_preco_max"),
-        quartos_min=slots.get("quartos"),
+        quartos_min=quartos_do_filtro(slots),
     )
 
     if not regioes:
@@ -503,7 +504,7 @@ def _listar_regioes(lead_id: int, slots: dict, *, turno: int) -> str:
         blocos += f"\n\n(e mais {len(por_cidade) - len(mostradas)} cidades)"
 
     filtro = []
-    if slots.get("quartos"):
+    if quartos_do_filtro(slots):
         filtro.append(f"{slots['quartos']} quarto(s)")
     if slots.get("faixa_preco_max"):
         valor = f"R$ {slots['faixa_preco_max']:,.0f}".replace(",", ".")
@@ -531,6 +532,34 @@ def _preco_formatado(imovel: dict) -> str:
     return preco + ("/mês" if imovel["finalidade"] == "aluguel" else "")
 
 
+def _specs_do_imovel(im: dict) -> str:
+    """Linha de especificacoes ("3 quartos · 2 banheiros · 350 m2"), montada
+    so com o que existe E e confiavel.
+
+    Dois cortes, ambos vindos do catalogo real:
+      * quarto/banheiro zero NAO aparece. Terreno tem quartos = 0, e "0
+        quarto(s)" num card de terreno e dado errado, nao dado neutro.
+      * campo marcado em `campos_estimados` NAO aparece. A imobiliaria deixa
+        `banheiros` em branco na maior parte dos anuncios e o importador o
+        estima por `suites + 1`; afirmar esse numero ao cliente seria a
+        alucinacao que o resto do projeto inteiro existe pra evitar. Estimado
+        serve pra busca e pro score, nunca pra frase."""
+    estimados = set(im.get("campos_estimados") or [])
+    partes = []
+    quartos = im.get("quartos") or 0
+    if quartos:
+        partes.append(f"{quartos} quarto{'s' if quartos != 1 else ''}")
+    banheiros = im.get("banheiros") or 0
+    if banheiros and "banheiros" not in estimados:
+        partes.append(f"{banheiros} banheiro{'s' if banheiros != 1 else ''}")
+    vagas = im.get("vagas") or 0
+    if vagas:
+        partes.append(f"{vagas} vaga{'s' if vagas != 1 else ''}")
+    if im.get("area"):
+        partes.append(f"{im['area']} m²")
+    return " · ".join(partes)
+
+
 def _formatar_cards(imoveis: list[dict]) -> str:
     """Card montado em codigo -- ver guardrail no docstring do modulo.
     Numeros (1, 2, 3) sao o que `_turno_escolha_visita` usa pra mapear a
@@ -539,8 +568,7 @@ def _formatar_cards(imoveis: list[dict]) -> str:
     for i, im in enumerate(imoveis, start=1):
         linha = (
             f"{i}. {im['titulo']} — {im['bairro']}\n"
-            f"   {_preco_formatado(im)} · {im['quartos']} quarto(s) · "
-            f"{im['banheiros']} banheiro(s) · {im['area']}m²"
+            f"   {_preco_formatado(im)} · {_specs_do_imovel(im)}"
         )
         if im.get("rentabilidade_estimada"):
             linha += f"\n   rentabilidade estimada: {im['rentabilidade_estimada']}% a.a."
@@ -581,13 +609,17 @@ def _galeria_imoveis(imoveis: list[dict]) -> list[dict]:
             "titulo": im["titulo"],
             "preco": _preco_formatado(im),
             "quartos": im["quartos"],
+            # Linha pronta de especificacoes (ver `_specs_do_imovel`): o
+            # template nao decide sozinho o que mostrar, senao reintroduz
+            # "0 quartos" e banheiro estimado.
+            "specs": _specs_do_imovel(im),
             "area": im["area"],
             "bairro": im["bairro"],
             "cidade": im.get("cidade"),
             "codigo": im.get("codigo"),
             "legenda": (
                 f"{i}. {im['titulo']} — {im['bairro']}\n"
-                f"{_preco_formatado(im)} · {im['quartos']} quarto(s) · {im['area']}m²"
+                f"{_preco_formatado(im)} · {_specs_do_imovel(im)}"
                 + (f"\nCód. {im['codigo']}" if im.get("codigo") else "")
             ),
             "fotos": fotos,
@@ -1223,7 +1255,8 @@ def _impasse_sem_resultado(lead_id: int, slots: dict, *, turno: int) -> tuple[st
     base = {
         "finalidade": finalidade,
         "zona": slots.get("regiao"),
-        "quartos_min": slots.get("quartos"),
+        "quartos_min": quartos_do_filtro(slots),
+        "tipo": slots.get("tipo_imovel"),
         "limite": 3,
     }
 

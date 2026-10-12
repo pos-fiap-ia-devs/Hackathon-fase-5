@@ -46,6 +46,7 @@ def get_conn() -> Iterator[Connection]:
 SLOTS_CAMPOS = [
     "intencao", "faixa_preco_min", "faixa_preco_max", "quartos", "regiao",
     "urgencia", "perfil_investidor", "ticket", "expectativa_retorno",
+    "tipo_imovel",
 ]
 
 

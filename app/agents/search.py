@@ -23,6 +23,7 @@ def buscar_imoveis(
     preco_min: int | None = None,
     preco_max: int | None = None,
     quartos_min: int | None = None,
+    tipo: str | None = None,
     texto_livre: str | None = None,
     limite: int = 5,
 ) -> list[dict]:
@@ -66,6 +67,11 @@ def buscar_imoveis(
     if quartos_min is not None:
         where.append("quartos >= %(quartos_min)s")
         params["quartos_min"] = quartos_min
+    if tipo:
+        # Igualdade exata: `tipo` vem do Literal fechado do qualificador, nao
+        # de texto livre, entao nao ha o que normalizar.
+        where.append("tipo = %(tipo)s")
+        params["tipo"] = tipo
 
     where_sql = " AND ".join(where)
 
@@ -76,7 +82,8 @@ def buscar_imoveis(
         params["limite"] = limite
         sql = f"""
             SELECT id, codigo, titulo, tipo, finalidade, bairro, zona, cidade, preco,
-                   quartos, banheiros, vagas, area, condominio,
+                   quartos, banheiros, vagas, area, condominio, iptu, suites,
+                   comodidades, campos_estimados, origem,
                    rentabilidade_estimada, descricao, fotos,
                    0.6 * (1 - (embedding <=> %(vetor)s))
                    + 0.4 * coalesce(ts_rank(busca, plainto_tsquery('portuguese', %(query_ts)s)), 0)
@@ -90,7 +97,8 @@ def buscar_imoveis(
         params["limite"] = limite
         sql = f"""
             SELECT id, codigo, titulo, tipo, finalidade, bairro, zona, cidade, preco,
-                   quartos, banheiros, vagas, area, condominio,
+                   quartos, banheiros, vagas, area, condominio, iptu, suites,
+                   comodidades, campos_estimados, origem,
                    rentabilidade_estimada, descricao, fotos, NULL AS score
             FROM imoveis
             WHERE {where_sql}

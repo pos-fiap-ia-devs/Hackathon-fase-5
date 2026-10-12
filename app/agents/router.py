@@ -318,6 +318,27 @@ def pediu_para_ver_opcoes(mensagem: str | None) -> bool:
     return any(pedido in normalizada for pedido in _PEDIDOS_VER_OPCOES)
 
 
+# Tipos em que "quantos quartos?" nao faz sentido. O catalogo real tem 74
+# terrenos, galpoes, lojas e salas; sem esta regra o agente perguntaria
+# quartos pra quem quer terreno, e a busca (`quartos >= N`) devolveria vazio
+# porque terreno tem quartos = 0. Fonte unica: o roteador, o scoring, a
+# busca e os cards leem DAQUI.
+TIPOS_SEM_QUARTO = frozenset({"terreno", "galpao", "loja", "sala", "predio"})
+
+
+def tipo_sem_quarto(tipo: str | None) -> bool:
+    return (tipo or "") in TIPOS_SEM_QUARTO
+
+
+def quartos_do_filtro(slots: dict) -> int | None:
+    """Quartos como FILTRO de busca. Para tipo sem quarto devolve None,
+    mesmo que o cliente tenha dito um numero antes de mudar de ideia pra
+    terreno -- senao `quartos >= 2` eliminaria todo terreno (quartos = 0)."""
+    if tipo_sem_quarto(slots.get("tipo_imovel")):
+        return None
+    return slots.get("quartos")
+
+
 def decidir_proximo(
     slots: dict, mensagem: str | None = None, dispensados: tuple[str, ...] = ()
 ) -> str:
@@ -349,7 +370,7 @@ def decidir_proximo(
         # demais, e o PDF pede os dois explicitamente no Cenario 1.
         if falta("faixa_preco_max", "perguntar_preco"):
             return "perguntar_preco"
-        if falta("quartos", "perguntar_quartos"):
+        if not tipo_sem_quarto(slots.get("tipo_imovel")) and falta("quartos", "perguntar_quartos"):
             return "perguntar_quartos"
         # Atalho: com preco e quartos na mao, um pedido explicito de ver o
         # portfolio vale mais que terminar o questionario. Regiao/urgencia
