@@ -1,5 +1,27 @@
 {% extends "base.html" %}
-{% block title %}Fale com a Bia{% endblock %}
+{% block title %}Fale com a Bia<script>
+// Desenha a bolha do cliente NA HORA e limpa o campo, antes da requisição
+// sair. O servidor devolve só a resposta do agente (_chat_mensagens.html).
+//
+// `textContent`, nunca innerHTML: é texto que o visitante digitou.
+function enviarOtimista(form) {
+  var campo = form.querySelector('input[name="mensagem"]');
+  var texto = campo.value.trim();
+  if (!texto) return;
+  var lista = document.getElementById('chat-mensagens');
+  var linha = document.createElement('div');
+  linha.className = 'text-sm text-right';
+  var balao = document.createElement('span');
+  balao.className = 'inline-block px-3 py-2 rounded-lg max-w-[85%] text-left ' +
+                    'break-words whitespace-pre-line bg-blue-600 text-white';
+  balao.textContent = texto;
+  linha.appendChild(balao);
+  lista.appendChild(linha);
+  lista.scrollTop = lista.scrollHeight;
+  campo.value = '';
+}
+</script>
+{% endblock %}
 {% block content %}
 <h1 class="text-2xl font-bold mb-4">Fale com a Bia 🏠</h1>
 <p class="text-sm text-gray-500 mb-4">Canal alternativo ao Telegram -- mesmo agente, mesmo orquestrador (seção 5.8 do plano: canal é só um adapter).</p>
@@ -18,8 +40,13 @@
     {% endfor %}
 </div>
 
-<form hx-post="/chat/send" hx-target="#chat-mensagens" hx-swap="beforeend"
-      hx-on::after-request="this.reset(); document.getElementById('chat-mensagens').scrollTop = 999999"
+<div id="digitando" class="digitando text-sm">
+        <span></span><span></span><span></span>
+    </div>
+    <form hx-post="/chat/send" hx-target="#chat-mensagens" hx-swap="beforeend"
+      hx-indicator="#digitando" hx-disabled-elt="find button"
+      hx-on::before-request="enviarOtimista(this)"
+      hx-on::after-request="document.getElementById('chat-mensagens').scrollTop = 999999"
       class="flex gap-2">
     <input type="text" name="mensagem" placeholder="Escreva sua mensagem..." required autofocus
            class="flex-1 border rounded px-3 py-2" autocomplete="off">

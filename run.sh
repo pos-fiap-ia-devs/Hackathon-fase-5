@@ -57,6 +57,15 @@ echo "==> schema + seed"
 #    ja tem, e informa o que aplicou.
 python -m scripts.preparar_banco
 
+echo "==> site da imobiliaria"
+# Estatico: o build le os imoveis do banco (ja de pe acima) e escreve
+# site/dist. Rapido e idempotente -- refaz do zero a cada subida, entao
+# imovel novo no seed aparece sem ninguem lembrar de rodar nada.
+python site/build.py >/dev/null
+nohup python -m http.server 5500 --directory site/dist > site.log 2>&1 &
+echo $! > .site.pid
+echo "   http://localhost:5500 (pid $(cat .site.pid))"
+
 echo "==> subindo app em background: http://localhost:8000"
 nohup uvicorn app.web.api:app --host 0.0.0.0 --port 8000 > run.log 2>&1 &
 echo $! > .run.pid

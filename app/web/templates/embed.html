@@ -11,6 +11,30 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+/* Indicador de "digitando". O turno leva 10-30s com o modelo local; sem
+   isto a tela fica IDENTICA depois do clique e o visitante conclui que
+   quebrou. O Telegram ja tinha o equivalente (`_manter_digitando`), o
+   chat web e o widget nao. */
+.digitando { display: none; padding: 2px 0; }
+.htmx-request .digitando,
+.digitando.htmx-request { display: block; }
+.digitando span {
+    display: inline-block;
+    width: 7px; height: 7px; margin-right: 3px;
+    border-radius: 50%;
+    background: #94a3b8;
+    animation: pulsa 1.2s infinite ease-in-out;
+}
+.digitando span:nth-child(2) { animation-delay: .18s; }
+.digitando span:nth-child(3) { animation-delay: .36s; }
+@keyframes pulsa {
+    0%, 60%, 100% { opacity: .25; transform: translateY(0); }
+    30%           { opacity: 1;   transform: translateY(-3px); }
+}
+/* Enquanto espera, o botao fica desabilitado de verdade (`hx-disabled-elt`
+   no form) -- aqui so o aspecto. */
+button[disabled] { opacity: .55; cursor: default; }
+
     </style>
 </head>
 <body class="bg-white text-gray-900 h-screen flex flex-col">
@@ -22,7 +46,7 @@
                    escapa por padrao, entao texto do cliente nao vira HTML. #}
                 {{ marca or "Fale com a gente" }}
             </div>
-            <div class="text-[11px] text-slate-300">Atendimento com IA</div>
+            <div class="text-[11px] text-slate-300">Atendimento com a Bia</div>
         </div>
         {# O botao mora aqui dentro, mas quem fecha o painel e o widget.js
            la fora -- outra origem, entao postMessage. #}
@@ -46,8 +70,13 @@
         {% endfor %}
     </div>
 
+    <div id="digitando" class="digitando text-sm px-3 pb-1">
+        <span></span><span></span><span></span>
+    </div>
     <form hx-post="/embed/send" hx-target="#chat-mensagens" hx-swap="beforeend"
-          hx-on::after-request="this.reset(); document.getElementById('chat-mensagens').scrollTop = 999999"
+          hx-indicator="#digitando" hx-disabled-elt="find button"
+          hx-on::before-request="enviarOtimista(this)"
+          hx-on::after-request="document.getElementById('chat-mensagens').scrollTop = 999999"
           class="flex gap-2 p-3 border-t shrink-0">
         {# O sid viaja no form, nao em cookie: dentro de um iframe de outra
            origem o cookie seria third-party e o Safari/Firefox bloqueiam. #}
@@ -56,5 +85,43 @@
                class="flex-1 border rounded px-3 py-2 text-sm" autocomplete="off">
         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded text-sm">Enviar</button>
     </form>
+<script>
+// O site que hospeda pede pra preencher o campo quando o visitante clica
+// em "Tenho interesse" num imovel (app/web/static/widget.js::abrir).
+// Preenche, NAO envia: ele clicou num botao, nao digitou a pergunta --
+// precisa poder revisar antes de mandar.
+window.addEventListener("message", function (e) {
+  // So aceita do proprio widget que nos embutiu. Sem esta checagem,
+  // qualquer pagina com um iframe nosso escreveria no campo do cliente.
+  if (e.source !== window.parent) return;
+  if (!e.data || e.data.tipo !== "bia:preencher") return;
+  var campo = document.querySelector('input[name="mensagem"]');
+  if (!campo) return;
+  campo.value = String(e.data.texto || "").slice(0, 500);
+  campo.focus();
+});
+</script>
+<script>
+// Desenha a bolha do cliente NA HORA e limpa o campo, antes da requisição
+// sair. O servidor devolve só a resposta do agente (_chat_mensagens.html).
+//
+// `textContent`, nunca innerHTML: é texto que o visitante digitou.
+function enviarOtimista(form) {
+  var campo = form.querySelector('input[name="mensagem"]');
+  var texto = campo.value.trim();
+  if (!texto) return;
+  var lista = document.getElementById('chat-mensagens');
+  var linha = document.createElement('div');
+  linha.className = 'text-sm text-right';
+  var balao = document.createElement('span');
+  balao.className = 'inline-block px-3 py-2 rounded-lg max-w-[85%] text-left ' +
+                    'break-words whitespace-pre-line bg-blue-600 text-white';
+  balao.textContent = texto;
+  linha.appendChild(balao);
+  lista.appendChild(linha);
+  lista.scrollTop = lista.scrollHeight;
+  campo.value = '';
+}
+</script>
 </body>
 </html>

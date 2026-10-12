@@ -90,10 +90,18 @@
   var bolha = raiz.querySelector(".bolha");
   var painel = raiz.querySelector(".painel");
   var iframe = null;
+  var iframeCarregado = false;
 
   function garantirIframe() {
     if (iframe) return;
     iframe = document.createElement("iframe");
+    iframe.addEventListener("load", function () {
+      iframeCarregado = true;
+      if (pendente) {
+        iframe.contentWindow.postMessage({ tipo: "bia:preencher", texto: pendente }, origem);
+        pendente = null;
+      }
+    });
     var url = new URL(origem + "/embed");
     url.searchParams.set("sid", sessionId());
     if (marca) url.searchParams.set("brand", marca);
@@ -102,11 +110,26 @@
     painel.appendChild(iframe);
   }
 
-  function abrir() {
+  // Mensagem pedida antes de o iframe existir ou terminar de carregar.
+  // Guardada aqui e entregue no `load` -- sem isso, o postMessage sai
+  // antes de a pagina do chat estar pronta e se perde em silencio.
+  var pendente = null;
+
+  function abrir(opcoes) {
     garantirIframe();
     painel.classList.add("aberto");
     bolha.textContent = "✕";
     bolha.setAttribute("aria-label", "Fechar chat");
+
+    var mensagem = opcoes && opcoes.message;
+    if (!mensagem) return;
+    // Preenche o campo em vez de ENVIAR: o visitante clicou num botao do
+    // site, nao digitou uma pergunta -- ele precisa poder revisar antes.
+    if (iframeCarregado) {
+      iframe.contentWindow.postMessage({ tipo: "bia:preencher", texto: mensagem }, origem);
+    } else {
+      pendente = mensagem;
+    }
   }
 
   function fechar() {

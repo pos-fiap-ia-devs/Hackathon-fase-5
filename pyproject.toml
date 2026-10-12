@@ -33,6 +33,15 @@ dev = ["pytest==8.3.4", "pytest-asyncio==0.25.2"]
 # entao nao precisa do `playwright install`.
 shots = ["playwright==1.49.1"]
 
+# Pacotes DECLARADOS, nao descobertos. Com `app`, `scripts`, `site` e
+# `tests` no topo, a descoberta automatica do setuptools desiste ("multiple
+# top-level packages") e o `uv pip install -e .` falha -- foi o que a pasta
+# `site/` causou. `scripts` entra porque e importado como modulo
+# (`python -m scripts.preparar_banco`); `site` nao, porque roda como script
+# solto (e o nome colidiria com o modulo `site` da stdlib).
+[tool.setuptools]
+packages = ["app", "scripts"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

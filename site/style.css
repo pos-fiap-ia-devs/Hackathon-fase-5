@@ -1,0 +1,495 @@
+/* Horizonte Imóveis — site da imobiliária.
+ *
+ * Decisões de design, pra quem for mexer:
+ *
+ * - UMA cor de marca (#0e41d5) e uma escala de cinzas. Nada de segunda cor
+ *   decorativa: num site de imóvel quem tem que puxar o olho é a FOTO e o
+ *   PREÇO, e cor demais compete com os dois.
+ * - Sombra em vez de borda nos cartões. Borda em grade de cards cria uma
+ *   malha de linhas que cansa; sombra separa sem desenhar.
+ * - Tipografia em escala estreita (14/15/17/20/32/56). Variação de tamanho
+ *   demais é o que faz layout parecer amador.
+ * - `clamp()` no que é grande. Sem media query pra tipografia.
+ */
+
+:root {
+    --marca: #0e41d5;
+    --marca-escura: #0a32a6;
+    --marca-clara: #eef2ff;
+
+    --tinta: #0f172a;
+    --tinta-media: #475569;
+    --tinta-fraca: #94a3b8;
+
+    --linha: #e2e8f0;
+    --fundo: #ffffff;
+    --fundo-suave: #f8fafc;
+
+    --raio: 14px;
+    --raio-pequeno: 8px;
+    --sombra: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.12);
+    --sombra-alta: 0 2px 4px rgb(15 23 42 / 0.05), 0 16px 40px -16px rgb(15 23 42 / 0.22);
+
+    --largura: 1180px;
+    --gutter: 24px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--tinta);
+    background: var(--fundo);
+    -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+.wrap {
+    max-width: var(--largura);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+}
+
+/* ---------------------------------------------------------------- cabeçalho */
+
+.topo {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(255 255 255 / 0.85);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--linha);
+}
+
+.topo .wrap {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    height: 68px;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.02em;
+}
+
+.marca-simbolo {
+    width: 30px; height: 30px;
+    display: grid; place-items: center;
+    border-radius: 9px;
+    background: var(--marca);
+    color: #fff;
+    font-size: 15px;
+}
+
+.nav {
+    display: flex;
+    gap: 22px;
+    margin-left: auto;
+    font-size: 14px;
+    color: var(--tinta-media);
+}
+.nav a:hover { color: var(--marca); }
+
+.botao {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--marca);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background .15s, transform .15s;
+}
+.botao:hover { background: var(--marca-escura); }
+.botao:active { transform: translateY(1px); }
+
+.botao-vazado {
+    background: transparent;
+    color: var(--marca);
+    border: 1px solid var(--linha);
+}
+.botao-vazado:hover { background: var(--marca-clara); border-color: var(--marca); }
+
+/* ---------------------------------------------------------------- hero */
+
+.hero {
+    padding: clamp(48px, 8vw, 96px) 0 clamp(32px, 5vw, 56px);
+    background:
+        radial-gradient(900px 420px at 88% -10%, var(--marca-clara), transparent 70%),
+        var(--fundo);
+}
+
+.hero h1 {
+    margin: 0 0 16px;
+    font-size: clamp(34px, 5.2vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    font-weight: 800;
+    max-width: 16ch;
+}
+.hero h1 em { font-style: normal; color: var(--marca); }
+
+.hero p {
+    margin: 0;
+    font-size: clamp(16px, 1.6vw, 19px);
+    color: var(--tinta-media);
+    max-width: 52ch;
+}
+
+/* ---------------------------------------------------------------- busca */
+
+.busca {
+    margin-top: 32px;
+    background: var(--fundo);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra-alta);
+    padding: 8px;
+}
+
+.busca-abas {
+    display: flex;
+    gap: 4px;
+    padding: 4px 4px 12px;
+}
+
+.aba {
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--tinta-media);
+    cursor: pointer;
+}
+.aba[aria-selected="true"] { background: var(--marca); color: #fff; }
+.aba:not([aria-selected="true"]):hover { background: var(--fundo-suave); }
+
+.busca-campos {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr auto;
+    gap: 8px;
+    align-items: end;
+    padding: 0 4px 4px;
+}
+
+.campo { display: flex; flex-direction: column; gap: 6px; }
+.campo label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--tinta-fraca);
+    padding-left: 2px;
+}
+.campo select, .campo input {
+    appearance: none;
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--linha);
+    border-radius: 10px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--tinta);
+    background: var(--fundo);
+}
+.campo select:focus, .campo input:focus {
+    outline: none;
+    border-color: var(--marca);
+    box-shadow: 0 0 0 3px rgb(14 65 213 / 0.12);
+}
+.busca-campos .botao { height: 42px; justify-content: center; }
+
+/* ---------------------------------------------------------------- seções */
+
+.secao { padding: clamp(40px, 6vw, 72px) 0; }
+.secao-suave { background: var(--fundo-suave); }
+
+.secao-topo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.secao h2 {
+    margin: 0;
+    font-size: clamp(22px, 2.6vw, 30px);
+    letter-spacing: -0.025em;
+    font-weight: 750;
+}
+.secao-topo p { margin: 6px 0 0; color: var(--tinta-media); font-size: 15px; }
+.secao-topo a { color: var(--marca); font-weight: 600; font-size: 14px; white-space: nowrap; }
+
+/* ---------------------------------------------------------------- cards */
+
+.grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 22px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    background: var(--fundo);
+    border-radius: var(--raio);
+    overflow: hidden;
+    box-shadow: var(--sombra);
+    transition: box-shadow .2s, transform .2s;
+}
+.card:hover { box-shadow: var(--sombra-alta); transform: translateY(-3px); }
+
+.card-foto {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: var(--fundo-suave);
+    overflow: hidden;
+}
+.card-foto img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .4s ease;
+}
+.card:hover .card-foto img { transform: scale(1.04); }
+
+.selo {
+    position: absolute;
+    top: 12px; left: 12px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.94);
+    backdrop-filter: blur(4px);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: var(--tinta);
+}
+.selo-marca { background: var(--marca); color: #fff; }
+
+.card-corpo { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
+
+.card-tipo {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--marca);
+}
+
+.card h3 {
+    margin: 6px 0 0;
+    font-size: 16px;
+    font-weight: 650;
+    line-height: 1.35;
+    letter-spacing: -0.012em;
+}
+
+.card-local { margin: 4px 0 0; font-size: 13.5px; color: var(--tinta-media); }
+
+.card-preco {
+    margin: 14px 0 0;
+    font-size: 21px;
+    font-weight: 750;
+    letter-spacing: -0.025em;
+}
+.card-preco span { font-size: 13px; font-weight: 500; color: var(--tinta-media); }
+
+.specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--linha);
+    font-size: 13px;
+    color: var(--tinta-media);
+}
+.specs b { font-weight: 650; color: var(--tinta); }
+
+.card-rodape {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--linha);
+}
+.codigo {
+    font-size: 12px;
+    color: var(--tinta-fraca);
+    font-variant-numeric: tabular-nums;
+}
+.card-rodape .botao { padding: 7px 14px; font-size: 13px; }
+
+/* ---------------------------------------------------------------- chips */
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.chip {
+    padding: 7px 14px;
+    border: 1px solid var(--linha);
+    border-radius: 999px;
+    background: var(--fundo);
+    font: inherit;
+    font-size: 13.5px;
+    color: var(--tinta-media);
+    cursor: pointer;
+    transition: all .15s;
+}
+.chip:hover { border-color: var(--marca); color: var(--marca); }
+.chip[aria-pressed="true"] { background: var(--marca); border-color: var(--marca); color: #fff; }
+
+/* ---------------------------------------------------------------- detalhe */
+
+.detalhe-topo { padding: 28px 0 0; }
+.volta { font-size: 14px; color: var(--tinta-media); }
+.volta:hover { color: var(--marca); }
+
+.detalhe-galeria {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+    margin-top: 18px;
+    border-radius: var(--raio);
+    overflow: hidden;
+}
+.detalhe-galeria img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4/3; }
+.detalhe-galeria .secundarias { display: grid; gap: 10px; }
+.detalhe-galeria .secundarias img { aspect-ratio: 16/11; }
+
+.detalhe-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 40px;
+    padding: 36px 0 72px;
+    align-items: start;
+}
+
+.detalhe h1 {
+    margin: 0;
+    font-size: clamp(24px, 3vw, 34px);
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+}
+
+.ficha {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 2px;
+    margin: 24px 0;
+    background: var(--linha);
+    border-radius: var(--raio-pequeno);
+    overflow: hidden;
+}
+.ficha div { background: var(--fundo); padding: 14px 16px; }
+.ficha dt { font-size: 12px; color: var(--tinta-fraca); margin: 0 0 3px; }
+.ficha dd { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -0.015em; }
+
+.painel {
+    position: sticky;
+    top: 92px;
+    background: var(--fundo);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra-alta);
+    padding: 22px;
+}
+.painel .preco { font-size: 30px; font-weight: 780; letter-spacing: -0.03em; }
+.painel .preco span { font-size: 14px; font-weight: 500; color: var(--tinta-media); }
+.painel .botao { width: 100%; justify-content: center; margin-top: 16px; }
+.painel .nota { margin: 14px 0 0; font-size: 12.5px; color: var(--tinta-fraca); line-height: 1.5; }
+
+/* ---------------------------------------------------------------- rodapé */
+
+.rodape {
+    border-top: 1px solid var(--linha);
+    padding: 48px 0 32px;
+    background: var(--fundo-suave);
+    font-size: 14px;
+    color: var(--tinta-media);
+}
+.rodape-grid {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(3, 1fr);
+    gap: 32px;
+    margin-bottom: 36px;
+}
+.rodape h4 {
+    margin: 0 0 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--tinta);
+}
+.rodape ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rodape a:hover { color: var(--marca); }
+.rodape-fim {
+    border-top: 1px solid var(--linha);
+    padding-top: 22px;
+    font-size: 12.5px;
+    color: var(--tinta-fraca);
+}
+
+/* ---------------------------------------------------------------- vazio */
+
+.vazio {
+    text-align: center;
+    padding: 64px 24px;
+    color: var(--tinta-media);
+}
+.vazio strong { display: block; color: var(--tinta); font-size: 17px; margin-bottom: 6px; }
+
+/* ---------------------------------------------------------------- telas estreitas */
+
+@media (max-width: 900px) {
+    .busca-campos { grid-template-columns: 1fr 1fr; }
+    .busca-campos .botao { grid-column: 1 / -1; }
+    .detalhe-grid { grid-template-columns: 1fr; gap: 28px; }
+    .painel { position: static; }
+    .rodape-grid { grid-template-columns: 1fr 1fr; }
+    .nav { display: none; }
+}
+
+@media (max-width: 560px) {
+    .detalhe-galeria { grid-template-columns: 1fr; }
+    .detalhe-galeria .secundarias { grid-template-columns: 1fr 1fr; }
+    .rodape-grid { grid-template-columns: 1fr; }
+}
+.rendimento { margin: 8px 0 0; font-size: 13px; color: var(--marca); }
+.rendimento b { font-weight: 700; }
+
+/* Aviso de chat indisponivel. Nao e decoracao: sem ele o clique em "Falar
+   com a Bia" com a aplicacao fora do ar nao fazia NADA -- nem erro visivel
+   nem explicacao. Falhar em silencio e pior que falhar. */
+.aviso {
+    position: fixed;
+    bottom: 92px; right: 20px;
+    z-index: 2147483001;
+    max-width: 320px;
+    padding: 14px 16px;
+    border-radius: var(--raio-pequeno);
+    background: #1e293b;
+    color: #fff;
+    font-size: 13.5px;
+    line-height: 1.5;
+    box-shadow: var(--sombra-alta);
+}
+.aviso strong { display: block; margin-bottom: 4px; }
+.aviso code { background: rgb(255 255 255 / 0.14); padding: 1px 5px; border-radius: 4px; font-size: 12px; }

@@ -8,6 +8,30 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+/* Indicador de "digitando". O turno leva 10-30s com o modelo local; sem
+   isto a tela fica IDENTICA depois do clique e o visitante conclui que
+   quebrou. O Telegram ja tinha o equivalente (`_manter_digitando`), o
+   chat web e o widget nao. */
+.digitando { display: none; padding: 2px 0; }
+.htmx-request .digitando,
+.digitando.htmx-request { display: block; }
+.digitando span {
+    display: inline-block;
+    width: 7px; height: 7px; margin-right: 3px;
+    border-radius: 50%;
+    background: #94a3b8;
+    animation: pulsa 1.2s infinite ease-in-out;
+}
+.digitando span:nth-child(2) { animation-delay: .18s; }
+.digitando span:nth-child(3) { animation-delay: .36s; }
+@keyframes pulsa {
+    0%, 60%, 100% { opacity: .25; transform: translateY(0); }
+    30%           { opacity: 1;   transform: translateY(-3px); }
+}
+/* Enquanto espera, o botao fica desabilitado de verdade (`hx-disabled-elt`
+   no form) -- aqui so o aspecto. */
+button[disabled] { opacity: .55; cursor: default; }
+
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
