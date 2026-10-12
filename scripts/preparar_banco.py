@@ -10,11 +10,11 @@ Duas diferenças que importam em relação a chamar o seed direto:
    imagem isso evita instalar o postgresql-client inteiro só pra rodar um
    arquivo .sql, e usa a mesma dependência que o app já tem.
 
-2. `app.db.seed` começa com `TRUNCATE imoveis RESTART IDENTITY CASCADE`.
-   Rodar isso a cada boot apagaria as VISITAS junto (o CASCADE desce por
-   `visitas.imovel_id`) -- um restart do container levaria embora a agenda
-   dos corretores. Por isso aqui ele só é chamado quando a tabela está
-   vazia; `--forcar` existe pra quem realmente quer resemear.
+2. O seed carrega o catálogo real por UPSERT (`scripts/carregar_catalogo.py`)
+   e não trunca nada, então é seguro a cada boot: atualiza o que mudou,
+   preserva ids e visitas. Antes ele fazia `TRUNCATE imoveis ... CASCADE`,
+   que apagava a agenda dos corretores num restart, e por isso só rodava
+   com a tabela vazia. `--forcar` agora é o único caminho destrutivo.
 """
 
 import argparse
@@ -95,7 +95,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--forcar", action="store_true",
-        help="resemeia mesmo com imóveis no banco (TRUNCATE: apaga visitas junto)",
+        help="apaga os imóveis antes de carregar (TRUNCATE: leva as visitas junto)",
     )
     args = parser.parse_args()
 
@@ -103,16 +103,11 @@ def main() -> int:
     aguardar_banco(url)
     aplicar_schema(url)
 
-    existentes = imoveis_no_banco(url)
-    if existentes and not args.forcar:
-        logger.info("seed: %s imóveis já no banco, nada a fazer", existentes)
-        return 0
-
-    # Import tardio: o seed abre pool e fala com o Ollama pros embeddings.
-    # Carregar isso quando só se quer o schema seria custo à toa.
+    # Import tardio: carregar abre pool e pode falar com o Ollama pros
+    # embeddings. Custo à toa quando só se quer o schema.
     from app.db.seed import run  # noqa: PLC0415
 
-    run()
+    run(truncar=args.forcar)
     return 0
 
 

@@ -93,6 +93,42 @@ ZONA_POR_CIDADE = {
 # Tipos do site -> tipos do nosso schema. O site tem mais categorias do que
 # o agente sabe qualificar; `terreno`, `galpao`, `loja`, `predio` e
 # `chacara` entram como estão, e o schema ganhou espaço pra eles.
+# Na CAPITAL o lead fala de zona (sul, norte, leste, oeste, centro), não de
+# cidade -- é a mesma convenção do seed sintético (app/db/seed.py). Mapear
+# só por cidade jogava os 6 imóveis de São Paulo em "grande sao paulo", e
+# "zona sul" nunca casava com os que existem de verdade (Planalto
+# Paulista, Santo Amaro, Brooklin). Chave: bairro sem acento, minúsculo.
+ZONA_CAPITAL_POR_BAIRRO = {
+    "planalto paulista": "zona sul",
+    "santo amaro": "zona sul",
+    "brooklin": "zona sul",
+    "moema": "zona sul",
+    "campo belo": "zona sul",
+    "vila mariana": "zona sul",
+    "chacara tatuape": "zona leste",
+    "tatuape": "zona leste",
+    "mooca": "zona leste",
+    # Pirituba/Jaraguá: a prefeitura classifica como zona norte.
+    "parque sao domingos": "zona norte",
+    "santana": "zona norte",
+    "pinheiros": "zona oeste",
+    "lapa": "zona oeste",
+    "perdizes": "zona oeste",
+    "centro": "centro",
+    "republica": "centro",
+}
+
+
+def zona_do_imovel(cidade: str, bairro: str) -> str:
+    """Zona como o lead fala. Capital: pelo bairro; resto: pela cidade.
+    Bairro da capital que não está no mapa cai em "grande sao paulo" em vez
+    de ser chutado -- zona errada é pior que zona genérica."""
+    cid = _sem_acento(cidade).lower()
+    if cid == "sao paulo":
+        return ZONA_CAPITAL_POR_BAIRRO.get(_sem_acento(bairro).lower(), "grande sao paulo")
+    return ZONA_POR_CIDADE.get(cid, "grande sao paulo")
+
+
 # Duas grafias porque há duas fontes: `property_type` do cadastro vem em
 # inglês maiúsculo (HOUSE, LAND), a trilha da página vem em português. A
 # trilha é a reserva quando o cadastro traz um tipo que não conhecemos.
@@ -414,7 +450,7 @@ def extrair(html: str, url: str) -> dict | None:
         "finalidade": finalidade,
         "bairro": (dados.get("neighborhood_display") or dados.get("neighborhood") or "").strip(" .,-"),
         "cidade": cidade,
-        "zona": ZONA_POR_CIDADE.get(_sem_acento(cidade).lower(), "grande sao paulo"),
+        "zona": zona_do_imovel(cidade, (dados.get("neighborhood_display") or dados.get("neighborhood") or "").strip(" .,-")),
         "preco": float(preco),
         "condominio": float(condominio) if condominio else None,
         "iptu": float(iptu) if iptu else None,

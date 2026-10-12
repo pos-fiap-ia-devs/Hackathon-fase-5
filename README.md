@@ -280,7 +280,7 @@ Ficam em `app/web/static/imoveis/`, **versionadas no repositório**, e são serv
 
 Antes as URLs apontavam para o `loremflickr.com` em tempo de execução. O serviço passou a responder **401** e, sem nenhuma linha do nosso código mudar, o Telegram parou de enviar foto (o álbum é pulado em silêncio quando o download falha) e o chat web passou a exibir imagem quebrada. Dependência de terceiro em tempo de execução, numa demonstração ao vivo, é risco sem contrapartida — agora não há nenhuma.
 
-As imagens são genéricas e não correspondem aos imóveis: a base de 200 é simulada. Trocar é `python -m scripts.baixar_fotos --forcar`.
+As fotos, os textos e os valores são do **catálogo real de uma imobiliária parceira** (266 imóveis, 731 fotos), usado com a autorização dela. Não há imóvel nem foto sintéticos: todo imóvel tem foto do próprio anúncio. A marca d'água da origem está desfocada (`scripts/borrar_marca.py`) e imagens de terceiros, como capturas do Google Street View, foram removidas (`scripts/achar_terceiros.py`). O catálogo é atualizado com `./atualizar_catalogo.sh`.
 
 ## Stack
 

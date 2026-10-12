@@ -33,6 +33,7 @@ from app.agents.router import (
     detectar_objecao,
     eh_aceite_curto,
     perguntou_quem_e,
+    quartos_do_filtro,
 )
 from app.agents.scheduler_agent import (
     escolher_corretor,

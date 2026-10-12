@@ -24,9 +24,14 @@
             {% if item.titulo %}
             <p class="font-semibold text-sm leading-snug break-words">{{ item.titulo }}</p>
             <p class="text-base font-bold text-amber-700 mt-0.5">{{ item.preco }}</p>
+            {# `specs` vem pronta de core/turno.py::_specs_do_imovel: sem
+               "0 quartos" em terreno e sem banheiro estimado. Mensagens
+               antigas (gravadas antes do campo existir) caem no formato
+               anterior. #}
             <p class="text-xs text-gray-500 mt-0.5">
-                {{ item.quartos }} quarto{{ "s" if item.quartos != 1 }}
-                {%- if item.area %} · {{ item.area }} m²{% endif %}
+                {% if item.specs is defined %}{{ item.specs }}
+                {%- else %}{{ item.quartos }} quarto{{ "s" if item.quartos != 1 }}
+                {%- if item.area %} · {{ item.area }} m²{% endif %}{% endif %}
             </p>
             <p class="text-xs text-gray-500">
                 {{ item.bairro }}{% if item.cidade %}, {{ item.cidade }}{% endif %}

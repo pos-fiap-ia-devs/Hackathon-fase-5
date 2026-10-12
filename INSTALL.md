@@ -178,9 +178,9 @@ docker compose exec -T db psql -U sdr -d sdr -tAc 'SELECT fotos[1] FROM imoveis 
 python -m scripts.preparar_banco --forcar
 ```
 
-> O `--forcar` executa `TRUNCATE imoveis ... CASCADE`, que **apaga as visitas agendadas** junto (há FK de `visitas` para `imoveis`). Numa instalação nova isso é irrelevante; num banco com demonstração em andamento, não é.
+> O `--forcar` executa `TRUNCATE imoveis ... CASCADE`, que **apaga as visitas agendadas** junto (há FK de `visitas` para `imoveis`). Sem ele, o carregador faz upsert por código e preserva visitas e ids — é o caminho seguro a cada subida.
 
-As 40 fotos vêm versionadas no repositório, em `app/web/static/imoveis/`. Não há download em tempo de execução — `scripts/baixar_fotos.py` só serve para trocá-las.
+As fotos (`app/web/static/imoveis/orion/`) e o catálogo (`app/db/catalogo_orion.json`) vêm versionados no repositório: subir o banco não depende de internet. `python -m scripts.importar_orion` só é preciso para atualizar o catálogo a partir da fonte.
 
 ### `docker info` não responde
 

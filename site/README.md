@@ -58,8 +58,8 @@ Sombra em vez de borda nos cartões: borda em grade cria uma malha de linhas que
 
 HTML puro, uma folha de estilo, nenhum build de JS. O único script da página é o `widget.js` do projeto.
 
-## Limitação conhecida
+## Fotos
 
-**As fotos não são de imóveis.** São imagens genéricas (paisagens, texturas) do pool em `app/web/static/imoveis/`, as mesmas que o agente envia no chat. Numa vitrine isso aparece mais do que no Telegram — um anúncio com foto de praia é o detalhe que denuncia que a base é simulada.
+São as do próprio anúncio, do catálogo real de uma imobiliária parceira, as mesmas que o agente envia no chat. A marca d'água da origem está desfocada e as imagens de terceiros foram removidas — ver `scripts/borrar_marca.py` e `scripts/achar_terceiros.py`.
 
-`foto_do_card` desloca a escolha pela posição na grade para que repetições não caiam lado a lado, mas isso é paliativo. Resolver de verdade é trocar o pool por fotos de arquitetura e interiores em `scripts/baixar_fotos.py`.
+`foto_do_card` desloca a escolha pela posição na grade, o que importa pouco agora: cada imóvel tem fotos próprias. Ele continua escolhendo entre as fotos do mesmo imóvel.

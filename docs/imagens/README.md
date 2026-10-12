@@ -29,10 +29,10 @@ passa a mostrar uma tela que não existe mais.
 | `widget.png` | A Bia embutida num site de imobiliária de terceiro: bolha flutuante e o chat aberto no iframe, com a marca do site | O `widget.js` (bolha, painel, cores); a página `/embed`; o cabeçalho com `data-brand` |
 | `injection.png` | Observabilidade com uma tentativa de **prompt injection** marcada: tipo classificado e o texto cru que o cliente enviou | Os tipos de `_PADROES` em [`core/injecao.py`](../../app/core/injecao.py); os rótulos; o bloco na aba de traces |
 
-As fotos dos imóveis são genéricas e **não têm relação com o imóvel** — a base é simulada. Ficam em
-`app/web/static/imoveis/`, versionadas, e são servidas por nós. Antes vinham do `loremflickr.com` em
+As fotos dos imóveis são **as do próprio anúncio**, do catálogo real de uma imobiliária parceira. Ficam em
+`app/web/static/imoveis/orion/`, versionadas, e são servidas por nós. Antes vinham do `loremflickr.com` em
 tempo de execução, até o serviço passar a responder 401: o Telegram parou de enviar foto nenhuma e o
-chat web passou a mostrar imagem quebrada, sem uma linha do nosso código ter mudado. Para trocá-las:
-`python -m scripts.baixar_fotos --forcar`.
+chat web passou a mostrar imagem quebrada, sem uma linha do nosso código ter mudado. Para atualizá-las:
+`./atualizar_catalogo.sh`.
 
 Os leads que aparecem nas listas são do banco de desenvolvimento.

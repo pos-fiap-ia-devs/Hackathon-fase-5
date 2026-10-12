@@ -236,7 +236,14 @@ def _sanitizar_vazamento_prompt(texto: str) -> str:
 # recorrente do modelo, so problema se o cliente nao tiver informado essa
 # regiao de verdade. Nao so "zona sul": ampliado pra todas as 5, achado
 # real mostrou o mesmo tique noutra variante de frase, mesma causa.
-_ZONAS_CONHECIDAS = ("zona sul", "zona norte", "zona leste", "zona oeste", "centro")
+# "litoral" e "grande sao paulo" entraram com o catalogo real: sao as duas
+# regioes que o lead passa a citar (Guaruja, Barueri) e que o modelo tambem
+# passa a poder alucinar. "interior" fica de FORA de proposito: aparece em
+# "interior do apartamento" e o guardrail apagaria frase legitima.
+_ZONAS_CONHECIDAS = (
+    "zona sul", "zona norte", "zona leste", "zona oeste", "centro",
+    "litoral", "grande sao paulo",
+)
 
 _QUEBRA_FRASE = re.compile(r"(?<=[.!?])\s+")
 

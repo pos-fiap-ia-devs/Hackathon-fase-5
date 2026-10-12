@@ -26,6 +26,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from app.agents.router import TIPOS_SEM_QUARTO
 from app.db.repo import get_conn  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parent
@@ -40,6 +41,12 @@ TIPOS = {
     "studio": "Studio",
     "cobertura": "Cobertura",
     "sala": "Sala comercial",
+    "terreno": "Terreno",
+    "galpao": "Galpão",
+    "loja": "Loja",
+    "predio": "Prédio",
+    "chacara": "Chácara",
+    "resort": "Casa em resort",
 }
 
 
@@ -52,12 +59,26 @@ def carregar() -> list[dict]:
             """
             SELECT id, codigo, titulo, tipo, finalidade, bairro, zona, cidade,
                    preco, quartos, banheiros, vagas, area, condominio,
-                   rentabilidade_estimada, descricao, fotos
+                   rentabilidade_estimada, descricao, fotos,
+                   iptu, suites, comodidades, campos_estimados
             FROM imoveis
             ORDER BY finalidade, preco
             """
         )
         return cur.fetchall()
+
+
+# Preenchida em main(): só há página/aba de "Investir" se existir imóvel
+# com rentabilidade cadastrada. O catálogo real não publica rentabilidade,
+# então o menu linkava pra uma página que nunca era gerada (404).
+HA_INVESTIMENTO = False
+
+
+def link_investir(raiz: str, *, item_de_lista: bool = False) -> str:
+    if not HA_INVESTIMENTO:
+        return ""
+    tag = f'<a href="{raiz}investir.html">Investir</a>'
+    return f"<li>{tag}</li>" if item_de_lista else tag
 
 
 def titulo_vitrine(im: dict) -> str:
@@ -69,18 +90,48 @@ def titulo_vitrine(im: dict) -> str:
     quartos em Moema", que é como anúncio de imóvel se escreve."""
     tipo = TIPOS.get(im["tipo"], im["tipo"])
     q = im["quartos"]
+    # Terreno, galpão, loja, sala e prédio não têm quarto: "Terreno de 0
+    # quartos" é dado errado, não neutro. Pra eles o que identifica é a
+    # metragem. Mesma regra do agente (agents/router.py::TIPOS_SEM_QUARTO).
+    if im["tipo"] in TIPOS_SEM_QUARTO:
+        if im["area"]:
+            return f"{tipo} de {im['area']} m² em {im['bairro']}"
+        return f"{tipo} em {im['bairro']}"
     if im["tipo"] == "studio" or q <= 1:
         return f"{tipo} em {im['bairro']}"
     return f"{tipo} de {q} quartos em {im['bairro']}"
 
 
+def ficha(im: dict) -> list[tuple[str, str]]:
+    """Especificações (rótulo, valor) só do que existe e é confiável.
+
+    Mesmos dois cortes do agente (core/turno.py::_specs_do_imovel): zero de
+    quarto/banheiro não aparece, e campo estimado não aparece. A imobiliária
+    deixa `banheiros` em branco na maior parte dos anúncios e o importador o
+    estima; numa página pública isso seria afirmar um número que ninguém
+    cadastrou."""
+    estimados = set(im.get("campos_estimados") or [])
+    itens = []
+    if im["quartos"]:
+        itens.append(("Quartos", str(im["quartos"])))
+    if im.get("suites"):
+        itens.append(("Suítes", str(im["suites"])))
+    if im["banheiros"] and "banheiros" not in estimados:
+        itens.append(("Banheiros", str(im["banheiros"])))
+    if im["vagas"]:
+        itens.append(("Vagas", str(im["vagas"])))
+    if im["area"]:
+        itens.append(("Área", f"{im['area']} m²"))
+    return itens
+
+
 def foto_do_card(im: dict, posicao: int) -> str | None:
     """Alterna a foto escolhida pela POSIÇÃO na grade, não só pelo imóvel.
 
-    O pool tem 8 fotos por tipo e 145 imóveis à venda: repetição é
-    inevitável. O que incomoda não é repetir, é repetir LADO A LADO -- na
-    primeira versão o 1º e o 3º card saíram com a mesma imagem. Deslocar
-    por posição espalha as repetições pra fora do campo de visão."""
+    Cada imóvel tem as próprias fotos (até 3, do anúncio real), então não
+    há mais pool compartilhado. Mantém-se o deslocamento por posição só
+    pra que o mesmo imóvel, ao aparecer em duas grades, não repita a foto
+    de capa no mesmo lugar."""
     fotos = im["fotos"] or []
     if not fotos:
         return None
@@ -134,7 +185,7 @@ def cabecalho(titulo: str, app: str, *, raiz: str = "") -> str:
     <nav class="nav">
       <a href="{raiz}comprar.html">Comprar</a>
       <a href="{raiz}alugar.html">Alugar</a>
-      <a href="{raiz}investir.html">Investir</a>
+      {link_investir(raiz)}
       <a href="{raiz}index.html#bairros">Bairros</a>
       <a href="{raiz}index.html#sobre">Quem somos</a>
     </nav>
@@ -157,8 +208,8 @@ def rodape(app: str, *, raiz: str = "") -> str:
         <h4>Imóveis</h4>
         <ul>
           <li><a href="{raiz}comprar.html">Comprar</a></li>
-          <li><a href="{raiz}alugar.html">Alugar</a>
-      <a href="{raiz}investir.html">Investir</a></li>
+          <li><a href="{raiz}alugar.html">Alugar</a></li>
+          {link_investir(raiz, item_de_lista=True)}
         </ul>
       </div>
       <div>
@@ -178,8 +229,8 @@ def rodape(app: str, *, raiz: str = "") -> str:
       </div>
     </div>
     <div class="rodape-fim">
-      Site e base de imóveis fictícios, criados para o Tech Challenge Fase 5 — FIAP Pós Tech IA para Devs.
-      As fotos são genéricas e não correspondem aos imóveis. Atendimento virtual pelo Agente SDR do projeto.
+      Projeto acadêmico do Tech Challenge Fase 5 — FIAP Pós Tech IA para Devs. Catálogo, textos e fotos
+      cedidos por uma imobiliária parceira para fins de demonstração. Atendimento virtual pelo Agente SDR do projeto.
     </div>
   </div>
 </footer>
@@ -244,10 +295,7 @@ def card(im: dict, *, raiz: str = "", posicao: int = 0) -> str:
     <p class="card-preco">{preco_br(im["preco"], im["finalidade"])}</p>
     {rendimento}
     <div class="specs">
-      <span><b>{im["quartos"]}</b> quarto{"s" if im["quartos"] != 1 else ""}</span>
-      <span><b>{im["banheiros"]}</b> banheiro{"s" if im["banheiros"] != 1 else ""}</span>
-      <span><b>{im["vagas"]}</b> vaga{"s" if im["vagas"] != 1 else ""}</span>
-      <span><b>{im["area"]}</b> m²</span>
+      {"".join(f"<span><b>{e(v)}</b> {e(r.lower())}</span>" for r, v in ficha(im))}
     </div>
     <div class="card-rodape">
       <span class="codigo">Cód. {e(im["codigo"])}</span>
@@ -300,7 +348,7 @@ def pagina_inicial(imoveis: list[dict], app: str) -> str:
       <div class="busca-abas" role="tablist">
         <button type="button" class="aba" role="tab" aria-selected="true" data-fin="venda">Comprar</button>
         <button type="button" class="aba" role="tab" aria-selected="false" data-fin="aluguel">Alugar</button>
-        <button type="button" class="aba" role="tab" aria-selected="false" data-fin="investir">Investir</button>
+        {'<button type="button" class="aba" role="tab" aria-selected="false" data-fin="investir">Investir</button>' if HA_INVESTIMENTO else ''}
       </div>
       <div class="busca-campos">
         <div class="campo">
@@ -506,6 +554,10 @@ def pagina_imovel(im: dict, app: str) -> str:
         f'<img src="{e(f)}" alt="Foto {i} do {e(titulo)}" loading="lazy" width="800" height="600">'
         for i, f in enumerate(fotos[1:3], start=2)
     )
+    iptu = (
+        f'<div><dt>IPTU</dt><dd>R$ {int(im["iptu"]):,}/mês</dd></div>'.replace(",", ".")
+        if im.get("iptu") else ""
+    )
     condominio = (
         f'<div><dt>Condomínio</dt><dd>R$ {int(im["condominio"]):,}</dd></div>'.replace(",", ".")
         if im["condominio"] else ""
@@ -531,11 +583,9 @@ def pagina_imovel(im: dict, app: str) -> str:
     <p class="card-local" style="font-size:16px">{e(im["bairro"])}, {e(im["cidade"])}</p>
 
     <dl class="ficha">
-      <div><dt>Quartos</dt><dd>{im["quartos"]}</dd></div>
-      <div><dt>Banheiros</dt><dd>{im["banheiros"]}</dd></div>
-      <div><dt>Vagas</dt><dd>{im["vagas"]}</dd></div>
-      <div><dt>Área</dt><dd>{im["area"]} m²</dd></div>
+      {"".join(f"<div><dt>{e(r)}</dt><dd>{e(v)}</dd></div>" for r, v in ficha(im))}
       {condominio}
+      {iptu}
     </dl>
 
     <h2 style="font-size:19px;margin:28px 0 8px">Sobre o imóvel</h2>
@@ -573,6 +623,8 @@ def main() -> int:
     app = args.app.rstrip("/")
 
     imoveis = carregar()
+    global HA_INVESTIMENTO
+    HA_INVESTIMENTO = any(im["rentabilidade_estimada"] for im in imoveis)
     if not imoveis:
         print("banco sem imóveis -- rode `python -m scripts.preparar_banco` antes.", file=sys.stderr)
         return 1

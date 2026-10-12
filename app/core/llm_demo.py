@@ -215,7 +215,7 @@ _URGENCIA = (
               "mudar logo", "fechar logo", "assim que possivel", "esse mes")),
 )
 
-_ZONAS = ("zona sul", "zona norte", "zona leste", "zona oeste", "centro")
+_ZONAS = ("zona sul", "zona norte", "zona leste", "zona oeste", "centro", "litoral", "grande sao paulo")
 
 # "600 mil", "R$ 600.000", "1,2 milhao", "600k"
 _VALOR = re.compile(
@@ -256,7 +256,13 @@ def _quartos(texto: str) -> int | None:
     return int(bruto) if bruto.isdigit() else _QUARTOS_POR_EXTENSO.get(bruto)
 
 
-_REGIAO_APOS_PREPOSICAO = re.compile(r"\b(?:em|na|no|bairro de|cidade de|regiao de)\s+([a-z]{4,}(?:\s+[a-z]{4,})?)")
+# Aceita o conector no meio ("santana DE parnaiba", "sao jose DOS campos"):
+# `de` tem 2 letras e a captura parava antes, gravando "santana" -- o nome
+# de um bairro de outra cidade -- no lugar de "Santana de Parnaiba".
+_REGIAO_APOS_PREPOSICAO = re.compile(
+    r"\b(?:em|na|no|bairro de|cidade de|regiao de)\s+"
+    r"((?:sao\s+)?[a-z]{4,}(?:\s+(?:de|da|do|dos|das)\s+[a-z]{4,}|\s+[a-z]{4,})?)"
+)
 # Palavras que seguem "em/na/no" sem serem lugar -- sem isto, "em mente"
 # e "no maximo" viravam região e o roteiro seguia com lixo no slot.
 _NAO_E_REGIAO = {
@@ -265,6 +271,13 @@ _NAO_E_REGIAO = {
     "valor", "valores", "preco", "precos", "quartos", "breve", "renda",
     "dinheiro", "maos", "aberto", "ideia", "vista", "frente", "aluguel",
     "investimento", "investimentos", "familia", "obras", "reforma",
+    "terreno", "terrenos", "lote", "lotes", "sobrado", "chacara", "galpao", "loja", "sala",
+    # Tempo nao e lugar: "casamento no sabado" gravava regiao=sabado. Ja
+    # acontecia antes do catalogo real; so ficou visivel agora.
+    "sabado", "domingo", "segunda", "terca", "quarta", "quinta", "sexta",
+    "semana", "semanas", "mes", "meses", "ano", "anos", "dia", "dias",
+    "manha", "tarde", "noite", "hoje", "amanha", "proximo", "proxima",
+    "final", "inicio", "comeco", "fim", "momento", "futuro", "prazo",
 }
 
 
@@ -290,6 +303,29 @@ _PERFIL_INVESTIDOR = (
 _RETORNO = re.compile(r"(\d+(?:[.,]\d+)?)\s*%")
 
 
+# Palavra dita pelo cliente -> valor do Literal de LeadQualification.tipo_imovel.
+# Ordem importa: "casa" aparece dentro de "casamento", e `\b` evita isso.
+_TIPOS = (
+    ("terreno", ("terreno", "terrenos", "lote", "lotes")),
+    ("apartamento", ("apartamento", "apartamentos", "apto")),
+    ("casa", ("casa", "casas", "sobrado", "sobrados")),
+    ("studio", ("studio", "estudio", "kitnet")),
+    ("cobertura", ("cobertura",)),
+    ("chacara", ("chacara", "chacaras", "sitio")),
+    ("galpao", ("galpao", "galpoes")),
+    ("loja", ("loja", "lojas")),
+    ("predio", ("predio", "predios")),
+    ("sala", ("sala comercial", "salas comerciais")),
+)
+
+
+def _tipo_imovel(texto: str) -> str | None:
+    for tipo, palavras in _TIPOS:
+        if any(re.search(rf"\b{re.escape(p)}\b", texto) for p in palavras):
+            return tipo
+    return None
+
+
 def _extrair_qualificacao(texto: str, intencao_ja_conhecida: str | None = None) -> dict:
     """`intencao_ja_conhecida` vem dos slots que o prompt carrega.
 
@@ -313,6 +349,8 @@ def _extrair_qualificacao(texto: str, intencao_ja_conhecida: str | None = None) 
         dados["regiao"] = regiao
     if (quartos := _quartos(normalizado)) is not None:
         dados["quartos"] = quartos
+    if (tipo := _tipo_imovel(normalizado)) is not None:
+        dados["tipo_imovel"] = tipo
 
     for urgencia, gatilhos in _URGENCIA:
         if any(g in normalizado for g in gatilhos):

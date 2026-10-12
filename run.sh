@@ -45,16 +45,20 @@ echo "==> schema + seed"
 # `scripts/preparar_banco.py`, nao `psql -f` + `python -m app.db.seed`.
 # Dois motivos, os dois descobertos doendo:
 #
-# 1. O seed comeca com `TRUNCATE imoveis RESTART IDENTITY CASCADE`, e
-#    `visitas.imovel_id` referencia `imoveis` -- o Postgres confirma
-#    ("Table visitas references imoveis"). Chamar o seed a cada subida
-#    apagava a agenda dos corretores junto. Agora so semeia se a tabela
-#    estiver vazia; `--forcar` resemeia de proposito.
+# 1. O seed antigo comecava com `TRUNCATE imoveis ... CASCADE`, e
+#    `visitas.imovel_id` referencia `imoveis`: chama-lo a cada subida
+#    apagava a agenda dos corretores. O seed agora CARREGA o catalogo real
+#    por upsert (`scripts/carregar_catalogo.py`), que nao trunca nada --
+#    entao roda a cada subida: atualiza o que mudou, preserva ids e visitas.
+#    So `--forcar` apaga, de proposito.
 # 2. O `psql -f ... 2>&1 || true` engolia TUDO: sem o binario do psql no
 #    PATH, o schema simplesmente nao era aplicado e ninguem ficava sabendo
 #    -- com tabela nova (usuarios/sessoes/convites) isso vira erro de
 #    coluna inexistente la na frente. O script usa psycopg, que o projeto
 #    ja tem, e informa o que aplicou.
+#
+# Precisa do Ollama no ar (embeddings) so na PRIMEIRA carga; nas seguintes
+# nada muda e nenhum embedding e refeito (~2s).
 python -m scripts.preparar_banco
 
 echo "==> site da imobiliaria"

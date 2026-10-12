@@ -10,9 +10,16 @@ subida. Por isso este carregador **nunca trunca**: faz upsert por `codigo`.
 Consequências do upsert:
   * rodar de novo atualiza preço, descrição e fotos sem mudar o `id` --
     visitas e encaminhamentos que apontam pro imóvel continuam válidos;
-  * os imóveis sintéticos (`origem='sintetico'`) ficam como estão;
   * um anúncio que saiu do site NÃO é apagado daqui, porque pode ter visita
     marcada. Sai do catálogo marcando-se `origem='arquivado'`, à mão.
+
+Só catálogo real
+----------------
+A base tinha 200 imóveis sintéticos (`origem='sintetico'`) com dado e foto
+inventados. Decidiu-se usar SÓ o catálogo real: texto, valores e fotos da
+própria imobiliária. Por isso `remover_legado()` tira o que não é `orion`.
+`visitas.imovel_id` é nulável, então a visita que apontava pra um sintético
+fica no banco com o imóvel em branco, em vez de sumir com a agenda.
 
 O embedding é recalculado só quando a descrição muda.
 
@@ -62,15 +69,32 @@ def _linha(item: dict) -> dict:
     }
 
 
-def carregar(*, seco: bool = False) -> dict[str, int]:
+def remover_legado(cur) -> int:
+    """Tira do banco o que não veio do catálogo real. Devolve quantos saíram.
+
+    A visita fica; só perde a referência ao imóvel. Apagá-la levaria a
+    agenda dos corretores junto, e o que apontava pra um imóvel que nunca
+    existiu não é motivo pra perder o compromisso do cliente."""
+    cur.execute(
+        "UPDATE visitas SET imovel_id = NULL "
+        "WHERE imovel_id IN (SELECT id FROM imoveis WHERE origem <> %s)", (ORIGEM,)
+    )
+    cur.execute("DELETE FROM imoveis WHERE origem <> %s", (ORIGEM,))
+    return cur.rowcount
+
+
+def carregar(*, seco: bool = False, truncar: bool = False) -> dict[str, int]:
     if not CATALOGO.exists():
         raise FileNotFoundError(
             f"{CATALOGO} não existe -- rode `python -m scripts.importar_orion` antes"
         )
     itens = json.loads(CATALOGO.read_text(encoding="utf-8"))
-    contagem = {"novos": 0, "atualizados": 0, "sem_foto": 0}
+    contagem = {"novos": 0, "atualizados": 0, "sem_foto": 0, "removidos": 0}
 
     with get_conn() as conn, conn.cursor() as cur:
+        if truncar and not seco:
+            # Destrutivo: o CASCADE leva as visitas junto. Só por `--forcar`.
+            cur.execute("TRUNCATE imoveis RESTART IDENTITY CASCADE")
         for item in itens:
             linha = _linha(item)
             if not linha["fotos"]:
@@ -119,6 +143,7 @@ def carregar(*, seco: bool = False) -> dict[str, int]:
             )
             contagem["atualizados" if existente else "novos"] += 1
         if not seco:
+            contagem["removidos"] = remover_legado(cur)
             conn.commit()
     return contagem
 
@@ -133,7 +158,8 @@ def main() -> int:
         print(erro, file=sys.stderr)
         return 1
     prefixo = "(seco) " if args.seco else ""
-    print(f"{prefixo}{c['novos']} novos · {c['atualizados']} atualizados · {c['sem_foto']} sem foto")
+    print(f"{prefixo}{c['novos']} novos · {c['atualizados']} atualizados · "
+          f"{c['sem_foto']} sem foto · {c['removidos']} legados removidos")
     return 0
 
 
