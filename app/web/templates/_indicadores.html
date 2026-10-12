@@ -1,0 +1,36 @@
+{# Indicadores do topo do painel. Todos saem de dado MEDIDO (repo.indicadores),
+   nenhum e estimativa -- mesma regra do painel de observabilidade.
+
+   O primeiro e o que o enunciado cita como causa de lead perdido:
+   "tempo de resposta elevado". #}
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+    <div class="bloco kpi">
+        <div class="kpi-rotulo">1ª resposta</div>
+        <div class="kpi-valor">
+            {% if kpi.primeira_resposta_s is not none %}{{ kpi.primeira_resposta_s }}<span style="font-size:15px;font-weight:600;color:var(--tinta-fraca)">s</span>{% else %}—{% endif %}
+        </div>
+        <div class="kpi-nota">média, do cliente ao agente</div>
+    </div>
+    <div class="bloco kpi">
+        <div class="kpi-rotulo">Qualificação</div>
+        <div class="kpi-valor">{{ kpi.taxa_qualificacao }}<span style="font-size:15px;font-weight:600;color:var(--tinta-fraca)">%</span></div>
+        <div class="kpi-nota">dos leads atendidos</div>
+    </div>
+    <div class="bloco kpi">
+        <div class="kpi-rotulo">Visitas</div>
+        <div class="kpi-valor">{{ kpi.visitas }}</div>
+        <div class="kpi-nota">agendadas</div>
+    </div>
+    <div class="bloco kpi">
+        <div class="kpi-rotulo">Especialista</div>
+        <div class="kpi-valor">{{ kpi.encaminhados }}</div>
+        <div class="kpi-nota">investidores encaminhados</div>
+    </div>
+    <div class="bloco kpi">
+        <div class="kpi-rotulo">Recuperados</div>
+        {# Único número com cor: um lead que voltou depois do follow-up é o
+           que o agente fez de diferente de um formulário. #}
+        <div class="kpi-valor" {% if kpi.recuperados %}style="color:var(--quente)"{% endif %}>{{ kpi.recuperados }}</div>
+        <div class="kpi-nota">voltaram após follow-up</div>
+    </div>
+</div>

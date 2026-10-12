@@ -58,6 +58,7 @@ def admin(client):
     # execução da suíte. As sessões somem junto, por `ON DELETE CASCADE`.
     with repo.get_conn() as conn, conn.cursor() as cur:
         cur.execute("DELETE FROM usuarios WHERE email LIKE %s", ("%@teste.local",))
+        cur.execute("DELETE FROM convites WHERE email LIKE %s", ("%@teste.local",))
         conn.commit()
 
 

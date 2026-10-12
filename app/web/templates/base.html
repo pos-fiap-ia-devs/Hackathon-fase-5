@@ -6,8 +6,16 @@
     <title>{% block title %}Agente SDR Imobiliário{% endblock %}</title>
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.3/dist/htmx.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    {# Inter: a mesma fonte do site da imobiliária. Duas telas do mesmo
+       produto com fontes diferentes é o que mais rápido denuncia que
+       foram feitas em momentos separados. #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;750&display=swap" rel="stylesheet">
+    {# DEPOIS do Tailwind: o sistema de design do painel sobrepõe os cinzas
+       de fábrica por ordem de cascata, sem precisar de `!important`. #}
+    <link rel="stylesheet" href="/static/painel.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 /* Indicador de "digitando". O turno leva 10-30s com o modelo local; sem
    isto a tela fica IDENTICA depois do clique e o visitante conclui que
    quebrou. O Telegram ja tinha o equivalente (`_manter_digitando`), o
@@ -31,30 +39,34 @@
 /* Enquanto espera, o botao fica desabilitado de verdade (`hx-disabled-elt`
    no form) -- aqui so o aspecto. */
 button[disabled] { opacity: .55; cursor: default; }
-
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
-    <nav class="bg-slate-800 text-white px-4 sm:px-6 py-3 flex flex-wrap gap-x-6 gap-y-2 items-center">
-        <span class="font-semibold">🏠 Horizonte SDR</span>
-        <a href="/dashboard" class="text-sm hover:underline">Dashboard</a>
-        <a href="/chat" class="text-sm hover:underline">Chat do lead</a>
+<body>
+    <nav class="topo-app px-5 sm:px-8 py-3 flex flex-wrap gap-x-7 gap-y-2 items-center">
+        {# Monograma, não emoji: o 🏠 era o detalhe mais "gerado" da tela. #}
+        <a href="/dashboard" class="marca no-underline">
+            <span class="simbolo">H</span>
+            Horizonte <span style="color:var(--tinta-fraca);font-weight:500">SDR</span>
+        </a>
+        <a href="/dashboard" class="no-underline {% if pagina == 'dashboard' %}ativo{% endif %}">Painel</a>
+        <a href="/chat" class="no-underline {% if pagina == 'chat' %}ativo{% endif %}">Chat do lead</a>
         {# `usuario` so chega nas telas do painel. As publicas (login, registro,
            chat do lead) nao definem a variavel -- o Jinja resolve como
            indefinido/falso e o bloco inteiro some. #}
         {% if usuario %}
         {% if usuario.papel == 'admin' %}
-        <a href="/dashboard/usuarios" class="text-sm hover:underline">Usuários</a>
+        <a href="/dashboard/usuarios" class="no-underline {% if pagina == 'usuarios' %}ativo{% endif %}">Usuários</a>
         {% endif %}
-        <span class="ml-auto flex items-center gap-3 text-sm">
-            <span class="text-slate-300">{{ usuario.nome }}</span>
+        <span class="ml-auto flex items-center gap-3">
+            {% if usuario.papel == 'admin' %}<span class="papel">admin</span>{% endif %}
+            <span style="color:var(--tinta-media);font-size:13.5px">{{ usuario.nome }}</span>
             <form method="post" action="/logout">
-                <button type="submit" class="hover:underline">Sair</button>
+                <button type="submit" style="color:var(--tinta-fraca);font-size:13.5px" class="hover:underline">Sair</button>
             </form>
         </span>
         {% endif %}
     </nav>
-    <main class="p-4 sm:p-6 max-w-6xl mx-auto">
+    <main class="px-5 sm:px-8 py-7 max-w-[1500px] mx-auto">
         {% block content %}{% endblock %}
     </main>
 </body>

@@ -77,6 +77,45 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Agente SDR Imobiliário", lifespan=lifespan)
 templates = Jinja2Templates(directory="app/web/templates")
 
+
+# Rotulos de exibicao. O banco guarda `visita_agendada` e `faixa_preco_max`
+# porque sao chaves; a tela mostrava a chave crua, e nome de coluna
+# aparecendo pro corretor e o tipo de detalhe que denuncia que ninguem
+# olhou a tela depois de montar. Dicionario explicito, nao um `.replace("_",
+# " ")`: "faixa preco max" continuaria errado.
+ROTULOS = {
+    # status de `leads.status`
+    "novo": "Novo",
+    "qualificando": "Qualificando",
+    "aguardando_escolha": "Escolhendo imóvel",
+    "visita_agendada": "Visita marcada",
+    "encaminhado": "Com especialista",
+    "encerrado": "Encerrado",
+    "perdido": "Perdido",
+    # chaves de slot
+    "intencao": "Intenção",
+    "regiao": "Região",
+    "quartos": "Quartos",
+    "urgencia": "Urgência",
+    "faixa_preco_min": "Preço mínimo",
+    "faixa_preco_max": "Preço máximo",
+    "nome": "Nome",
+    "telefone": "Telefone",
+    "tipo_imovel": "Tipo de imóvel",
+    "ticket": "Ticket",
+}
+
+
+def _rotulo(chave) -> str:
+    """Nome legível de uma chave; devolve a própria chave quando não há um
+    cadastrado, pra que um campo novo apareça em vez de sumir."""
+    if chave is None:
+        return "—"
+    return ROTULOS.get(str(chave), str(chave))
+
+
+templates.env.filters["rotulo"] = _rotulo
+
 # Fotos dos imoveis, servidas por nos (app/db/seed.py grava os caminhos em
 # `imoveis.fotos`). Antes eram URLs do loremflickr -- ate o servico
 # responder 401 e a galeria sumir de todos os canais sem aviso.
@@ -284,7 +323,7 @@ def registro(
 def usuarios_page(request: Request, usuario: dict = Depends(exigir_admin)):
     return templates.TemplateResponse(
         "usuarios.html",
-        {"request": request, "usuario": usuario,
+        {"request": request, "usuario": usuario, "pagina": "usuarios",
          "usuarios": repo.listar_usuarios(), "convites": repo.listar_convites_pendentes()},
     )
 
@@ -311,7 +350,7 @@ def criar_convite(
     )
     return templates.TemplateResponse(
         "usuarios.html",
-        {"request": request, "usuario": usuario,
+        {"request": request, "usuario": usuario, "pagina": "usuarios",
          "usuarios": repo.listar_usuarios(), "convites": repo.listar_convites_pendentes(),
          "link_convite": f"{request.base_url}registro?token={token}",
          "horas_convite": settings.convite_horas},
@@ -331,7 +370,7 @@ def alternar_usuario_ativo(
     repo.definir_usuario_ativo(usuario_id, ativo == "true")
     return templates.TemplateResponse(
         "usuarios.html",
-        {"request": request, "usuario": usuario,
+        {"request": request, "usuario": usuario, "pagina": "usuarios",
          "usuarios": repo.listar_usuarios(), "convites": repo.listar_convites_pendentes()},
     )
 
@@ -345,12 +384,53 @@ def health():
 
 @app.get("/", response_class=HTMLResponse)
 def raiz(request: Request, usuario: dict = Depends(exigir_login)):
-    return templates.TemplateResponse("dashboard.html", {"request": request, "usuario": usuario})
+    return templates.TemplateResponse(
+        "dashboard.html", {"request": request, "usuario": usuario, "pagina": "dashboard"}
+    )
 
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request, usuario: dict = Depends(exigir_login)):
-    return templates.TemplateResponse("dashboard.html", {"request": request, "usuario": usuario})
+    return templates.TemplateResponse(
+        "dashboard.html", {"request": request, "usuario": usuario, "pagina": "dashboard"}
+    )
+
+
+def _contexto_funil(request: Request, erro: str | None = None) -> dict:
+    colunas = repo.funil()
+    # Prioridade pela MESMA funcao do detalhe e da tabela (core/scoring.py).
+    # Tres lugares calculando a mesma coisa seria tres lugares pra divergir.
+    for leads in colunas.values():
+        for lead in leads:
+            lead["prioridade"] = scoring.prioridade_de(lead["score"], lead)
+    return {
+        "request": request, "funil": colunas,
+        "etapas": repo.ETAPAS_FUNIL, "erro": erro,
+    }
+
+
+@app.get("/dashboard/funil", response_class=HTMLResponse)
+def funil(request: Request, usuario: dict = Depends(exigir_login)):
+    return templates.TemplateResponse("_funil.html", _contexto_funil(request))
+
+
+@app.post("/dashboard/lead/{lead_id}/etapa", response_class=HTMLResponse)
+def mover_etapa(
+    request: Request, lead_id: int, etapa: str = Form(...),
+    usuario: dict = Depends(exigir_login),
+):
+    """Move o lead no quadro. `leads.status` nao e so rotulo: e o que
+    roteia o grafo, entao o repo RECUSA destinos que fariam o agente
+    prometer um compromisso inexistente -- e a recusa volta pra tela."""
+    erro = repo.mover_lead(lead_id, etapa)
+    return templates.TemplateResponse("_funil.html", _contexto_funil(request, erro))
+
+
+@app.get("/dashboard/indicadores", response_class=HTMLResponse)
+def indicadores(request: Request, usuario: dict = Depends(exigir_login)):
+    return templates.TemplateResponse(
+        "_indicadores.html", {"request": request, "kpi": repo.indicadores()}
+    )
 
 
 @app.get("/dashboard/leads-table", response_class=HTMLResponse)

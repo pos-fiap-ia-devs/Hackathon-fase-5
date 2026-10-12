@@ -1,17 +1,47 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — Agente SDR{% endblock %}
+{% block title %}Painel — Agente SDR{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Leads</h1>
+{# Hierarquia: UM h1 na página, seções anunciadas por rótulo pequeno em
+   caixa alta. Antes havia quatro h2 do mesmo peso e nenhum h1 real, e o
+   olho não achava onde começar. #}
+<header class="mb-5">
+    <h1>Painel</h1>
+    <p style="color:var(--tinta-media);margin-top:3px">
+        Leads qualificados pela Bia, do primeiro contato ao especialista.
+    </p>
+</header>
 
-<div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] gap-4 lg:gap-6">
-    <div class="min-w-0">
-        <div id="leads-table" hx-get="/dashboard/leads-table" hx-trigger="load, every 3s" hx-swap="innerHTML"></div>
-    </div>
-    <div id="lead-detail" class="min-w-0 bg-white rounded-lg border p-4 min-h-[200px]">
-        <p class="text-gray-400 text-sm">Clique num lead pra ver os detalhes.</p>
-    </div>
-</div>
+<div id="indicadores" class="mb-8" hx-get="/dashboard/indicadores" hx-trigger="load, every 10s" hx-swap="innerHTML"></div>
 
-<h2 class="text-xl font-bold mt-10 mb-4">Observabilidade <span class="text-sm font-normal text-gray-500">(agent_traces)</span></h2>
-<div id="traces" class="min-w-0" hx-get="/dashboard/traces" hx-trigger="load, every 3s" hx-swap="innerHTML"></div>
+<section class="mb-9">
+    <div class="flex items-baseline justify-between mb-3">
+        <h2>Funil</h2>
+        <span style="color:var(--tinta-fraca);font-size:12px">arraste um lead para mudar a etapa</span>
+    </div>
+    {# Sem `every Ns` aqui, ao contrario das outras secoes: recarregar o
+       quadro no meio de um arraste cancelaria o gesto. Atualiza no load e
+       depois de cada movimento. #}
+    <div id="funil" hx-get="/dashboard/funil" hx-trigger="load" hx-swap="innerHTML"></div>
+</section>
+
+<section class="mb-9">
+    <h2 class="mb-3">Todos os leads</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] gap-4 lg:gap-6">
+        <div class="min-w-0">
+            <div id="leads-table" class="max-h-[560px] overflow-y-auto rounded-xl"
+                 hx-get="/dashboard/leads-table" hx-trigger="load, every 3s" hx-swap="innerHTML"></div>
+        </div>
+        <div id="lead-detail" class="min-w-0 bloco p-4 min-h-[200px] lg:sticky lg:top-[70px] lg:max-h-[calc(100vh-90px)] lg:overflow-y-auto">
+            <p style="color:var(--tinta-fraca);font-size:13px">Clique num lead pra ver os detalhes.</p>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="flex items-baseline justify-between mb-3">
+        <h2>Observabilidade</h2>
+        <span style="color:var(--tinta-fraca);font-size:12px">medido em <code>agent_traces</code>, por turno</span>
+    </div>
+    <div id="traces" class="min-w-0" hx-get="/dashboard/traces" hx-trigger="load, every 3s" hx-swap="innerHTML"></div>
+</section>
 {% endblock %}

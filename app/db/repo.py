@@ -953,3 +953,140 @@ def get_campos_dispensados(lead_id: int) -> tuple[str, ...]:
         cur.execute("SELECT campos_dispensados FROM leads WHERE id = %s", (lead_id,))
         linha = cur.fetchone()
         return tuple(linha["campos_dispensados"] or ()) if linha else ()
+
+
+# ---------------------------------------------------------------- painel: funil e indicadores
+
+# Etapas do funil, na ordem em que o lead anda. `encerrado` e `perdido`
+# NAO entram no quadro: sao saidas, nao etapas -- misturar os dois com as
+# colunas ativas faria 85 cartoes mortos esconderem os 7 que importam.
+ETAPAS_FUNIL = (
+    ("novo", "Novo"),
+    ("qualificando", "Qualificando"),
+    ("aguardando_escolha", "Escolhendo imóvel"),
+    ("visita_agendada", "Visita marcada"),
+    ("encaminhado", "Com especialista"),
+)
+
+
+def funil() -> dict[str, list[dict]]:
+    """Leads por etapa, pro quadro Kanban. Dentro da coluna, o de maior
+    score primeiro -- a pergunta do corretor e "por quem ligo agora"."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT l.id, l.chat_id, l.canal, l.nome, l.status, l.score,
+                   l.telefone_mascarado, l.ultima_interacao_em,
+                   s.intencao, s.regiao, s.quartos, s.faixa_preco_max, s.ticket, s.urgencia,
+                   r.texto AS resumo,
+                   (SELECT conteudo FROM mensagens m
+                     WHERE m.lead_id = l.id AND m.papel = 'user'
+                     ORDER BY m.criado_em DESC LIMIT 1) AS ultima_fala
+              FROM leads l
+              LEFT JOIN slots s   ON s.lead_id = l.id
+              LEFT JOIN resumos r ON r.lead_id = l.id
+             WHERE l.status = ANY(%s)
+             ORDER BY l.score DESC, l.ultima_interacao_em DESC
+            """,
+            ([etapa for etapa, _ in ETAPAS_FUNIL],),
+        )
+        linhas = cur.fetchall()
+
+    colunas: dict[str, list[dict]] = {etapa: [] for etapa, _ in ETAPAS_FUNIL}
+    for linha in linhas:
+        colunas[linha["status"]].append(linha)
+    return colunas
+
+
+def indicadores() -> dict:
+    """Os números do topo do painel. Todos saem de dado medido, nenhum é
+    estimativa -- mesma regra do painel de observabilidade."""
+    with get_conn() as conn, conn.cursor() as cur:
+        # Tempo até a 1a resposta: diferença entre a 1a fala do cliente e a
+        # 1a resposta do agente, por lead. É o indicador que o enunciado
+        # cita primeiro ("tempo de resposta elevado" perde lead).
+        cur.execute(
+            """
+            WITH primeira AS (
+                SELECT lead_id,
+                       min(criado_em) FILTER (WHERE papel = 'user')      AS cliente,
+                       min(criado_em) FILTER (WHERE papel = 'assistant') AS agente
+                  FROM mensagens GROUP BY lead_id
+            )
+            SELECT avg(EXTRACT(EPOCH FROM (agente - cliente))) AS segundos
+              FROM primeira WHERE cliente IS NOT NULL AND agente > cliente
+            """
+        )
+        resposta = cur.fetchone()["segundos"]
+
+        cur.execute(
+            """
+            SELECT
+                count(*) FILTER (WHERE l.status <> 'novo')                       AS atendidos,
+                count(*) FILTER (WHERE s.intencao IS NOT NULL
+                                   AND s.intencao <> 'indefinido')               AS qualificados,
+                (SELECT count(*) FROM visitas WHERE status = 'agendada')         AS visitas,
+                (SELECT count(*) FROM encaminhamentos)                           AS encaminhados,
+                -- Recuperado: recebeu follow-up e VOLTOU a falar depois dele.
+                -- É o cenário 3 do enunciado funcionando, medido.
+                (SELECT count(DISTINCT f.lead_id) FROM follow_up_jobs f
+                  WHERE f.status = 'enviado'
+                    AND EXISTS (SELECT 1 FROM mensagens m
+                                 WHERE m.lead_id = f.lead_id AND m.papel = 'user'
+                                   AND m.criado_em > f.executar_em))             AS recuperados
+              FROM leads l LEFT JOIN slots s ON s.lead_id = l.id
+            """
+        )
+        linha = cur.fetchone()
+
+    atendidos = linha["atendidos"] or 0
+    return {
+        "primeira_resposta_s": round(resposta) if resposta else None,
+        "taxa_qualificacao": round(100 * linha["qualificados"] / atendidos) if atendidos else 0,
+        "visitas": linha["visitas"],
+        "encaminhados": linha["encaminhados"],
+        "recuperados": linha["recuperados"],
+    }
+
+
+# Etapas que o corretor pode arrastar livremente: nenhuma delas faz o
+# grafo prometer algo ao cliente.
+ETAPAS_LIVRES = ("novo", "qualificando", "aguardando_escolha")
+
+# Estas duas mudam o RAMO do grafo e fazem o agente falar de um
+# compromisso concreto (`core/turno.py::_resumo_desfecho` cita data,
+# corretor e imovel). Sem o registro correspondente, o proximo turno do
+# cliente cairia num ramo que nao tem o que citar -- e o guardrail de nao
+# alucinar so funciona quando o dado real existe.
+ETAPAS_COM_REGISTRO = {
+    "visita_agendada": "visitas",
+    "encaminhado": "encaminhamentos",
+}
+
+
+def mover_lead(lead_id: int, etapa: str) -> str | None:
+    """Move o lead de etapa. Devolve None em caso de sucesso, ou a razao
+    da recusa -- que o painel mostra ao corretor.
+
+    Recusar e deliberado: o `status` nao e so rotulo de quadro, e o que
+    roteia o grafo (core/graph.py::_rota_por_status)."""
+    valido = {e for e, _ in ETAPAS_FUNIL}
+    if etapa not in valido:
+        return f"Etapa desconhecida: {etapa}"
+
+    tabela = ETAPAS_COM_REGISTRO.get(etapa)
+    with get_conn() as conn, conn.cursor() as cur:
+        if tabela:
+            cur.execute(f"SELECT 1 FROM {tabela} WHERE lead_id = %s LIMIT 1", (lead_id,))
+            if not cur.fetchone():
+                rotulo = dict(ETAPAS_FUNIL)[etapa]
+                return (
+                    f"Não dá pra mover para “{rotulo}”: não há "
+                    f"{'visita agendada' if tabela == 'visitas' else 'encaminhamento'} "
+                    "registrado para este lead. O agente passaria a falar de um "
+                    "compromisso que não existe."
+                )
+        cur.execute("UPDATE leads SET status = %s WHERE id = %s", (etapa, lead_id))
+        movidos = cur.rowcount
+        conn.commit()
+    return None if movidos else "Lead não encontrado."

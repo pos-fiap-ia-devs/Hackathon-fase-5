@@ -30,7 +30,7 @@
             <option value="admin">Administrador</option>
         </select>
         <button type="submit"
-                class="bg-slate-800 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-slate-700">
+                class="botao">
             Gerar link
         </button>
     </form>
@@ -78,14 +78,18 @@
     </table>
 </div>
 
-<h2 class="text-sm font-semibold mb-2">Convites pendentes</h2>
+<div class="flex items-baseline gap-2 mb-2">
+    <h2>Convites pendentes</h2>
+    <span class="coluna-contagem">{{ convites|length }}</span>
+</div>
 {% if convites %}
-<ul class="text-sm text-gray-600 space-y-1">
+<ul class="bloco p-4 space-y-1.5 max-h-72 overflow-y-auto" style="font-size:13px;color:var(--tinta-media)">
     {% for c in convites %}
-    <li>{{ c.email }} · {{ c.papel }} · expira em {{ c.expira_em.strftime('%d/%m/%Y %H:%M') }}</li>
+    <li><span style="color:var(--tinta);font-weight:600">{{ c.email }}</span>
+        · {{ c.papel }} · expira em {{ c.expira_em.strftime('%d/%m/%Y %H:%M') }}</li>
     {% endfor %}
 </ul>
 {% else %}
-<p class="text-sm text-gray-400">Nenhum.</p>
+<p style="color:var(--tinta-fraca);font-size:13px">Nenhum.</p>
 {% endif %}
 {% endblock %}

@@ -12,21 +12,19 @@
     </div>
     {% endif %}
 
-    <form method="post" action="/login" class="bg-white rounded-lg border border-gray-200 p-5 space-y-4">
+    <form method="post" action="/login" class="bloco p-5 space-y-4">
         <div>
             <label for="email" class="block text-sm font-medium mb-1">E-mail</label>
             <input id="email" name="email" type="email" required autofocus autocomplete="username"
-                   class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
-                          focus:outline-none focus:ring-2 focus:ring-slate-400">
+                   class="campo w-full">
         </div>
         <div>
             <label for="senha" class="block text-sm font-medium mb-1">Senha</label>
             <input id="senha" name="senha" type="password" required autocomplete="current-password"
-                   class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
-                          focus:outline-none focus:ring-2 focus:ring-slate-400">
+                   class="campo w-full">
         </div>
         <button type="submit"
-                class="w-full bg-slate-800 text-white rounded-md py-2 text-sm font-medium hover:bg-slate-700">
+                class="botao w-full">
             Entrar
         </button>
     </form>
