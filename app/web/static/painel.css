@@ -260,3 +260,121 @@ body h3 { font-weight: 700; }
     transition: background .15s;
 }
 .botao:hover:not([disabled]) { background: var(--marca-escura); }
+
+/* ---------------------------------------------------------------- barra lateral */
+
+/* Rail escuro fixo à esquerda, no lugar da barra horizontal. Recolhido
+   mostra só ícones (64px); expandido mostra os rótulos (212px). A
+   preferência fica em localStorage e é aplicada ANTES da pintura (script
+   no <head> do base.html), senão a barra abriria larga e encolheria na
+   frente do usuário a cada navegação.
+ *
+ * Navy, não a cor da marca: o azul #0e41d5 é o que marca o item ATIVO e o
+ * que destaca ação na tela. Se o rail inteiro fosse dele, não sobraria
+ * contraste pra nada. */
+:root { --rail: #14304d; --rail-larg: 64px; }
+:root[data-rail="aberto"] { --rail-larg: 212px; }
+
+.rail {
+    position: fixed; inset: 0 auto 0 0; z-index: 50;
+    width: var(--rail-larg);
+    background: var(--rail);
+    display: flex; flex-direction: column;
+    padding: 14px 0 12px;
+    transition: width .18s ease;
+    overflow: visible;
+}
+.rail-marca {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 18px 16px;
+    color: #fff; font-weight: 700; font-size: 15px; letter-spacing: -.015em;
+    white-space: nowrap;
+}
+.rail-marca svg { flex: 0 0 auto; }
+.rail hr { border: 0; border-top: 1px solid rgb(255 255 255 / .09); margin: 0 0 10px; }
+
+.rail-item {
+    display: flex; align-items: center; gap: 13px;
+    padding: 10px 0 10px 20px;
+    color: rgb(255 255 255 / .62);
+    font-size: 13.5px; white-space: nowrap;
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: color .12s, background .12s;
+}
+.rail-item svg { flex: 0 0 20px; }
+.rail-item:hover { color: #fff; background: rgb(255 255 255 / .06); }
+.rail-item.ativo {
+    color: #fff;
+    border-left-color: var(--marca);
+    background: rgb(14 65 213 / .22);
+}
+/* O rótulo some junto com a largura; `visibility` em vez de `display`
+   pro texto não reflowar no meio da transição. */
+.rail-rotulo { opacity: 1; transition: opacity .14s; }
+:root:not([data-rail="aberto"]) .rail-rotulo,
+:root:not([data-rail="aberto"]) .rail-marca span { opacity: 0; pointer-events: none; }
+
+.rail-grupo {
+    font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: rgb(255 255 255 / .33);
+    padding: 14px 0 5px 23px; white-space: nowrap;
+}
+:root:not([data-rail="aberto"]) .rail-grupo { opacity: 0; }
+
+/* Botão de recolher: metade pra fora da barra, como no exemplo. */
+.rail-toggle {
+    position: absolute; top: 18px; right: -11px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--rail); color: #fff;
+    border: 1px solid rgb(255 255 255 / .18);
+    display: grid; place-items: center;
+    cursor: pointer;
+}
+.rail-toggle svg { transition: transform .18s; }
+:root[data-rail="aberto"] .rail-toggle svg { transform: rotate(180deg); }
+
+.rail-rodape { margin-top: auto; padding: 10px 0 0; border-top: 1px solid rgb(255 255 255 / .09); }
+.rail-usuario {
+    display: flex; align-items: center; gap: 11px;
+    padding: 9px 0 9px 20px;
+    color: rgb(255 255 255 / .7); font-size: 13px; white-space: nowrap;
+}
+.rail-inicial {
+    flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--marca); color: #fff;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+}
+
+/* O conteúdo acompanha a largura do rail. */
+.conteudo { margin-left: var(--rail-larg); transition: margin-left .18s ease; }
+
+/* Em telas estreitas o rail fica sempre recolhido: 212px de 390px seriam
+   metade da tela. */
+@media (max-width: 640px) {
+    :root, :root[data-rail="aberto"] { --rail-larg: 56px; }
+    :root[data-rail="aberto"] .rail-rotulo,
+    :root[data-rail="aberto"] .rail-marca span,
+    :root[data-rail="aberto"] .rail-grupo { opacity: 0; }
+    .rail-item { padding-left: 16px; }
+}
+
+/* Âncoras do rail: sem folga, o título da seção encosta no topo da
+   janela e some atrás da margem. */
+#funil, #leads, #traces { scroll-margin-top: 24px; }
+html { scroll-behavior: smooth; }
+
+/* Recolhido, o recuo de 20px que alinha os rótulos deixa o ícone fora do
+   centro da faixa de 64px. Centraliza e tira o rótulo do fluxo, pra que
+   ele não ocupe largura enquanto está invisível. */
+:root:not([data-rail="aberto"]) .rail-item,
+:root:not([data-rail="aberto"]) .rail-usuario,
+:root:not([data-rail="aberto"]) .rail-marca {
+    padding-left: 0; padding-right: 0;
+    justify-content: center; gap: 0;
+}
+:root:not([data-rail="aberto"]) .rail-item { border-left-width: 0; border-right: 3px solid transparent; }
+:root:not([data-rail="aberto"]) .rail-item.ativo { border-right-color: var(--marca); }
+:root:not([data-rail="aberto"]) .rail-rotulo,
+:root:not([data-rail="aberto"]) .rail-marca span { width: 0; overflow: hidden; }
