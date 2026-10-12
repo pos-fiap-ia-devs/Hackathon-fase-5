@@ -301,7 +301,12 @@ def _gerar_resposta(mensagem: str, slots: dict, proxima_acao: str, *, lead_id: i
     permite_nome = turno <= 1 or perguntou_quem_e(mensagem)
     try:
         texto, trace = chat_text(
-            agente=agente, system=system, user=user, slots=slots, permite_nome=permite_nome
+            agente=agente, system=system, user=user, slots=slots,
+            permite_nome=permite_nome,
+            # Guardrail estrutural: valor que o CLIENTE afirmou e que nao
+            # esta nos slots nao pode voltar na resposta (core/llm.py::
+            # _sanitizar_valor_do_cliente).
+            mensagem_cliente=mensagem,
         )
         registrar_trace(trace, lead_id=lead_id, turno=turno)
         return texto

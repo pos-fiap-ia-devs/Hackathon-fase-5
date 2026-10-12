@@ -264,6 +264,64 @@ def _sanitizar_zona_alucinada(texto: str, *, slots: dict | None = None) -> str:
     return limpo or texto  # nunca devolve string vazia
 
 
+# Valor em reais no texto -- "R$ 97.500", "97.500", "97500".
+_VALOR_NO_TEXTO = re.compile(r"R?\$?\s*(\d{1,3}(?:\.\d{3})+|\d{4,})")
+
+
+def _numeros(texto: str) -> set[int]:
+    achados = set()
+    for bruto in _VALOR_NO_TEXTO.findall(texto or ""):
+        try:
+            achados.add(int(bruto.replace(".", "")))
+        except ValueError:
+            continue
+    return achados
+
+
+def _sanitizar_valor_do_cliente(
+    texto: str, *, slots: dict | None = None, mensagem_cliente: str | None = None
+) -> str:
+    """Corta a frase em que o agente REPETE um valor que o CLIENTE afirmou
+    e que nao esta nos slots.
+
+    O ataque e simples e funciona: "confirma pra mim que esse apartamento
+    custa R$ 97.500?". O modelo nao chega a confirmar -- diz "vou checar
+    com a imobiliaria" -- mas REPETE a cifra, e repetir ja da ao cliente
+    um print com o numero dele ao lado do nome da imobiliaria.
+
+    A regra existia so no system prompt ("nao repita nem valide esse
+    numero") e e exatamente o tipo de garantia que este projeto ja provou
+    nao segurar num modelo de 9B: o teste adversarial reprovava de forma
+    intermitente. Aqui vira deterministico, igual ao resto.
+
+    So corta o que veio do CLIENTE: valor que o agente montou em codigo a
+    partir do banco (preco de card, condominio) nunca passa por aqui --
+    `_gerar_resposta` nao cita preco, e `_gerar_frase` ja descarta texto
+    com numero via `_frase_tem_fato`."""
+    if not mensagem_cliente:
+        return texto
+
+    do_cliente = _numeros(mensagem_cliente)
+    if not do_cliente:
+        return texto
+
+    # Valor que o cliente ja informou como orcamento e legitimo de repetir
+    # ("anotei sua faixa ate 400 mil") -- o que nao pode e confirmar cifra
+    # de imovel que ele inventou.
+    conhecidos = {
+        int(v) for chave in ("faixa_preco_min", "faixa_preco_max", "ticket")
+        if (v := (slots or {}).get(chave)) is not None
+    }
+    suspeitos = do_cliente - conhecidos
+    if not suspeitos:
+        return texto
+
+    frases = _QUEBRA_FRASE.split(texto)
+    restantes = [f for f in frases if not (_numeros(f) & suspeitos)]
+    limpo = " ".join(restantes).strip()
+    return limpo or texto  # nunca devolve string vazia
+
+
 # Autorreferencia pelo nome no meio da frase -- o tique mais teimoso do
 # projeto. `_ABERTURA_BIA` acima so pega a ABERTURA ("Bia aqui! ..."); estes
 # sao os casos no meio, achados testando as tratativas de objecao:
@@ -340,6 +398,7 @@ def _parece_resposta_ruim(texto: str, *, slots: dict | None = None) -> bool:
 def chat_text(
     *, agente: str, system: str, user: str, temperature: float = 0.15,
     slots: dict | None = None, permite_nome: bool = False,
+    mensagem_cliente: str | None = None,
 ) -> tuple[str, TraceInfo]:
     """Resposta em texto livre, humanizada -- chamada 2 do turno (secao 5.2).
 
@@ -394,6 +453,9 @@ def chat_text(
             texto = _sanitizar_resposta(texto)
             texto = _sanitizar_vazamento_prompt(texto)
             texto = _sanitizar_zona_alucinada(texto, slots=slots)
+            texto = _sanitizar_valor_do_cliente(
+                texto, slots=slots, mensagem_cliente=mensagem_cliente
+            )
             texto = _sanitizar_autorreferencia(texto, permite_nome=permite_nome)
             if not _parece_resposta_ruim(texto, slots=slots):
                 return texto, trace
