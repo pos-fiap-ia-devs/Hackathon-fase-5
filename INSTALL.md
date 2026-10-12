@@ -109,6 +109,26 @@ E `STT_ENABLED=true` no `.env`. Só funciona em Apple Silicon — `mlx-whisper` 
 
 ---
 
+## Voz da Bia fora do macOS
+
+O cliente **sempre ouve** — quem gera o áudio é a máquina que roda a aplicação, e quem escuta é o Telegram, em qualquer aparelho. O que muda é a voz:
+
+| App rodando em | Backend | Precisa instalar? |
+|---|---|---|
+| macOS | `say` (voz pt-BR do sistema) | não |
+| Container (`./rebuild.sh --docker`) | `piper` | não, o Dockerfile faz |
+| Linux ou Windows nativo | `piper` | sim |
+
+No terceiro caso:
+
+```bash
+uv pip install -e ".[tts]"
+```
+
+E baixe um modelo pt-BR de [rhasspy/piper-voices](https://huggingface.co/rhasspy/piper-voices/tree/main/pt/pt_BR), apontando `TTS_MODELO_PIPER` para o arquivo `.onnx` no `.env`.
+
+Sem nenhum dos dois backends, a Bia responde **só em texto** — nada quebra, e o log avisa uma vez. Áudio é complemento, nunca requisito.
+
 ## Testes
 
 ```bash

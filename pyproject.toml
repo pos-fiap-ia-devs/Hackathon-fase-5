@@ -27,6 +27,12 @@ dependencies = [
 [project.optional-dependencies]
 # Etapa 8 - transcricao de audio. Separado para nao bloquear o nucleo.
 stt = ["mlx-whisper==0.4.3"]
+# Sintese de voz pra quem roda NATIVO fora do macOS (Linux, Windows): o
+# `say` nao existe la. No macOS nao precisa -- o `say` ja vem no sistema.
+# No container tambem nao: o Dockerfile ja instala.
+# Depois de instalar, baixe um modelo pt-BR e aponte TTS_MODELO_PIPER:
+#   https://huggingface.co/rhasspy/piper-voices/tree/main/pt/pt_BR
+tts = ["piper-tts==1.8.0"]
 dev = ["pytest==8.3.4", "pytest-asyncio==0.25.2"]
 # Capturas de tela da documentacao (scripts/screenshots/). Fora do nucleo e
 # fora da imagem Docker -- ferramenta de host. Usa o Chrome ja instalado,
