@@ -11,6 +11,22 @@ Os membros do grupo são compostos pelos seguintes alunos:
 
 Youtube:  https://www.youtube.com/watch?v=E5UAWlIyjjk
 
+## Testar agora (versão no ar)
+
+Tudo abaixo está rodando, não precisa instalar nada:
+
+| O quê | Onde | Acesso |
+|---|---|---|
+| 🤖 **Bot no Telegram** (texto e áudio) | [@ImobVendas_bot](https://t.me/ImobVendas_bot) | é só mandar "Oi" |
+| 📊 **Painel do corretor** | <http://168.0.198.45:8000> | usuário `admin@teste.com.br` · senha `1234567890` |
+| 🏠 **Site da imobiliária** (com a Bia no widget) | <http://168.0.198.45:5500> | aberto |
+
+Roteiro sugerido: abra o painel numa aba e converse com o bot no Telegram. O lead aparece no painel em tempo real, com score, funil, conversa e traces de cada turno.
+
+- **Compra ou aluguel:** "Quero alugar um apartamento de 2 quartos em Barueri até 5 mil". A Bia mostra os imóveis com fotos e agenda a visita com um corretor.
+- **Investimento:** "Quero investir, busco renda com aluguel, uns 2 milhões". A Bia mostra os imóveis com rentabilidade estimada e agenda a conversa com o especialista em investimentos.
+- **Voz:** mande um áudio no Telegram. A Bia transcreve e responde em áudio.
+
 
 A Bia atende por Telegram (texto e áudio), chat web, widget embutido no site da imobiliária ou CLI. Os quatro canais passam pelo mesmo orquestrador. Ela entende se o lead quer comprar, alugar ou investir, qualifica com uma pergunta por mensagem, mostra imóveis reais do banco, agenda a visita com o corretor certo e volta a procurar quem some no meio da conversa. O corretor acompanha tudo num painel com score explicado, resumo e observabilidade.
 
@@ -20,6 +36,7 @@ A Bia atende por Telegram (texto e áudio), chat web, widget embutido no site da
 
 ## Sumário
 
+- [Testar agora (versão no ar)](#testar-agora-versão-no-ar)
 - [Entregáveis do desafio](#entregáveis-do-desafio)
 - [Requisitos do enunciado, um a um](#requisitos-do-enunciado-um-a-um)
 - [O problema e a solução](#o-problema-e-a-solução)
