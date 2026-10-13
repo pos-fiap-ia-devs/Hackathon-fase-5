@@ -34,7 +34,7 @@ def test_legenda_traz_preco_formatado_em_codigo():
     legenda = _galeria_imoveis([_imovel()])[0]["legenda"]
     assert legenda == (
         "1. Apartamento reformado — Moema\n"
-        "R$ 650.000 · 2 quarto(s) · 72m²\n"
+        "R$ 650.000 · 2 quartos · 72 m²\n"
         "Cód. MOE-0007"
     )
 
@@ -73,3 +73,23 @@ def test_resposta_turno_e_string_para_quem_so_quer_texto():
 
 def test_resposta_turno_sem_galeria():
     assert RespostaTurno("oi").galeria == []
+
+
+# ---------------------------------------------------------------- catálogo real
+
+def test_terreno_nao_mostra_zero_quartos():
+    """Terreno tem quartos = 0 no catálogo real. "0 quarto(s)" na legenda é
+    dado errado, não neutro."""
+    legenda = _galeria_imoveis([_imovel(tipo="terreno", quartos=0, area=420)])[0]["legenda"]
+    assert "quarto" not in legenda
+    assert "420 m²" in legenda
+
+
+def test_banheiro_estimado_nao_vira_fato():
+    """A imobiliária deixa `banheiros` em branco e o importador o estima.
+    Estimado não pode aparecer pro cliente como se fosse do cadastro."""
+    estimado = _galeria_imoveis([_imovel(banheiros=2, campos_estimados=["banheiros"])])[0]
+    cadastrado = _galeria_imoveis([_imovel(banheiros=2, campos_estimados=[])])[0]
+    assert "banheiro" not in estimado["legenda"]
+    assert "banheiro" not in estimado["specs"]
+    assert "2 banheiros" in cadastrado["specs"]

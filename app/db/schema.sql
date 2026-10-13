@@ -230,6 +230,11 @@ ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS comodidades TEXT[] NOT NULL DEFAULT
 -- coluna antes de citar o numero.
 ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS campos_estimados TEXT[] NOT NULL DEFAULT '{}';
 CREATE INDEX IF NOT EXISTS imoveis_origem_idx ON imoveis (origem);
+-- Como a rentabilidade foi obtida. O catalogo real nao publica rentabilidade;
+-- ela e CALCULADA, e quem le precisa saber de que: 'anunciado' = aluguel e
+-- venda do MESMO imovel, ambos publicados; 'comparaveis' = aluguel estimado
+-- pela mediana de R$/m2 de imoveis do mesmo tipo alugados na mesma cidade.
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS rentabilidade_base TEXT;
 -- Tipo que o cliente pediu (apartamento, casa, terreno...). NAO e perguntado:
 -- so se guarda quando ele diz. Serve a duas coisas -- filtrar a busca e
 -- saber que quarto nao se aplica (terreno, galpao, loja, sala, predio).

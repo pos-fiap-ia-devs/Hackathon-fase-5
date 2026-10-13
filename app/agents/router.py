@@ -326,6 +326,42 @@ def pediu_para_ver_opcoes(mensagem: str | None) -> bool:
 TIPOS_SEM_QUARTO = frozenset({"terreno", "galpao", "loja", "sala", "predio"})
 
 
+# Palavra dita pelo cliente -> tipo de imovel. Deteccao em CODIGO, nao no
+# LLM: testado contra o modelo real, o campo no schema sem regra no prompt
+# voltava null em 6 de 6 frases ("terreno em Barueri" inclusive), e com uma
+# regra de 1 linha no prompt o cenario 1 do enunciado perdia a REGIAO em 3
+# de 3. Palavra de tipo de imovel e vocabulario fechado -- nao precisa de
+# modelo. `\b` dos dois lados: "casa" nao pode casar com "casamento".
+TIPOS_POR_PALAVRA: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("terreno", ("terreno", "terrenos", "lote", "lotes")),
+    ("apartamento", ("apartamento", "apartamentos", "apto", "aptos")),
+    ("cobertura", ("cobertura", "coberturas")),
+    ("studio", ("studio", "studios", "estudio", "kitnet", "kitnete")),
+    ("casa", ("casa", "casas", "sobrado", "sobrados")),
+    ("chacara", ("chacara", "chacaras", "sitio")),
+    ("galpao", ("galpao", "galpoes")),
+    ("loja", ("loja", "lojas", "ponto comercial")),
+    ("predio", ("predio", "predios")),
+    ("sala", ("sala comercial", "salas comerciais", "escritorio", "conjunto comercial")),
+)
+
+
+def detectar_tipo_imovel(mensagem: str | None) -> str | None:
+    """Tipo que o cliente NOMEOU na mensagem, ou None. A primeira palavra
+    da ordem acima vence -- "apartamento ou casa" fica apartamento, que e o
+    que ele disse primeiro."""
+    if not mensagem:
+        return None
+    texto = _normalizar(mensagem)
+    achados = []
+    for tipo, palavras in TIPOS_POR_PALAVRA:
+        for palavra in palavras:
+            m = re.search(rf"\b{re.escape(palavra)}\b", texto)
+            if m:
+                achados.append((m.start(), tipo))
+    return min(achados)[1] if achados else None
+
+
 def tipo_sem_quarto(tipo: str | None) -> bool:
     return (tipo or "") in TIPOS_SEM_QUARTO
 

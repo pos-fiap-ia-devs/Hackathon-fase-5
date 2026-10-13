@@ -34,8 +34,8 @@ from tests.conftest import precisa_de_ollama, precisa_de_seed
         "São Paulo (Capital)",   # o valor exato que travou o lead
         "Sao Paulo capital",
         "Sao Paulo",
-        "Campinas",
-        "Moema",
+        "Barueri",
+        "Aldeia da Serra",
         "zona sul",
     ],
 )
@@ -46,7 +46,7 @@ def test_regiao_atendida_e_reconhecida(termo):
 
 
 @precisa_de_seed
-@pytest.mark.parametrize("termo", ["Bauru", "Rio de Janeiro", "Piracicaba", "Belo Horizonte"])
+@pytest.mark.parametrize("termo", ["Bauru", "Rio de Janeiro", "Piracicaba", "Belo Horizonte", "Campinas"])
 def test_regiao_fora_da_area_continua_recusada(termo):
     """O conserto do match não pode passar a aceitar qualquer coisa."""
     from app.db import repo
@@ -55,7 +55,7 @@ def test_regiao_fora_da_area_continua_recusada(termo):
 
 
 @precisa_de_seed
-@pytest.mark.parametrize("termo", ["São Paulo (Capital)", "Campinas", "Moema", "zona sul"])
+@pytest.mark.parametrize("termo", ["São Paulo (Capital)", "Barueri", "Aldeia da Serra", "zona sul"])
 def test_validacao_e_busca_concordam(termo):
     """O defeito mais traiçoeiro desta família: `regiao_existe` dizia que
     sim e a busca voltava vazia, então o agente respondia "não encontrei
@@ -88,7 +88,7 @@ def test_cidade_fora_da_area_nao_prende_o_lead():
     # O slot tem que sair limpo, senao o proximo turno cai no mesmo no.
     assert repo.get_slots(lead["id"]).get("regiao") is None
 
-    processar_turno(chat_id=chat_id, canal="telegram", mensagem="então Campinas", origem="texto")
+    processar_turno(chat_id=chat_id, canal="telegram", mensagem="então Barueri", origem="texto")
     assert repo.get_slots(lead["id"]).get("regiao") is not None
 
 

@@ -21,10 +21,13 @@ import argparse
 import html
 import re
 import shutil
+from functools import lru_cache
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from PIL import Image
 
 from app.agents.router import TIPOS_SEM_QUARTO
 from app.db.repo import get_conn  # noqa: E402
@@ -60,7 +63,7 @@ def carregar() -> list[dict]:
             SELECT id, codigo, titulo, tipo, finalidade, bairro, zona, cidade,
                    preco, quartos, banheiros, vagas, area, condominio,
                    rentabilidade_estimada, descricao, fotos,
-                   iptu, suites, comodidades, campos_estimados
+                   iptu, suites, comodidades, campos_estimados, rentabilidade_base
             FROM imoveis
             ORDER BY finalidade, preco
             """
@@ -81,6 +84,36 @@ def link_investir(raiz: str, *, item_de_lista: bool = False) -> str:
     return f"<li>{tag}</li>" if item_de_lista else tag
 
 
+def metodo_rentabilidade(im: dict) -> str:
+    """De onde veio o número, em português. O catálogo não publica
+    rentabilidade: ela é calculada, e quem lê precisa saber de quê."""
+    base = im.get("rentabilidade_base") or ""
+    if base.startswith("anunciado"):
+        return "calculada com o aluguel e o preço de venda anunciados para este mesmo imóvel"
+    if base.startswith("comparaveis"):
+        return "aluguel estimado pela mediana de imóveis do mesmo tipo alugados na cidade"
+    return "estimativa"
+
+
+def metros(area: int) -> str:
+    """2000 -> "2.000 m²". Terreno do catálogo real chega a 1.024.520 m²,
+    e sem separador o número não se lê."""
+    return f"{int(area):,} m²".replace(",", ".")
+
+
+# Singular de cada rótulo da ficha, pro card: "1 suítes" é erro de texto.
+_SINGULAR = {"Quartos": "quarto", "Suítes": "suíte", "Banheiros": "banheiro", "Vagas": "vaga"}
+
+
+def spec_card(rotulo: str, valor: str) -> str:
+    """Um item da ficha no formato do card ("<b>1</b> suíte")."""
+    if rotulo == "Área":
+        numero, _, unidade = valor.partition(" ")
+        return f"<span><b>{e(numero)}</b> {e(unidade)}</span>"
+    nome = _SINGULAR[rotulo] if valor == "1" else rotulo.lower()
+    return f"<span><b>{e(valor)}</b> {e(nome)}</span>"
+
+
 def titulo_vitrine(im: dict) -> str:
     """Título legível pra vitrine, montado dos campos.
 
@@ -95,7 +128,7 @@ def titulo_vitrine(im: dict) -> str:
     # metragem. Mesma regra do agente (agents/router.py::TIPOS_SEM_QUARTO).
     if im["tipo"] in TIPOS_SEM_QUARTO:
         if im["area"]:
-            return f"{tipo} de {im['area']} m² em {im['bairro']}"
+            return f"{tipo} de {metros(im['area'])} em {im['bairro']}"
         return f"{tipo} em {im['bairro']}"
     if im["tipo"] == "studio" or q <= 1:
         return f"{tipo} em {im['bairro']}"
@@ -121,21 +154,105 @@ def ficha(im: dict) -> list[tuple[str, str]]:
     if im["vagas"]:
         itens.append(("Vagas", str(im["vagas"])))
     if im["area"]:
-        itens.append(("Área", f"{im['area']} m²"))
+        itens.append(("Área", metros(im["area"])))
     return itens
 
 
-def foto_do_card(im: dict, posicao: int) -> str | None:
-    """Alterna a foto escolhida pela POSIÇÃO na grade, não só pelo imóvel.
+STATIC = RAIZ.parent / "app" / "web"
 
-    Cada imóvel tem as próprias fotos (até 3, do anúncio real), então não
-    há mais pool compartilhado. Mantém-se o deslocamento por posição só
-    pra que o mesmo imóvel, ao aparecer em duas grades, não repita a foto
-    de capa no mesmo lugar."""
+# Tipos que vão pra vitrine da página inicial. Terreno, galpão e sala são
+# metade do catálogo, mas foto de lote vazio não vende a imobiliária -- e
+# era o que aparecia primeiro, porque a lista vinha ordenada por preço
+# crescente e os mais baratos são terrenos.
+TIPOS_VITRINE = ("casa", "apartamento", "cobertura", "studio")
+
+
+@lru_cache(maxsize=None)
+def _medidas(caminho_web: str) -> tuple[int, int, int]:
+    """(largura, altura, bytes) da foto. `caminho_web` é /static/..."""
+    arquivo = STATIC / caminho_web.lstrip("/")
+    try:
+        with Image.open(arquivo) as im:
+            return im.width, im.height, arquivo.stat().st_size
+    except (OSError, ValueError):
+        return 0, 0, 0
+
+
+def _horizontal(caminho_web: str) -> bool:
+    largura, altura, _ = _medidas(caminho_web)
+    return bool(largura) and largura >= altura
+
+
+def foto_do_card(im: dict, posicao: int = 0) -> str | None:
+    """A capa do imóvel: a PRIMEIRA foto horizontal do anúncio.
+
+    A ordem das fotos é escolha do corretor -- a primeira é a que ele quis
+    na frente. Respeita-se isso, só pulando foto vertical, que recortada
+    pro card 4:3 perde metade da imagem.
+
+    Tentou-se antes escolher pela "quantidade de detalhe" (tamanho do
+    arquivo): olhando o resultado, a regra premiava folhagem e piso de
+    lajota -- uma vitrine com estacionamento vazio e rua deserta na frente
+    de salas mobiliadas. Foto bonita não se mede em bytes.
+
+    `posicao` fica na assinatura pra não quebrar quem chama."""
     fotos = im["fotos"] or []
     if not fotos:
         return None
-    return fotos[(im["id"] + posicao) % len(fotos)]
+    return next((f for f in fotos if _horizontal(f)), fotos[0])
+
+
+# Na vitrine, quantos apartamentos no máximo entram na frente das casas.
+# O catálogo real é quase todo casa; sem cota, a home virava nove casas.
+APARTAMENTOS_NA_VITRINE = 2
+
+
+def _base(codigo: str) -> str:
+    """`CA1512-HORZ-L` e `CA1512-HORZ` são o mesmo imóvel (aluguel e venda)."""
+    return codigo.removesuffix("-L")
+
+
+def vitrine(imoveis: list[dict], quantos: int = 0, *, evitar: set[str] = frozenset()) -> list[dict]:
+    """Os imóveis que abrem a página inicial.
+
+    Só residencial, com a melhor capa possível, até
+    `APARTAMENTOS_NA_VITRINE` apartamentos na frente, e no máximo um por
+    bairro na primeira passada -- senão a vitrine vira seis casas do mesmo
+    condomínio. `evitar` recebe os códigos já mostrados em outra seção: o
+    imóvel anunciado pra venda e aluguel não aparece duas vezes na home."""
+    quantos = quantos or DESTAQUES
+    candidatos = [
+        im for im in imoveis
+        if im["tipo"] in TIPOS_VITRINE and im["fotos"] and _base(im["codigo"]) not in evitar
+    ]
+    # Preço mais alto primeiro: imóvel de padrão mais alto costuma ter foto
+    # profissional, e é o que a imobiliária quer na frente. Capa horizontal
+    # antes de vertical, e mais fotos antes de menos, como desempate.
+    candidatos.sort(
+        key=lambda im: (_horizontal(foto_do_card(im)), float(im["preco"]), len(im["fotos"])),
+        reverse=True,
+    )
+
+    escolhidos: list[dict] = []
+    bairros: set[str] = set()
+
+    def pegar(im: dict) -> None:
+        escolhidos.append(im)
+        bairros.add(im["bairro"])
+
+    for im in [c for c in candidatos if c["tipo"] == "apartamento"][:APARTAMENTOS_NA_VITRINE]:
+        pegar(im)
+    for im in candidatos:
+        if len(escolhidos) == quantos:
+            return escolhidos
+        if im not in escolhidos and im["bairro"] not in bairros:
+            pegar(im)
+    for im in candidatos:
+        if len(escolhidos) == quantos:
+            break
+        if im not in escolhidos:
+            pegar(im)
+    return escolhidos
 
 
 def descricao_vitrine(texto: str) -> str:
@@ -281,7 +398,7 @@ def card(im: dict, *, raiz: str = "", posicao: int = 0) -> str:
     # decide, nao a metragem. Sai do banco (`rentabilidade_estimada`),
     # nunca de conta feita aqui.
     rendimento = (
-        f'<p class="rendimento"><b>{im["rentabilidade_estimada"]}% a.a.</b> de rentabilidade estimada</p>'
+        f'<p class="rendimento"><b>{im["rentabilidade_estimada"]}% a.a.</b> de rentabilidade bruta estimada</p>'
         if im["rentabilidade_estimada"] else ""
     )
     return f"""<article class="card">
@@ -295,7 +412,7 @@ def card(im: dict, *, raiz: str = "", posicao: int = 0) -> str:
     <p class="card-preco">{preco_br(im["preco"], im["finalidade"])}</p>
     {rendimento}
     <div class="specs">
-      {"".join(f"<span><b>{e(v)}</b> {e(r.lower())}</span>" for r, v in ficha(im))}
+      {"".join(spec_card(r, v) for r, v in ficha(im))}
     </div>
     <div class="card-rodape">
       <span class="codigo">Cód. {e(im["codigo"])}</span>
@@ -322,6 +439,8 @@ def grade(imoveis: list[dict], *, raiz: str = "") -> str:
 def pagina_inicial(imoveis: list[dict], app: str) -> str:
     venda = [im for im in imoveis if im["finalidade"] == "venda"]
     aluguel = [im for im in imoveis if im["finalidade"] == "aluguel"]
+    destaque_venda = vitrine(venda)
+    destaque_aluguel = vitrine(aluguel, evitar={_base(im["codigo"]) for im in destaque_venda})
     bairros = sorted({im["bairro"] for im in imoveis})
     cidades = sorted({im["cidade"] for im in imoveis})
 
@@ -341,7 +460,7 @@ def pagina_inicial(imoveis: list[dict], app: str) -> str:
 <section class="hero">
   <div class="wrap">
     <h1>O seu próximo endereço <em>começa numa conversa</em>.</h1>
-    <p>{len(imoveis)} imóveis em {len(cidades)} cidades de São Paulo. Fale com a Bia a
+    <p>{len({_base(im['codigo']) for im in imoveis})} imóveis em {len(cidades)} cidades de São Paulo. Fale com a Bia a
     qualquer hora — ela entende o que você procura e agenda a visita com o corretor.</p>
 
     <form class="busca" onsubmit="return filtrar(event)">
@@ -365,7 +484,7 @@ def pagina_inicial(imoveis: list[dict], app: str) -> str:
         </div>
         <div class="campo">
           <label for="f-codigo">Código do imóvel</label>
-          <input id="f-codigo" placeholder="MOE-0001" autocomplete="off">
+          <input id="f-codigo" placeholder="{e(destaque_venda[0]["codigo"]) if destaque_venda else ""}" autocomplete="off">
         </div>
         <button class="botao" type="submit">Buscar</button>
       </div>
@@ -383,7 +502,7 @@ def pagina_inicial(imoveis: list[dict], app: str) -> str:
       </div>
       <a href="comprar.html">Ver todos →</a>
     </div>
-    {grade(venda[:DESTAQUES])}
+    {grade(destaque_venda)}
   </div>
 </section>
 
@@ -396,7 +515,7 @@ def pagina_inicial(imoveis: list[dict], app: str) -> str:
       </div>
       <a href="alugar.html">Ver todos →</a>
     </div>
-    {grade(aluguel[:DESTAQUES])}
+    {grade(destaque_aluguel)}
   </div>
 </section>
 
@@ -563,7 +682,8 @@ def pagina_imovel(im: dict, app: str) -> str:
         if im["condominio"] else ""
     )
     rentabilidade = (
-        f'<p class="nota">Rentabilidade estimada de {im["rentabilidade_estimada"]}% ao ano.</p>'
+        f'<p class="nota">Rentabilidade bruta estimada de {im["rentabilidade_estimada"]}% ao ano — '
+        f'{e(metodo_rentabilidade(im))}. Não inclui condomínio, IPTU, vacância nem impostos.</p>'
         if im["rentabilidade_estimada"] else ""
     )
 

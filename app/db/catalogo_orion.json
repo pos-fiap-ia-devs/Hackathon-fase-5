@@ -36,7 +36,9 @@
    "/static/imoveis/orion/AP0030-HORZ-1.jpg",
    "/static/imoveis/orion/AP0030-HORZ-2.jpg",
    "/static/imoveis/orion/AP0030-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "AP0190-HORZ",
@@ -69,7 +71,9 @@
    "quadra",
    "lavabo"
   ],
-  "campos_estimados": [],
+  "campos_estimados": [
+   "rentabilidade"
+  ],
   "fotos_origem": [
    "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu01Z6Y1u+zAutZtcU6aZmDWa3p3R2Ne9oHOb2JHO54vRjtP8X83V0qpl06X8HwbxtfJObP16BEsiSPliWhLzUNvcBT14rzmejX7-HolhBnRNxSY2tVJw63+cB8iG13kN6iqqUd3ctjHSSqu3XFlDQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
    "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxhp6oxr1i4Qi5RccoKu5iKpxJ2d1t2ugBWR27j2sazc6d-dVubE9LoN6ffqFGHpt4F-TYIpDGd9RedLTjzTX6DaM3lNvmK7tkTheOVWElMExhwwrUdqnUGme6CW-mlpxD2aMcmJpj6VY572LmNgTbMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
@@ -79,7 +83,9 @@
    "/static/imoveis/orion/AP0190-HORZ-1.jpg",
    "/static/imoveis/orion/AP0190-HORZ-2.jpg",
    "/static/imoveis/orion/AP0190-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": 7.95,
+  "rentabilidade_base": "comparaveis (3 aluguéis de apartamento em Barueri)"
  },
  {
   "codigo": "AP0206-HORZ",
@@ -115,7 +121,9 @@
    "/static/imoveis/orion/AP0206-HORZ-1.jpg",
    "/static/imoveis/orion/AP0206-HORZ-2.jpg",
    "/static/imoveis/orion/AP0206-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "AP0207-HORZ",
@@ -155,7 +163,9 @@
    "/static/imoveis/orion/AP0207-HORZ-1.jpg",
    "/static/imoveis/orion/AP0207-HORZ-2.jpg",
    "/static/imoveis/orion/AP0207-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "AP0188-HORZ",
@@ -194,7 +204,9 @@
    "/static/imoveis/orion/AP0188-HORZ-1.jpg",
    "/static/imoveis/orion/AP0188-HORZ-2.jpg",
    "/static/imoveis/orion/AP0188-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "AP0205-HORZ",
@@ -234,7 +246,9 @@
    "/static/imoveis/orion/AP0205-HORZ-1.jpg",
    "/static/imoveis/orion/AP0205-HORZ-2.jpg",
    "/static/imoveis/orion/AP0205-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "AP0141-HORZ",
@@ -266,7 +280,9 @@
    "/static/imoveis/orion/AP0141-HORZ-1.jpg",
    "/static/imoveis/orion/AP0141-HORZ-2.jpg",
    "/static/imoveis/orion/AP0141-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1495-HORZ",
@@ -302,7 +318,9 @@
    "/static/imoveis/orion/CA1495-HORZ-1.jpg",
    "/static/imoveis/orion/CA1495-HORZ-2.jpg",
    "/static/imoveis/orion/CA1495-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1335-HORZ",
@@ -347,7 +365,9 @@
    "/static/imoveis/orion/CA1335-HORZ-1.jpg",
    "/static/imoveis/orion/CA1335-HORZ-2.jpg",
    "/static/imoveis/orion/CA1335-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1432-HORZ",
@@ -393,10 +413,54 @@
    "/static/imoveis/orion/CA1432-HORZ-1.jpg",
    "/static/imoveis/orion/CA1432-HORZ-2.jpg",
    "/static/imoveis/orion/CA1432-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1471-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-3-quartos-232-m/CA1471-ORIO",
+  "titulo": "Casa com 3 quartos, 232 m², aluguel por R$ 12.000/mês ou à venda por R$ 2.450.000",
+  "descricao": "Um imóvel amplo e confortável, ideal para quem busca espaço e bem-estar para a família. Conta com 3 dormitórios, ambientes integrados e ótima iluminação natural.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pássaros",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 2450000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 3,
+  "suites": 3,
+  "banheiros": 4,
+  "vagas": 0,
+  "area": 232,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "ar-condicionado",
+   "água encanada",
+   "energia elétrica"
+  ],
+  "campos_estimados": [
+   "banheiros"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu3Y81u9kyEwbze03Y5yyjTKZhYGrwsmp-Wea15zKmfbq+f+mRdXjkYwzzpThAFexiPF4H+F-FXJfVbBxFUSzUtjFOVYOuBDcin7ueIx5TFMK2FEbjy154gHjBpuH7XwA6iCOMNjek3HQUo-lK1h1QPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0VG6N5J2hETqvEaBJDvuy+t0amr7dWk916ypa-GorCFzsn8DMbzz6Yf+7bPOVXzjo5JSeEkFxAgeuM-eQ7bWYSFLEF0uheol3rXU6B3cjJu8lhjySha7kC7BsOd7mxp0g65Fc7HtzW8QLzqKFhBEN9HR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtux1fjMhDzBYei-M9Z77joymBw4TExv6rp2fJ0bCGhKzY1sbYdePS6b8U-L6vPFe2kqw-QoM5LHBmfPJrfkbVT5iAHyJzqmLXpWntX5ljYTdfx18WtSpzx32GYcD31nASyTqPBPPJoz6papqjXFUZFrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1471-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1471-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1471-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1471-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-3-quartos-232-m/CA1471-ORIO",
   "titulo": "Casa com 3 quartos, 232 m², aluguel por R$ 12.000/mês ou à venda por R$ 2.450.000",
   "descricao": "Um imóvel amplo e confortável, ideal para quem busca espaço e bem-estar para a família. Conta com 3 dormitórios, ambientes integrados e ótima iluminação natural.",
@@ -433,10 +497,53 @@
    "/static/imoveis/orion/CA1471-HORZ-1.jpg",
    "/static/imoveis/orion/CA1471-HORZ-2.jpg",
    "/static/imoveis/orion/CA1471-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1465-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-3-quartos-257-m/CA1465-ORIO",
+  "titulo": "Casa com 3 quartos, 257 m², aluguel por R$ 19.000/mês ou à venda por R$ 3.300.000",
+  "descricao": "maravilhoso imóvel em Aldeia da Serra: \r\nCasa semi-térrea\r\nCasa em final de obra\r\n3 suítes\r\n1 escritório\r\nPscina\r\nJacuzzi",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pássaros",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 3300000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 3,
+  "suites": 3,
+  "banheiros": 4,
+  "vagas": 0,
+  "area": 256,
+  "comodidades": [
+   "condomínio fechado",
+   "piscina",
+   "escritório"
+  ],
+  "campos_estimados": [
+   "banheiros",
+   "rentabilidade"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2JX3+Bv3gcFzOo6ROaUniSCw7i798jAk2e2xJHYu4zkkNHGX-nUk5I+iL7wSUSDtapnbdgaHWkkeNtYXUDIXrqpEnV15gigoB36VaBrTXJEwyQJyTMOmnmzfrey6n4Rgn3-CtjDpiyTTqfIPVdDQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxg+gdtP3DUnkPEITbzu5DOd5ImN2Ie+s2WRwLLHiLr8hcn5XuLv861l4aLxCw6msZZuR4RiGEYnQeNFbzfVRYWlOlYLvB2zghrLXZBjRjVS2CUiiQpf+kSpaoOJ8HIf-COIIMLcpwDXQaviPXFCCrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0ki1tcxuUgcltQJA7W3mHnaxt+a-uW8tnmX5o7a5pf+3-z2W-3Ml58Pz7PaL3mCovJufeUMHHFfeLQjHSHlAoipEHpVkhnWvGmXSeNeHjdc+gEuuzoAm0mUXpuA-Vc6gif5G6P9gXaUQoLnEVcNDrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": 6.91,
+  "fotos": [
+   "/static/imoveis/orion/CA1465-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1465-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1465-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": "anunciado (venda e aluguel do mesmo imóvel)"
+ },
+ {
+  "codigo": "CA1465-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-3-quartos-257-m/CA1465-ORIO",
   "titulo": "Casa com 3 quartos, 257 m², aluguel por R$ 19.000/mês ou à venda por R$ 3.300.000",
   "descricao": "maravilhoso imóvel em Aldeia da Serra: \r\nCasa semi-térrea\r\nCasa em final de obra\r\n3 suítes\r\n1 escritório\r\nPscina\r\nJacuzzi",
@@ -471,7 +578,9 @@
    "/static/imoveis/orion/CA1465-HORZ-1.jpg",
    "/static/imoveis/orion/CA1465-HORZ-2.jpg",
    "/static/imoveis/orion/CA1465-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1505-HORZ",
@@ -510,7 +619,9 @@
    "/static/imoveis/orion/CA1505-HORZ-1.jpg",
    "/static/imoveis/orion/CA1505-HORZ-2.jpg",
    "/static/imoveis/orion/CA1505-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0346-HORZ",
@@ -564,7 +675,9 @@
    "/static/imoveis/orion/CA0346-HORZ-1.jpg",
    "/static/imoveis/orion/CA0346-HORZ-2.jpg",
    "/static/imoveis/orion/CA0346-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1424-HORZ",
@@ -608,7 +721,9 @@
    "/static/imoveis/orion/CA1424-HORZ-1.jpg",
    "/static/imoveis/orion/CA1424-HORZ-2.jpg",
    "/static/imoveis/orion/CA1424-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0746-HORZ",
@@ -656,7 +771,9 @@
    "/static/imoveis/orion/CA0746-HORZ-1.jpg",
    "/static/imoveis/orion/CA0746-HORZ-2.jpg",
    "/static/imoveis/orion/CA0746-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1480-HORZ",
@@ -706,7 +823,9 @@
    "/static/imoveis/orion/CA1480-HORZ-1.jpg",
    "/static/imoveis/orion/CA1480-HORZ-2.jpg",
    "/static/imoveis/orion/CA1480-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1497-HORZ",
@@ -743,7 +862,9 @@
    "/static/imoveis/orion/CA1497-HORZ-1.jpg",
    "/static/imoveis/orion/CA1497-HORZ-2.jpg",
    "/static/imoveis/orion/CA1497-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0858-HORZ",
@@ -786,7 +907,9 @@
    "/static/imoveis/orion/CA0858-HORZ-1.jpg",
    "/static/imoveis/orion/CA0858-HORZ-2.jpg",
    "/static/imoveis/orion/CA0858-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0099-HORZ",
@@ -837,7 +960,9 @@
    "/static/imoveis/orion/CA0099-HORZ-1.jpg",
    "/static/imoveis/orion/CA0099-HORZ-2.jpg",
    "/static/imoveis/orion/CA0099-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1401-HORZ",
@@ -882,7 +1007,9 @@
    "/static/imoveis/orion/CA1401-HORZ-1.jpg",
    "/static/imoveis/orion/CA1401-HORZ-2.jpg",
    "/static/imoveis/orion/CA1401-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1413-HORZ",
@@ -933,7 +1060,9 @@
    "/static/imoveis/orion/CA1413-HORZ-1.jpg",
    "/static/imoveis/orion/CA1413-HORZ-2.jpg",
    "/static/imoveis/orion/CA1413-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1201-HORZ",
@@ -985,7 +1114,9 @@
    "/static/imoveis/orion/CA1201-HORZ-1.jpg",
    "/static/imoveis/orion/CA1201-HORZ-2.jpg",
    "/static/imoveis/orion/CA1201-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1503-HORZ",
@@ -1033,10 +1164,63 @@
    "/static/imoveis/orion/CA1503-HORZ-1.jpg",
    "/static/imoveis/orion/CA1503-HORZ-2.jpg",
    "/static/imoveis/orion/CA1503-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1299-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-3-quartos-550-m/CA1299-ORIO",
+  "titulo": "Casa com 3 quartos, 550 m², aluguel por R$ 18.500/mês ou à venda por R$ 6.000.000",
+  "descricao": "3 suítes c/ armarios, ofurô ou banheiras + uma de empregada.\r\n3 salas: estar, jantar,  sinuca + 1 mezanino c/ lareira, para atividades artísticas..Lavabo Escritório \r\nCozinha,  dispensa, lavanderia. Quintal p/ varal, etc...c/ depósito subterrâneo. \r\nJardim c/ 4 espelhos d'água. \r\n. Piscina c/ 1/2 raia, área prá brincadeiras e infantil.\r\nAcademia c/ aparelho estação,  balança e bicicleta hergometrica.\r\nGaragem para 4 carros cobertos + 4 descobertos.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pássaros",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 6000000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 3,
+  "suites": 3,
+  "banheiros": 4,
+  "vagas": 8,
+  "area": 550,
+  "comodidades": [
+   "condomínio fechado",
+   "ar-condicionado",
+   "piscina",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "banheiro de empregada",
+   "dependência de empregada",
+   "copa",
+   "cozinha",
+   "quintal",
+   "escritório",
+   "lavabo"
+  ],
+  "campos_estimados": [
+   "banheiros"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu3pF7dVq7Q40v+UUa+WzoXargpWEyey9i1XT1b3XoIjj-8DaWdX8koQRlILZQweok4ppW8AdNlJ8bepwYTDJAomPJCJc5iLJrX2QV5peEzBQ0w03kElgx2mDRLK8wFwp-yr-APnHpCTQQvvDXH1YTbMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2dh-N5M2ScVrc0CZbPu4DTe24Ce2c2LvWSS+46Isbfa9-z+bpn11qIh3IjqCV29nIphf9h2InknWeRVHgHvD9iGBmh0hCKIhxmXEZF0WHZw4TopvlIB5wHlBImW2n0eySz7PN3DlCihQ7zZW35+M8NHR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu19Jiths-Q06gM4hbJWkvjmu3Z3N4uqQoFWwwIr7nIzHz8zUB-ny07ll04rvIAaXsPNrYfImIV1pPspNe0GzR97QJiJxrGGBq2KTboVWHi8K1DY-nxR+5UK+bJ+nygVs1iyfGqrSozfVQZLiKngAFttHR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1299-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1299-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1299-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1299-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-3-quartos-550-m/CA1299-ORIO",
   "titulo": "Casa com 3 quartos, 550 m², aluguel por R$ 18.500/mês ou à venda por R$ 6.000.000",
   "descricao": "3 suítes c/ armarios, ofurô ou banheiras + uma de empregada.\r\n3 salas: estar, jantar,  sinuca + 1 mezanino c/ lareira, para atividades artísticas..Lavabo Escritório \r\nCozinha,  dispensa, lavanderia. Quintal p/ varal, etc...c/ depósito subterrâneo. \r\nJardim c/ 4 espelhos d'água. \r\n. Piscina c/ 1/2 raia, área prá brincadeiras e infantil.\r\nAcademia c/ aparelho estação,  balança e bicicleta hergometrica.\r\nGaragem para 4 carros cobertos + 4 descobertos.",
@@ -1082,7 +1266,9 @@
    "/static/imoveis/orion/CA1299-HORZ-1.jpg",
    "/static/imoveis/orion/CA1299-HORZ-2.jpg",
    "/static/imoveis/orion/CA1299-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0276-HORZ",
@@ -1136,7 +1322,9 @@
    "/static/imoveis/orion/CA0276-HORZ-1.jpg",
    "/static/imoveis/orion/CA0276-HORZ-2.jpg",
    "/static/imoveis/orion/CA0276-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0010-HORZ",
@@ -1192,7 +1380,9 @@
    "/static/imoveis/orion/CA0010-HORZ-1.jpg",
    "/static/imoveis/orion/CA0010-HORZ-2.jpg",
    "/static/imoveis/orion/CA0010-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1191-HORZ",
@@ -1235,10 +1425,62 @@
    "/static/imoveis/orion/CA1191-HORZ-1.jpg",
    "/static/imoveis/orion/CA1191-HORZ-2.jpg",
    "/static/imoveis/orion/CA1191-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1489-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-290-m/CA1489-ORIO",
+  "titulo": "Casa com 4 quartos, 290 m², aluguel por R$ 12.000/mês ou à venda por R$ 2.400.000",
+  "descricao": "Imóvel para venda e locação em Aldeia da Serra, alameda tranquila, muito verde e segurança 24hrs.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pássaros",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 2400000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 4,
+  "suites": 4,
+  "banheiros": 3,
+  "vagas": 0,
+  "area": 290,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "piscina",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "quintal",
+   "escritório",
+   "lavabo"
+  ],
+  "campos_estimados": [],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0Ba0+9jyysGn5YVZLCkggmA19mz5tKnvW2axaLnko3w1MzRXceG7pkPjrfsKVelq4t0cfwQbkBQRLVxbjrBUd6FOXhjsWaqrF3Xa5hISG1L3y8-tjYP+1+eWbau5VkX1y6JLqLjmHKnb6C8LGFDQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu3d2-MxU9hEcu-QCZLiQjhSC3oa3wuDBg02-vZbHnuPK95ylYsD9y94vw-XxAF+inIlVHfEOI3h8e7leeRzpBtyFGURNrB7T9xXTQKVLE2gO8zEsqilxyh6-V52NqG80wQOvCcLJ9C+hR-3NB1kAPOlHR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2l13u9T+UsugONJQYPmunWw-YDLu8ql9liXxr3JoaL7zs-PDcr0954F96ziSHi3vYJvQ+YmFk5jd+hmGDzGBr2iEE9MvAui907QFeVZf0Ry6BERrCBM4l6aVsXzsk8+33yIO-f-iD7UZa7FJkFTQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1489-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1489-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1489-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1489-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-290-m/CA1489-ORIO",
   "titulo": "Casa com 4 quartos, 290 m², aluguel por R$ 12.000/mês ou à venda por R$ 2.400.000",
   "descricao": "Imóvel para venda e locação em Aldeia da Serra, alameda tranquila, muito verde e segurança 24hrs.",
@@ -1283,7 +1525,9 @@
    "/static/imoveis/orion/CA1489-HORZ-1.jpg",
    "/static/imoveis/orion/CA1489-HORZ-2.jpg",
    "/static/imoveis/orion/CA1489-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0472-HORZ",
@@ -1337,7 +1581,9 @@
    "/static/imoveis/orion/CA0472-HORZ-1.jpg",
    "/static/imoveis/orion/CA0472-HORZ-2.jpg",
    "/static/imoveis/orion/CA0472-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0240-HORZ",
@@ -1390,10 +1636,59 @@
    "/static/imoveis/orion/CA0240-HORZ-1.jpg",
    "/static/imoveis/orion/CA0240-HORZ-2.jpg",
    "/static/imoveis/orion/CA0240-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1392-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-322-m/CA1392-ORIO",
+  "titulo": "Casa, 322 m² - venda por R$ 2.300.000,00 ou aluguel por R$ 12.288,43/mês - Morada dos Pássaros - Barueri/SP",
+  "descricao": "Vende-se  casa térrea em Aldeia da Serra. Excelente localização, muito verde, segurança, paz e tranquilidade para você que procura isso e muito mais, alameda tranquila e arborizada.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pássaros",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 2300000.0,
+  "condominio": 1128.0,
+  "iptu": 1918.0,
+  "quartos": 4,
+  "suites": 2,
+  "banheiros": 4,
+  "vagas": 4,
+  "area": 322,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "lareira",
+   "piscina",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "cozinha",
+   "lavanderia",
+   "quintal"
+  ],
+  "campos_estimados": [],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu1kiytJC2kwZyNorUI28vwWG+qKPyOam9GupopPxnbeDipLmX9zxk9kx1qHpNHGzmKpAQ4A8Cx1JQulGFTWyeIeENSB7qhaQnnycaLQYUjty5T0RqUp5y1Ghc4WvrE8chzmcM6jqlCDUS77NDk5mPLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu012isJS2k80jO48B7GEpTTWjpeN--SgnG+o-8rwvbf--sPAfMr8lKEe-If0Mk+io4xsHIcdbEEpWNFZaxzYZL2pNlp+u2K3l2n9YrVsbzRa3iE1zjRZnHDkV6H90VEx3gO4G62d8DSMR4T6XV5zNb9HR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0F5jOM-uzgMs9AJc+SDhSmewYWduOmXsHaS+7SNsrnZkJjZYPzkyYE8+6rDTFXwvqFDR+UgFkc8WtMnShO1AYOKZmp1uDWwq0-MSKMYZ2Z1xz4cvkh5mXiAY5GRsm45hgiSNM+Aj3arcfGjAAFTQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1392-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1392-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1392-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1392-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-322-m/CA1392-ORIO",
   "titulo": "Casa, 322 m² - venda por R$ 2.300.000,00 ou aluguel por R$ 12.288,43/mês - Morada dos Pássaros - Barueri/SP",
   "descricao": "Vende-se  casa térrea em Aldeia da Serra. Excelente localização, muito verde, segurança, paz e tranquilidade para você que procura isso e muito mais, alameda tranquila e arborizada.",
@@ -1435,7 +1730,9 @@
    "/static/imoveis/orion/CA1392-HORZ-1.jpg",
    "/static/imoveis/orion/CA1392-HORZ-2.jpg",
    "/static/imoveis/orion/CA1392-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0266-HORZ",
@@ -1485,7 +1782,9 @@
    "/static/imoveis/orion/CA0266-HORZ-1.jpg",
    "/static/imoveis/orion/CA0266-HORZ-2.jpg",
    "/static/imoveis/orion/CA0266-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0343-HORZ",
@@ -1535,7 +1834,9 @@
    "/static/imoveis/orion/CA0343-HORZ-1.jpg",
    "/static/imoveis/orion/CA0343-HORZ-2.jpg",
    "/static/imoveis/orion/CA0343-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0413-HORZ",
@@ -1585,7 +1886,9 @@
    "/static/imoveis/orion/CA0413-HORZ-1.jpg",
    "/static/imoveis/orion/CA0413-HORZ-2.jpg",
    "/static/imoveis/orion/CA0413-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0342-HORZ",
@@ -1634,7 +1937,9 @@
    "/static/imoveis/orion/CA0342-HORZ-1.jpg",
    "/static/imoveis/orion/CA0342-HORZ-2.jpg",
    "/static/imoveis/orion/CA0342-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1499-HORZ",
@@ -1672,7 +1977,9 @@
    "/static/imoveis/orion/CA1499-HORZ-1.jpg",
    "/static/imoveis/orion/CA1499-HORZ-2.jpg",
    "/static/imoveis/orion/CA1499-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0984-HORZ",
@@ -1725,7 +2032,9 @@
    "/static/imoveis/orion/CA0984-HORZ-1.jpg",
    "/static/imoveis/orion/CA0984-HORZ-2.jpg",
    "/static/imoveis/orion/CA0984-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1296-HORZ",
@@ -1772,7 +2081,9 @@
    "/static/imoveis/orion/CA1296-HORZ-1.jpg",
    "/static/imoveis/orion/CA1296-HORZ-2.jpg",
    "/static/imoveis/orion/CA1296-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1455-HORZ",
@@ -1809,7 +2120,9 @@
    "/static/imoveis/orion/CA1455-HORZ-1.jpg",
    "/static/imoveis/orion/CA1455-HORZ-2.jpg",
    "/static/imoveis/orion/CA1455-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1504-HORZ",
@@ -1855,10 +2168,63 @@
    "/static/imoveis/orion/CA1504-HORZ-1.jpg",
    "/static/imoveis/orion/CA1504-HORZ-2.jpg",
    "/static/imoveis/orion/CA1504-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1282-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-398-m/CA1282-ORIO",
+  "titulo": "Casa com 4 dormitórios, 397 m² - venda por R$ 2.576.000,00 ou aluguel por R$ 14.947,00/mês - Morada dos Pássaros - Barueri/SP",
+  "descricao": "Imóvel para locação em Aldeia da Serra, Barueri, Morada dos Pásssaros.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pássaros",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 2576000.0,
+  "condominio": 847.0,
+  "iptu": 100.0,
+  "quartos": 4,
+  "suites": 4,
+  "banheiros": 5,
+  "vagas": 0,
+  "area": 397,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "lareira",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "banheiro de empregada",
+   "dependência de empregada",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "quintal",
+   "lavabo",
+   "armários embutidos"
+  ],
+  "campos_estimados": [],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2hm9sgwxxY0peQTTK2-oDKd0d+S4POfslqnpayKm5fD3vOmWevc4pEFlKvPJWWqno0-X+4hK0xiRel0fx3BRqekMkdVhRqVuGf-FrxeXVdW0BNpvxFe41CnWK-93nsh3xiAEMrIki2nHbL8GgN2Mb1HR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu1ZL78pXxREzyvQgQbGQsAab0cDR49ur8GSO3ZDVnZ2AjM-mXt6AlI4g7orqDkf3qYxXSdEJDxtZTbBgbEDsZdiOBU9svDW3pVXpQ+pAblptxzM5vU1A4mvhTZ2d6EFh1QOSLdDb8hGhEYX4UX9gHrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu1xQ1u98zAsitZEUQ7uf5ROf-qqU293Bsmu94cLQsbXa4tHuXefXmKACgZKoTwT1modAd5kOCFJ4SPV2SgbKAp2RE2FxniSdgF7VV7xDc3Re8hspnTdXzmy6caGUrX515CbgU6-HiSWJEZDRAUJyLrlHR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1282-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1282-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1282-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1282-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-398-m/CA1282-ORIO",
   "titulo": "Casa com 4 dormitórios, 397 m² - venda por R$ 2.576.000,00 ou aluguel por R$ 14.947,00/mês - Morada dos Pássaros - Barueri/SP",
   "descricao": "Imóvel para locação em Aldeia da Serra, Barueri, Morada dos Pásssaros.",
@@ -1904,7 +2270,9 @@
    "/static/imoveis/orion/CA1282-HORZ-1.jpg",
    "/static/imoveis/orion/CA1282-HORZ-2.jpg",
    "/static/imoveis/orion/CA1282-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0922-HORZ",
@@ -1952,7 +2320,9 @@
    "/static/imoveis/orion/CA0922-HORZ-1.jpg",
    "/static/imoveis/orion/CA0922-HORZ-2.jpg",
    "/static/imoveis/orion/CA0922-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1101-HORZ",
@@ -1997,7 +2367,9 @@
    "/static/imoveis/orion/CA1101-HORZ-1.jpg",
    "/static/imoveis/orion/CA1101-HORZ-2.jpg",
    "/static/imoveis/orion/CA1101-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0809-HORZ",
@@ -2048,7 +2420,9 @@
    "/static/imoveis/orion/CA0809-HORZ-1.jpg",
    "/static/imoveis/orion/CA0809-HORZ-2.jpg",
    "/static/imoveis/orion/CA0809-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1519-HORZ",
@@ -2094,10 +2468,63 @@
    "/static/imoveis/orion/CA1519-HORZ-1.jpg",
    "/static/imoveis/orion/CA1519-HORZ-2.jpg",
    "/static/imoveis/orion/CA1519-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0045-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-430-m/CA0045-ORIO",
+  "titulo": "Casa com 4 quartos, 430 m², aluguel por R$ 14.500 ou à venda por R$ 2.750.000",
+  "descricao": "Casa com 4 dormitórios, 430 m² -  Aldeia da Serra - Barueri/SP",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Aldeia da Serra",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 2750000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 4,
+  "suites": 4,
+  "banheiros": 5,
+  "vagas": 2,
+  "area": 430,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "piscina",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "dependência de empregada",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "lavabo"
+  ],
+  "campos_estimados": [
+   "banheiros"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu3VgwYhJvA4MwsM4TKLns3Owx53R7tiLilq3ocz3mL3+juLyQ+Dyk7tg1pn3GX3xvoRBeO4KNU98XONYSzDsAN25HCFRrCDWvFztQJViR1tc7l4FqRsVy1i+frWVskU0yROrKNXEtHWxSaW3JEZjCrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0FWzu1E7BYFkJYfbLmAuHCL5YC9+8+GimGdvavknrTS6duiYZ+Pz5IT44jTJQGosa9KRNF8aGFpXKwrdQfbVqiSBiEIoHzViGHfQ+N3c0pegl4eqTJPzX6ZeYPx53cWxzz+G-HUhQy3dfzAG1dzErMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0RM59JhzxwZy-1cfeaBvTKD2L-LvfSfqkrIyK3agYyK5dr-Yur1061g8vTRQlGMkZBSauQ4Yx1+aNtqYjrjcLWsPWl8+wTQ-B-XT5RpRUxNxQs+oTF+wUGcYqG13mUJ+T+BJdHigWuKTK7UGH9-D9tHR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA0045-HORZ-1.jpg",
+   "/static/imoveis/orion/CA0045-HORZ-2.jpg",
+   "/static/imoveis/orion/CA0045-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA0045-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-430-m/CA0045-ORIO",
   "titulo": "Casa com 4 quartos, 430 m², aluguel por R$ 14.500 ou à venda por R$ 2.750.000",
   "descricao": "Casa com 4 dormitórios, 430 m² -  Aldeia da Serra - Barueri/SP",
@@ -2143,7 +2570,9 @@
    "/static/imoveis/orion/CA0045-HORZ-1.jpg",
    "/static/imoveis/orion/CA0045-HORZ-2.jpg",
    "/static/imoveis/orion/CA0045-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0937-HORZ",
@@ -2195,7 +2624,9 @@
    "/static/imoveis/orion/CA0937-HORZ-1.jpg",
    "/static/imoveis/orion/CA0937-HORZ-2.jpg",
    "/static/imoveis/orion/CA0937-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1189-HORZ",
@@ -2240,7 +2671,9 @@
    "/static/imoveis/orion/CA1189-HORZ-1.jpg",
    "/static/imoveis/orion/CA1189-HORZ-2.jpg",
    "/static/imoveis/orion/CA1189-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1013-HORZ",
@@ -2286,7 +2719,9 @@
    "/static/imoveis/orion/CA1013-HORZ-1.jpg",
    "/static/imoveis/orion/CA1013-HORZ-2.jpg",
    "/static/imoveis/orion/CA1013-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1339-HORZ",
@@ -2335,10 +2770,70 @@
    "/static/imoveis/orion/CA1339-HORZ-1.jpg",
    "/static/imoveis/orion/CA1339-HORZ-2.jpg",
    "/static/imoveis/orion/CA1339-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0066-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-450-m/CA0066-ORIO",
+  "titulo": "Casa com 4 quartos, 450 m², aluguel por R$ 25.000 ou à venda por R$ 3.200.000",
+  "descricao": "Casa com  450m² de construção em terreno de 660m² sendo 4 dormitórios com 2 suítes, ar condicionado em 6 ambientes, Sala em 3 ambientes, lareira, lavabo, área de lazer com piscina, sauna, churrasqueira.  Vende ou Aluga Mobiliado com equipamentos elétricos e eletrônicos. Jardinagem e limpeza de piscina, estão inclusos no aluguel. Venha morar na Aldeia da Serra - Barueri/SP",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Aldeia da Serra",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 3200000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 4,
+  "suites": 2,
+  "banheiros": 3,
+  "vagas": 7,
+  "area": 450,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "lareira",
+   "piscina",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "banheiro de empregada",
+   "dependência de empregada",
+   "copa",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "sauna",
+   "banheira de hidromassagem",
+   "lavabo",
+   "armários embutidos"
+  ],
+  "campos_estimados": [
+   "banheiros",
+   "rentabilidade"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNvoG5419lF2DsFl8YeBIKBuCCn5r2tvvyDiGOKxJH5vYSB5fHRcpn65bkCy7-qHATwsfQ6XpkWM29ETdBQVBPbRNyGBFZjnj2Bt0yTYbtIWFF0-wo3tCpfxwKEWsmLq3sb-QjwFKqA8HLJTP+4URYYX-lYCtoz5F9N4lGnUVdgqR9Qu4m9s2qFPub2JoCihipUBAow-56-X7-hkZaPK5RkVqk2dXwP61MDUbcUm+6GWehj7QEYoKGRUEnBwEKQ07JzJpypDIxKnPELw1mRT+ZPuRnul4eUjPOlakXSMU5hqu-A7fCxYqG0Sbexem-uzNsT+Y6adYhVIMjqT2lVECwkcC8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNvrX9H9NNvwUcMn-0yR6a9pAa3+9u56v25gnS04pj1u62K2NzTXZby2JAHlL7fFQHwqYNCTPd7bHh0edBddx3pbrCMGEBrgxbJjEbmQqZsbVFrhjE5oBFC60SWWYarqWcAwB+UXuyB8nTQCaC5XwwWUawNEtEw7ldR7AL0SVpntREFocalqyCZPuL1b5Wiyi1eWxVo6JOmT73nmZ7AZphmFeUmKDQJ41sRS6oF0baQTPl08g0LueWPU0LKw1yN17R1JJ6pWIwanqNRn1uVSeYa6028k9XE1636ZkiOZ1EgqefIp+ezPKCtXvjvZGarwtVB5pLLbZAZK4-kQSRKQjQtc2IO.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNvoG11zYxA1zgwm9AZco7uowKX9Z25vfCynXmt8s36j5jRz9LDd4Lc7oQYwfauFXuHkJx7SfEbYnd6Yc1xXhfhfoycGHxbgQa0rWbHcZFoH0AP1VwXtThy5QW2Acf8zAQ1+AjwFKqA8HLJTP+4URYYX-lYCtoz5F9N4lGnUVdgqR9Qu4m9s2qFPub2JoCihipUBAow-56-X7-hkZaPK5RkVqk2dXwP61MDUbcUm+6GWehj7QEYoKGRUEnBwEKQ07JzJpypDIxKnPELw1mRT+ZPuRnul4eUjPOlakXSMU5hqu-A7fCxYqG0Sbexem-uzNsT+Y6adYhVIMjqT2lVECwkcC8=.jpg"
+  ],
+  "rentabilidade_estimada": 9.38,
+  "fotos": [
+   "/static/imoveis/orion/CA0066-HORZ-1.jpg",
+   "/static/imoveis/orion/CA0066-HORZ-2.jpg",
+   "/static/imoveis/orion/CA0066-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": "anunciado (venda e aluguel do mesmo imóvel)"
+ },
+ {
+  "codigo": "CA0066-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-450-m/CA0066-ORIO",
   "titulo": "Casa com 4 quartos, 450 m², aluguel por R$ 25.000 ou à venda por R$ 3.200.000",
   "descricao": "Casa com  450m² de construção em terreno de 660m² sendo 4 dormitórios com 2 suítes, ar condicionado em 6 ambientes, Sala em 3 ambientes, lareira, lavabo, área de lazer com piscina, sauna, churrasqueira.  Vende ou Aluga Mobiliado com equipamentos elétricos e eletrônicos. Jardinagem e limpeza de piscina, estão inclusos no aluguel. Venha morar na Aldeia da Serra - Barueri/SP",
@@ -2390,7 +2885,9 @@
    "/static/imoveis/orion/CA0066-HORZ-1.jpg",
    "/static/imoveis/orion/CA0066-HORZ-2.jpg",
    "/static/imoveis/orion/CA0066-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0185-HORZ",
@@ -2442,7 +2939,9 @@
    "/static/imoveis/orion/CA0185-HORZ-1.jpg",
    "/static/imoveis/orion/CA0185-HORZ-2.jpg",
    "/static/imoveis/orion/CA0185-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0371-HORZ",
@@ -2495,7 +2994,9 @@
    "/static/imoveis/orion/CA0371-HORZ-1.jpg",
    "/static/imoveis/orion/CA0371-HORZ-2.jpg",
    "/static/imoveis/orion/CA0371-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1150-HORZ",
@@ -2547,7 +3048,9 @@
    "/static/imoveis/orion/CA1150-HORZ-1.jpg",
    "/static/imoveis/orion/CA1150-HORZ-2.jpg",
    "/static/imoveis/orion/CA1150-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1517-HORZ",
@@ -2595,7 +3098,9 @@
    "/static/imoveis/orion/CA1517-HORZ-1.jpg",
    "/static/imoveis/orion/CA1517-HORZ-2.jpg",
    "/static/imoveis/orion/CA1517-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1155-HORZ",
@@ -2649,10 +3154,57 @@
    "/static/imoveis/orion/CA1155-HORZ-1.jpg",
    "/static/imoveis/orion/CA1155-HORZ-2.jpg",
    "/static/imoveis/orion/CA1155-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0976-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-485-m/CA0976-ORIO",
+  "titulo": "Casa com 4 quartos, 485 m², aluguel por R$ 15.500/mês ou à venda por R$ 2.990.000",
+  "descricao": "Excelente imóvel, bem localizado.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Residencial das Estrelas",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 2990000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 4,
+  "suites": 2,
+  "banheiros": 4,
+  "vagas": 0,
+  "area": 485,
+  "comodidades": [
+   "condomínio fechado",
+   "piscina",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "lavanderia",
+   "área de serviço",
+   "armários embutidos"
+  ],
+  "campos_estimados": [],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu35u1PxX+Q8GzugyAIOFjiiHm6ea4dyFgHq6w7PnppXl9s-jeILU5tAA4eu2D1u1tOtdHIQtaUEkTuIlRzHueYmOOkZMgz+B-E-ESrIXYWNE1C1vwTVbz0mIWoSl2gJqwzmqCtjzjSi3R576Gm17HrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxld3JdTxz0hno8ZV7ziox6B5YmG+dmLsEmUxoHYiLLizOf5ZeP81YYf0PXrT1yyo4F7QIEGbVhOZshVewHMW6y9Y1t8gzeo-0rubLJ+ZU9Yhi8zySd283qAdryw+UAs0CiXAqjejQWjXaXYI3BNCc9HR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu3s4--5SuAURq9YoQry15jKX+7nJyoaG8mSP5qP-uJ-i+sPWAuiE1dkd6vTiKXuNuq9dGdMIGFpLXPhDWiCxcpuvHmlrogGXgWXUQ5AbHVENhy4ZnR5BnXG5TbKj62kOw3GfAqPk8QSPEIfDIQxTQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA0976-HORZ-1.jpg",
+   "/static/imoveis/orion/CA0976-HORZ-2.jpg",
+   "/static/imoveis/orion/CA0976-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA0976-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-485-m/CA0976-ORIO",
   "titulo": "Casa com 4 quartos, 485 m², aluguel por R$ 15.500/mês ou à venda por R$ 2.990.000",
   "descricao": "Excelente imóvel, bem localizado.",
@@ -2692,7 +3244,9 @@
    "/static/imoveis/orion/CA0976-HORZ-1.jpg",
    "/static/imoveis/orion/CA0976-HORZ-2.jpg",
    "/static/imoveis/orion/CA0976-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0284-HORZ",
@@ -2745,7 +3299,9 @@
    "/static/imoveis/orion/CA0284-HORZ-1.jpg",
    "/static/imoveis/orion/CA0284-HORZ-2.jpg",
    "/static/imoveis/orion/CA0284-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0364-HORZ",
@@ -2798,10 +3354,67 @@
    "/static/imoveis/orion/CA0364-HORZ-1.jpg",
    "/static/imoveis/orion/CA0364-HORZ-2.jpg",
    "/static/imoveis/orion/CA0364-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0370-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-500-m/CA0370-ORIO",
+  "titulo": "Casa com 4 quartos, 500 m², aluguel por R$ 18.000/mês ou à venda por R$ 4.000.000",
+  "descricao": "Ótima casa de alto padrão, com 4 suítes com mais 1 Dormitório reversível. Ampla suíte Master com Closet e Hidromassagem. Imóvel bem localizado em alameda alta com boa ventilação e iluminação. Conta ainda com piscina aquecida e local para sauna.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Aldeia da Serra",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 4000000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 4,
+  "suites": 4,
+  "banheiros": 5,
+  "vagas": 9,
+  "area": 500,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "piscina",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "banheiro de empregada",
+   "dependência de empregada",
+   "copa",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "banheira de hidromassagem",
+   "lavabo",
+   "armários embutidos"
+  ],
+  "campos_estimados": [
+   "banheiros"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu3tA2uVjuSA5vesdA+eJgC2N4bKW+f6pqmSc+crLsayE0sbzUuDD0bENyvDyDXKgrqxSeeINbFEhPcAjcj20T6W9BmFwvB2ho12VYr1CSWxn9jNoiyoBmgWXebeL0EYP-yuYK+-Ko3SjSqLXLQxwPMFHR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2pn09dSwDwkvvc2eqCAsgWD+K7PooecrmKP5o3ynKr6+vLATumDz6cC1Ov5KVmdnKBuVNAgLFI8Q9FGegaycYinP0RmhTaBr2zXXuFeXlhb0Ds-vQ1vxlybVpj3r2EH2T6hCqr0jBOoe7vZPVpHErMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0BL1O1NuTsPjY8lAbC+sjSDx9Ww+Y6zh1bHxLHM5Pb5-5ukcvaC+Ixu0JfXK2yevLF7eeQ3KBxeYOsqVQzLaJ+EJF1UrHyWtneRROVDQWpbhiEKnBhuyXaJerqp93sA2TiFKfPkrQixa6vFLW5gMLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA0370-HORZ-1.jpg",
+   "/static/imoveis/orion/CA0370-HORZ-2.jpg",
+   "/static/imoveis/orion/CA0370-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA0370-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-500-m/CA0370-ORIO",
   "titulo": "Casa com 4 quartos, 500 m², aluguel por R$ 18.000/mês ou à venda por R$ 4.000.000",
   "descricao": "Ótima casa de alto padrão, com 4 suítes com mais 1 Dormitório reversível. Ampla suíte Master com Closet e Hidromassagem. Imóvel bem localizado em alameda alta com boa ventilação e iluminação. Conta ainda com piscina aquecida e local para sauna.",
@@ -2851,10 +3464,61 @@
    "/static/imoveis/orion/CA0370-HORZ-1.jpg",
    "/static/imoveis/orion/CA0370-HORZ-2.jpg",
    "/static/imoveis/orion/CA0370-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0694-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-517-m/CA0694-ORIO",
+  "titulo": "Casa com 4 quartos, 517 m², aluguel por R$ 25.000/mês ou à venda por R$ 6.000.000",
+  "descricao": "Excelente imóvel à venda e locação em condomínio fechado, muito verde, paz e tranquilidade, agende uma visita",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pássaros",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 6000000.0,
+  "condominio": 3300.0,
+  "iptu": 320.0,
+  "quartos": 4,
+  "suites": 4,
+  "banheiros": 5,
+  "vagas": 4,
+  "area": 516,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "varanda",
+   "mobiliado",
+   "piscina",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "dependência de empregada",
+   "despensa",
+   "cozinha"
+  ],
+  "campos_estimados": [
+   "banheiros"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu1dq4d1ttjEyq+o1a7yR7BnZ75W3-8mnnFWOoI+Ps6P43pOkUMvm8bEC9vTQKwGc6qtXGfIKEnhgPMpxHiu3UJu+Y0R8hiap40njX4dFW3h60DoynyZ64we9VJqO6ns+5jOsBd7elw28c5vPWWIFN+lHR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxs6++VL500VwsNCcJvgowKi5Zu76tG7nQG1-5TGsu2e2dn1fPDXxZsI1qTUV0WeqpBHbeclF05aR+tqTx-pdImuYHhfqAHdiXTMVrpxG1tY4SErz0dUwwu2TLfz+nIC+QT7DcHWhj6lQ5z+I1NlQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2V5lY5+2BEcscg0Zbqzmx7b6d+qovaF-U2t2Ynao5j-zOD0AfWOjYcGzq-iLQbpg-VDGv4NFnJYd+MjaAy1VL2qDVYLvmSDuRrJSIxrZHJ4wy9rig0A9gCVZ4n201QPwh+GB9HDlBDJZoncAlJjFrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA0694-HORZ-1.jpg",
+   "/static/imoveis/orion/CA0694-HORZ-2.jpg",
+   "/static/imoveis/orion/CA0694-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA0694-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-517-m/CA0694-ORIO",
   "titulo": "Casa com 4 quartos, 517 m², aluguel por R$ 25.000/mês ou à venda por R$ 6.000.000",
   "descricao": "Excelente imóvel à venda e locação em condomínio fechado, muito verde, paz e tranquilidade, agende uma visita",
@@ -2898,7 +3562,9 @@
    "/static/imoveis/orion/CA0694-HORZ-1.jpg",
    "/static/imoveis/orion/CA0694-HORZ-2.jpg",
    "/static/imoveis/orion/CA0694-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1185-HORZ",
@@ -2951,7 +3617,9 @@
    "/static/imoveis/orion/CA1185-HORZ-1.jpg",
    "/static/imoveis/orion/CA1185-HORZ-2.jpg",
    "/static/imoveis/orion/CA1185-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1506-HORZ",
@@ -2992,7 +3660,9 @@
    "/static/imoveis/orion/CA1506-HORZ-1.jpg",
    "/static/imoveis/orion/CA1506-HORZ-2.jpg",
    "/static/imoveis/orion/CA1506-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1042-HORZ",
@@ -3045,7 +3715,9 @@
    "/static/imoveis/orion/CA1042-HORZ-1.jpg",
    "/static/imoveis/orion/CA1042-HORZ-2.jpg",
    "/static/imoveis/orion/CA1042-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1297-HORZ",
@@ -3097,7 +3769,9 @@
    "/static/imoveis/orion/CA1297-HORZ-1.jpg",
    "/static/imoveis/orion/CA1297-HORZ-2.jpg",
    "/static/imoveis/orion/CA1297-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0291-HORZ",
@@ -3152,7 +3826,9 @@
    "/static/imoveis/orion/CA0291-HORZ-1.jpg",
    "/static/imoveis/orion/CA0291-HORZ-2.jpg",
    "/static/imoveis/orion/CA0291-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1115-HORZ",
@@ -3195,7 +3871,9 @@
    "/static/imoveis/orion/CA1115-HORZ-1.jpg",
    "/static/imoveis/orion/CA1115-HORZ-2.jpg",
    "/static/imoveis/orion/CA1115-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0938-HORZ",
@@ -3247,7 +3925,9 @@
    "/static/imoveis/orion/CA0938-HORZ-1.jpg",
    "/static/imoveis/orion/CA0938-HORZ-2.jpg",
    "/static/imoveis/orion/CA0938-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0988-HORZ",
@@ -3290,10 +3970,62 @@
    "/static/imoveis/orion/CA0988-HORZ-1.jpg",
    "/static/imoveis/orion/CA0988-HORZ-2.jpg",
    "/static/imoveis/orion/CA0988-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1076-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-600-m/CA1076-ORIO",
+  "titulo": "Casa com 4 dormitórios, 600 m² - venda por R$ 3.850.000,00 ou aluguel por R$ 24.373,66/mês - Morada dos Pássaros - Barueri/SP",
+  "descricao": "Belíssima residencia com vista definitiva em Aldeia d Serra, alameda tranquila, cozinha planejada completa de armários, sala de estar, jantar e lareira e varanda envidraçada, lazer com piscina, churrasqueira e salão de festas, 2 vagas cobertas e 4 descobertas",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pássaros",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 3850000.0,
+  "condominio": 1200.0,
+  "iptu": 173.0,
+  "quartos": 4,
+  "suites": 2,
+  "banheiros": 4,
+  "vagas": 0,
+  "area": 600,
+  "comodidades": [
+   "condomínio fechado",
+   "mobiliado",
+   "piscina",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "despensa",
+   "lavanderia",
+   "quintal",
+   "escritório",
+   "lavabo",
+   "armários embutidos"
+  ],
+  "campos_estimados": [
+   "rentabilidade"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNvzlY7841-2kYGlvUEUK+TmCDZ44CO7MeTtxqh36HpnpPWjf3+VZ7V8N1gjpXYPgKOifB6WtM3FHtLZuh5VBWzbp3eO2INpjSOgEnCTqFpQUEK3AY2iyB72kmgBrWz5w4Xxi+FF9fEuwGBE+W9LmEDFLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNv+hx2jsloxA5nrtszUrWk5zKr3aOU1o3JnUiapajZmZzczJ3mdvmCl5AD9-DPL0yyn7BBSsAqDWZJY9ljbxi2ZYy4Jmd0uWm++hrfYKpCQ0QJ-Cs0jDdR5Qe6bZ6c1X822z6aDff6oQ6MVYy-XwNXQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNv02JAzP1SowtvitBDW+OPpGycxcCly4-AjEC-1ajH4IrG6cf+ZNXE74Fii--zLVGXr7FMfvkKYhBfN85DWkTUYrqSPUB+vmTVrX6TRrFIHFhy2ScNlzJ36lKyXb6l01M26TmSIfX+pD7VUfHkJlMJCr9KAt8stFhX+AKpSRdyvwwV7purs3PTcKG1MI36iGwAF0wy6oK5APevm5PPedV-GacxP3wP61NeW6wcmvuVAupw6QEZovrFTQeShQjQiOM3eYWuXNdKnbwBkQ-FH7RIuEy5xtbP0PP+OxmHYFRopLvM8KS4OfamGrSte2+jxctT+JLOLoRLK43kQSRVXWU1enAd7lK4+PTZ4hi6Mic=.jpg"
+  ],
+  "rentabilidade_estimada": 7.17,
+  "fotos": [
+   "/static/imoveis/orion/CA1076-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1076-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1076-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": "anunciado (venda e aluguel do mesmo imóvel)"
+ },
+ {
+  "codigo": "CA1076-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-600-m/CA1076-ORIO",
   "titulo": "Casa com 4 dormitórios, 600 m² - venda por R$ 3.850.000,00 ou aluguel por R$ 24.373,66/mês - Morada dos Pássaros - Barueri/SP",
   "descricao": "Belíssima residencia com vista definitiva em Aldeia d Serra, alameda tranquila, cozinha planejada completa de armários, sala de estar, jantar e lareira e varanda envidraçada, lazer com piscina, churrasqueira e salão de festas, 2 vagas cobertas e 4 descobertas",
@@ -3336,7 +4068,9 @@
    "/static/imoveis/orion/CA1076-HORZ-1.jpg",
    "/static/imoveis/orion/CA1076-HORZ-2.jpg",
    "/static/imoveis/orion/CA1076-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1441-HORZ",
@@ -3383,7 +4117,9 @@
    "/static/imoveis/orion/CA1441-HORZ-1.jpg",
    "/static/imoveis/orion/CA1441-HORZ-2.jpg",
    "/static/imoveis/orion/CA1441-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1370-HORZ",
@@ -3429,7 +4165,9 @@
    "/static/imoveis/orion/CA1370-HORZ-1.jpg",
    "/static/imoveis/orion/CA1370-HORZ-2.jpg",
    "/static/imoveis/orion/CA1370-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1289-HORZ",
@@ -3473,7 +4211,9 @@
    "/static/imoveis/orion/CA1289-HORZ-1.jpg",
    "/static/imoveis/orion/CA1289-HORZ-2.jpg",
    "/static/imoveis/orion/CA1289-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0069-HORZ",
@@ -3529,10 +4269,69 @@
    "/static/imoveis/orion/CA0069-HORZ-1.jpg",
    "/static/imoveis/orion/CA0069-HORZ-2.jpg",
    "/static/imoveis/orion/CA0069-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0212-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-720-m/CA0212-ORIO",
+  "titulo": "Casa com 4 quartos, 720 m², aluguel por R$ 24.000/mês ou à venda por R$ 4.950.000",
+  "descricao": "* Dormitórios: 04, sendo todas suítes\r\n* Living: 3 ambientes\r\n* Banheiros: 7 (4 suites + Lavabo + Piscina + Serviço)\r\n* Vagas de garagem: 6\r\n* Área do terreno: 834,00 m²\r\n* Área construída: ~830,00 m² (preciso conferir no projeto final)\r\n* Valor de venda: R$ 4.950.000,00\r\n* Valor de locação: R$ 24.000,00\r\n* Valor do condomínio: R$ 1.585,00\r\n* IPTU anual: R$ 2.113,00\r\n* Cozinha equipada com fogão, forno, micro e lava-louça novos.\r\n* Armários e closets novos\r\n* Assoalho do pavimento superior em madeira Canela recem instalados\r\n* Casa toda revisada na parte elétrica e hidraulica\r\n* Madeiras de portas e janelas ajustadas e enceradas\r\n* Novos box serão instalados nos banheiros (já encomendados)\r\n* Iluminação em fase de orçamento",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Aldeia da Serra",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 4950000.0,
+  "condominio": 1585.0,
+  "iptu": 2113.0,
+  "quartos": 4,
+  "suites": 4,
+  "banheiros": 5,
+  "vagas": 0,
+  "area": 720,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "piscina",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "banheiro de empregada",
+   "dependência de empregada",
+   "copa",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "sauna",
+   "escritório",
+   "banheira de hidromassagem",
+   "lavabo",
+   "armários embutidos"
+  ],
+  "campos_estimados": [
+   "banheiros"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0s4-cA0uQsEkMQ9Xb+zmg6K0L21-uii9R7L8Z35sYLJ0cLmbubfxacY+qH5KHKFl69DR-ohNnFmNs5zexfvAZ2pFk8MhGaKon-yTpRJRlYM3yALzzdtwB6+BoKlp3sA+QOUVOvloxm7Va-dWUZlQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0hl0dh24QdgjvY7XIWc4DO41Yme4vKwiRyGppPbsLHChJjRGenS6KEa6qCvHQ+XvZJSZIYgFnhXf-J4bDDEA6S+JUJIsinJphuWZoJ7E1NE-yQNlgtnmHCHVJKK7FtuxhqmN-zFugy+YLy2GnBAErMNAdsz6EIJ9xa9RhJisg0F+onwszjAeK61MI38x3QNBQhk6Z-oAProjIPRO8EmV6ggNCpA9FMcTaYW1fCGA+5+7U4IuaHHAxmSggTWgK0yc976HIMZ3vgclg3KGbNR6Bi7wIDBgvf+bU3UOwdrp+zL+aG2aa-xS6GnLT30hMtO+pLfII8JdYSpG2cLQnhwYn5R+x-n+KGLrkerLniV5BBfSQGA.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu01m-PNBtzsCi+kVYqWBhBmH9ISS3Nq28x6Lo8-Uk5Ls-vGiWN-604YZ7vLoTm+274pVH8coEFhcWspKZTv4B6ffYkZdgzeDimDGdKR7TmRQ9isRoShny0aAQ4ab0lEhiiW5Ws3ztwKVEKO5H1V5CrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA0212-HORZ-1.jpg",
+   "/static/imoveis/orion/CA0212-HORZ-2.jpg",
+   "/static/imoveis/orion/CA0212-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA0212-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-4-quartos-720-m/CA0212-ORIO",
   "titulo": "Casa com 4 quartos, 720 m², aluguel por R$ 24.000/mês ou à venda por R$ 4.950.000",
   "descricao": "* Dormitórios: 04, sendo todas suítes\r\n* Living: 3 ambientes\r\n* Banheiros: 7 (4 suites + Lavabo + Piscina + Serviço)\r\n* Vagas de garagem: 6\r\n* Área do terreno: 834,00 m²\r\n* Área construída: ~830,00 m² (preciso conferir no projeto final)\r\n* Valor de venda: R$ 4.950.000,00\r\n* Valor de locação: R$ 24.000,00\r\n* Valor do condomínio: R$ 1.585,00\r\n* IPTU anual: R$ 2.113,00\r\n* Cozinha equipada com fogão, forno, micro e lava-louça novos.\r\n* Armários e closets novos\r\n* Assoalho do pavimento superior em madeira Canela recem instalados\r\n* Casa toda revisada na parte elétrica e hidraulica\r\n* Madeiras de portas e janelas ajustadas e enceradas\r\n* Novos box serão instalados nos banheiros (já encomendados)\r\n* Iluminação em fase de orçamento",
@@ -3584,7 +4383,9 @@
    "/static/imoveis/orion/CA0212-HORZ-1.jpg",
    "/static/imoveis/orion/CA0212-HORZ-2.jpg",
    "/static/imoveis/orion/CA0212-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0552-HORZ",
@@ -3639,7 +4440,9 @@
    "/static/imoveis/orion/CA0552-HORZ-1.jpg",
    "/static/imoveis/orion/CA0552-HORZ-2.jpg",
    "/static/imoveis/orion/CA0552-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1005-HORZ",
@@ -3690,7 +4493,9 @@
    "/static/imoveis/orion/CA1005-HORZ-1.jpg",
    "/static/imoveis/orion/CA1005-HORZ-2.jpg",
    "/static/imoveis/orion/CA1005-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1391-HORZ",
@@ -3739,7 +4544,9 @@
    "/static/imoveis/orion/CA1391-HORZ-1.jpg",
    "/static/imoveis/orion/CA1391-HORZ-2.jpg",
    "/static/imoveis/orion/CA1391-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1469-HORZ",
@@ -3782,7 +4589,9 @@
    "/static/imoveis/orion/CA1469-HORZ-1.jpg",
    "/static/imoveis/orion/CA1469-HORZ-2.jpg",
    "/static/imoveis/orion/CA1469-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0157-HORZ",
@@ -3838,10 +4647,55 @@
    "/static/imoveis/orion/CA0157-HORZ-1.jpg",
    "/static/imoveis/orion/CA0157-HORZ-2.jpg",
    "/static/imoveis/orion/CA0157-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1354-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-5-quartos-348-m/CA1354-ORIO",
+  "titulo": "Casa com 5 quartos, 348 m², aluguel por R$ 10.500/mês ou à venda por R$ 1.920.000",
+  "descricao": "Sala de lareira, sala de jantar , cozinha , lavanderia 5 quartos /  SENDO 3 suítes / 7 vagas  -TERREA Quartos Espaçosos\r\n: Com 5 dormitórios, incluindo 3 suítes, esta casa oferece a privacidade e o conforto que sua família merece.\r\nPiscina e Churrasqueira:  \r\n.Garagem Generosa: A garagem com espaço para 7 carros .",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pássaros",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 1920000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 5,
+  "suites": 3,
+  "banheiros": 4,
+  "vagas": 7,
+  "area": 348,
+  "comodidades": [
+   "churrasqueira",
+   "piscina",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "energia elétrica"
+  ],
+  "campos_estimados": [
+   "banheiros"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu1lCyfVr3gYTvesLR56ehhuf84+1+-288ka-477G7p6G1sHEfp7i0r0QwaTWKHS+t5FZZ944b0F2SPdUG0XGAIfZAFJ4piODgHfJaoN-Emlw-QMRoiBU-F-hU6aT7lxg+RiBFc7GtHO+Xr3nLlNCErMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2JG2uMxuhwZndULWr3ilwWH47qp+dnCoXyH5ojhgq3b5MX9Qebz-70+0ZLjMHC9675gY4F7akdSQdIiWhD7ZrW6J1l8pzyTnF3EFqBqElhXwCg5oEhb+nmTZpiIxnso+BuEFtXclQnWFLDeOGtTQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxlhjM8z4zkGkMwuTJal7C7e-a+yv9SJ8l+I0pjqlJr48Z7yc+2C0YY+66O2EFqAkqQ+YNUAE215ZOhlRR-rVIegLiQM+jClplXhXuRLSkRYwB0ftTxXn1aaZZOM1FgU9Di7J6Lv93SsUaD4IkF5OLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1354-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1354-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1354-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1354-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-5-quartos-348-m/CA1354-ORIO",
   "titulo": "Casa com 5 quartos, 348 m², aluguel por R$ 10.500/mês ou à venda por R$ 1.920.000",
   "descricao": "Sala de lareira, sala de jantar , cozinha , lavanderia 5 quartos /  SENDO 3 suítes / 7 vagas  -TERREA Quartos Espaçosos\r\n: Com 5 dormitórios, incluindo 3 suítes, esta casa oferece a privacidade e o conforto que sua família merece.\r\nPiscina e Churrasqueira:  \r\n.Garagem Generosa: A garagem com espaço para 7 carros .",
@@ -3879,7 +4733,9 @@
    "/static/imoveis/orion/CA1354-HORZ-1.jpg",
    "/static/imoveis/orion/CA1354-HORZ-2.jpg",
    "/static/imoveis/orion/CA1354-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0964-HORZ",
@@ -3924,7 +4780,9 @@
    "/static/imoveis/orion/CA0964-HORZ-1.jpg",
    "/static/imoveis/orion/CA0964-HORZ-2.jpg",
    "/static/imoveis/orion/CA0964-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1029-HORZ",
@@ -3976,7 +4834,9 @@
    "/static/imoveis/orion/CA1029-HORZ-1.jpg",
    "/static/imoveis/orion/CA1029-HORZ-2.jpg",
    "/static/imoveis/orion/CA1029-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0667-HORZ",
@@ -4024,7 +4884,9 @@
    "/static/imoveis/orion/CA0667-HORZ-1.jpg",
    "/static/imoveis/orion/CA0667-HORZ-2.jpg",
    "/static/imoveis/orion/CA0667-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1104-HORZ",
@@ -4070,7 +4932,9 @@
    "/static/imoveis/orion/CA1104-HORZ-1.jpg",
    "/static/imoveis/orion/CA1104-HORZ-2.jpg",
    "/static/imoveis/orion/CA1104-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0194-HORZ",
@@ -4122,7 +4986,9 @@
    "/static/imoveis/orion/CA0194-HORZ-1.jpg",
    "/static/imoveis/orion/CA0194-HORZ-2.jpg",
    "/static/imoveis/orion/CA0194-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1323-HORZ",
@@ -4171,7 +5037,9 @@
    "/static/imoveis/orion/CA1323-HORZ-1.jpg",
    "/static/imoveis/orion/CA1323-HORZ-2.jpg",
    "/static/imoveis/orion/CA1323-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0595-HORZ",
@@ -4213,7 +5081,9 @@
    "/static/imoveis/orion/CA0595-HORZ-1.jpg",
    "/static/imoveis/orion/CA0595-HORZ-2.jpg",
    "/static/imoveis/orion/CA0595-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1472-HORZ",
@@ -4251,7 +5121,9 @@
    "/static/imoveis/orion/CA1472-HORZ-1.jpg",
    "/static/imoveis/orion/CA1472-HORZ-2.jpg",
    "/static/imoveis/orion/CA1472-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0059-HORZ",
@@ -4303,7 +5175,9 @@
    "/static/imoveis/orion/CA0059-HORZ-1.jpg",
    "/static/imoveis/orion/CA0059-HORZ-2.jpg",
    "/static/imoveis/orion/CA0059-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0708-HORZ",
@@ -4350,7 +5224,9 @@
    "/static/imoveis/orion/CA0708-HORZ-1.jpg",
    "/static/imoveis/orion/CA0708-HORZ-2.jpg",
    "/static/imoveis/orion/CA0708-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0167-HORZ",
@@ -4403,10 +5279,71 @@
    "/static/imoveis/orion/CA0167-HORZ-1.jpg",
    "/static/imoveis/orion/CA0167-HORZ-2.jpg",
    "/static/imoveis/orion/CA0167-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1437-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-6-quartos-1-025-m/CA1437-ORIO",
+  "titulo": "Casa com 6 quartos, 1.025 m², aluguel por R$ 40.000/mês ou à venda por R$ 7.600.000",
+  "descricao": "Excelente sobrado com 1025 m² em terreno amplo com 1.710 m² em local privilegiado com vistas e fundo para mata protegida. Com suas 6 suítes amplas com closets com vistas para as montanhas, tem total privacidade e comodidade. Suas 6 salas interligadas em espaço único em pé direito alto, com lareira, sala de musica, sala de jogos, home theater, estar e um excelente bar, traz um aconchego agradavel. Sala de almoço e jantar proximas da cozinha com armários planejado e com acesso à área gourmet, completam a área social. Piscina grande , coberta e aquecida, ligada a área da sala de ginastica, sauna e vestiários, tem vistas para a área de mata natural protegida. Área de serviço com lavenderia e suites de empregados, muito bem projetadas, trazendo total privacidade. Garagem coberta para 4 veículos e ampla área para estacionamento que acomoda pelo menos outros 6 veículos. Muito jardim no entorno da casa, que dá impressão que estamos em um sítio. Venha conhecer e se apaixonar. Contate-nos.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pássaros",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 7600000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 6,
+  "suites": 6,
+  "banheiros": 13,
+  "vagas": 10,
+  "area": 1025,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "lareira",
+   "ar-condicionado",
+   "piscina",
+   "TV a cabo",
+   "varanda gourmet",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "banheiro de empregada",
+   "dependência de empregada",
+   "copa",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "quintal",
+   "sauna",
+   "escritório",
+   "banheira de hidromassagem",
+   "lavabo",
+   "armários embutidos"
+  ],
+  "campos_estimados": [],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2R7--505QkF188cV6HmmwCjz6G0ovuwmxWV+Zrdr4v04vHdUPqb8ZoglJDCLwGGl5VnHOQWOUVce-deXDDMAYOaDSh+mGLX9xjKQ4xrYWdv4yIioRRtzkuYRbmL9WkWngOrVvPm8i-Xc-n7BVlDQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu3hs98pA2wZhz8QdZIKOhxXY9L6m1vmJ9laO4o7MgbzG0+P+VfDw5YYw8vTOSXq3hI9UT+EIYh8ka-lHWRDXVICMBVVenWGAqGTTEoN6HDBFwQ8PqjNuxGaSU6SUy0M+0AGODPyHugGnar3kM1pERbMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxdH1f5E6y8Yj9giQeW5pBbZxpeo392h9W26o8+JpLjJzsDRQsuP6ttn6KnuO1W+r75baNgjH2dQa+hTGBzzVqXdJ3tohQjWq3TycaVKZ29k-xs2ok5WnGOhWqj9+gNo3zuoVen97wLQTbrdKHVwMLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1437-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1437-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1437-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1437-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-barueri-6-quartos-1-025-m/CA1437-ORIO",
   "titulo": "Casa com 6 quartos, 1.025 m², aluguel por R$ 40.000/mês ou à venda por R$ 7.600.000",
   "descricao": "Excelente sobrado com 1025 m² em terreno amplo com 1.710 m² em local privilegiado com vistas e fundo para mata protegida. Com suas 6 suítes amplas com closets com vistas para as montanhas, tem total privacidade e comodidade. Suas 6 salas interligadas em espaço único em pé direito alto, com lareira, sala de musica, sala de jogos, home theater, estar e um excelente bar, traz um aconchego agradavel. Sala de almoço e jantar proximas da cozinha com armários planejado e com acesso à área gourmet, completam a área social. Piscina grande , coberta e aquecida, ligada a área da sala de ginastica, sauna e vestiários, tem vistas para a área de mata natural protegida. Área de serviço com lavenderia e suites de empregados, muito bem projetadas, trazendo total privacidade. Garagem coberta para 4 veículos e ampla área para estacionamento que acomoda pelo menos outros 6 veículos. Muito jardim no entorno da casa, que dá impressão que estamos em um sítio. Venha conhecer e se apaixonar. Contate-nos.",
@@ -4460,7 +5397,9 @@
    "/static/imoveis/orion/CA1437-HORZ-1.jpg",
    "/static/imoveis/orion/CA1437-HORZ-2.jpg",
    "/static/imoveis/orion/CA1437-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1444-HORZ",
@@ -4513,7 +5452,9 @@
    "/static/imoveis/orion/CA1444-HORZ-1.jpg",
    "/static/imoveis/orion/CA1444-HORZ-2.jpg",
    "/static/imoveis/orion/CA1444-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1410-HORZ",
@@ -4569,7 +5510,9 @@
    "/static/imoveis/orion/CA1410-HORZ-1.jpg",
    "/static/imoveis/orion/CA1410-HORZ-2.jpg",
    "/static/imoveis/orion/CA1410-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1522-HORZ",
@@ -4619,7 +5562,9 @@
    "/static/imoveis/orion/CA1522-HORZ-1.jpg",
    "/static/imoveis/orion/CA1522-HORZ-2.jpg",
    "/static/imoveis/orion/CA1522-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1492-HORZ",
@@ -4658,7 +5603,9 @@
    "/static/imoveis/orion/CA1492-HORZ-1.jpg",
    "/static/imoveis/orion/CA1492-HORZ-2.jpg",
    "/static/imoveis/orion/CA1492-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1491-HORZ",
@@ -4693,7 +5640,9 @@
    "/static/imoveis/orion/CA1491-HORZ-1.jpg",
    "/static/imoveis/orion/CA1491-HORZ-2.jpg",
    "/static/imoveis/orion/CA1491-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1496-HORZ",
@@ -4730,7 +5679,9 @@
    "/static/imoveis/orion/CA1496-HORZ-1.jpg",
    "/static/imoveis/orion/CA1496-HORZ-2.jpg",
    "/static/imoveis/orion/CA1496-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1514-HORZ",
@@ -4775,7 +5726,9 @@
    "/static/imoveis/orion/CA1514-HORZ-1.jpg",
    "/static/imoveis/orion/CA1514-HORZ-2.jpg",
    "/static/imoveis/orion/CA1514-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1525-HORZ",
@@ -4820,7 +5773,9 @@
    "/static/imoveis/orion/CA1525-HORZ-1.jpg",
    "/static/imoveis/orion/CA1525-HORZ-2.jpg",
    "/static/imoveis/orion/CA1525-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1342-HORZ",
@@ -4861,7 +5816,9 @@
    "/static/imoveis/orion/CA1342-HORZ-1.jpg",
    "/static/imoveis/orion/CA1342-HORZ-2.jpg",
    "/static/imoveis/orion/CA1342-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1510-HORZ",
@@ -4902,7 +5859,9 @@
    "/static/imoveis/orion/CA1510-HORZ-1.jpg",
    "/static/imoveis/orion/CA1510-HORZ-2.jpg",
    "/static/imoveis/orion/CA1510-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1428-HORZ",
@@ -4946,7 +5905,9 @@
    "/static/imoveis/orion/CA1428-HORZ-1.jpg",
    "/static/imoveis/orion/CA1428-HORZ-2.jpg",
    "/static/imoveis/orion/CA1428-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1493-HORZ",
@@ -4984,7 +5945,9 @@
    "/static/imoveis/orion/CA1493-HORZ-1.jpg",
    "/static/imoveis/orion/CA1493-HORZ-2.jpg",
    "/static/imoveis/orion/CA1493-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1524-HORZ",
@@ -5034,7 +5997,9 @@
    "/static/imoveis/orion/CA1524-HORZ-1.jpg",
    "/static/imoveis/orion/CA1524-HORZ-2.jpg",
    "/static/imoveis/orion/CA1524-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1328-HORZ",
@@ -5082,10 +6047,57 @@
    "/static/imoveis/orion/CA1328-HORZ-1.jpg",
    "/static/imoveis/orion/CA1328-HORZ-2.jpg",
    "/static/imoveis/orion/CA1328-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1500-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-itapevi-5-quartos-437-m/CA1500-ORIO",
+  "titulo": "Casa com 5 quartos, 437 m², aluguel por R$ 20.000/mês ou à venda por R$ 4.000.000",
+  "descricao": ".",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada das Nuvens",
+  "cidade": "Itapevi",
+  "zona": "grande sao paulo",
+  "preco": 4000000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 5,
+  "suites": 5,
+  "banheiros": 6,
+  "vagas": 3,
+  "area": 437,
+  "comodidades": [
+   "condomínio fechado",
+   "piscina",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "cozinha",
+   "escritório"
+  ],
+  "campos_estimados": [
+   "banheiros"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu3Zp3NZK1BsRl-ghQZqXvy+45NW62uWhkUeY1crdjurE28fjcO6O1oov36OpNAWRo6BBbYIdDx1lf8sqXhaxRq2wBnNdvGiWuEHCbLxWGWhu3AoZoDdp-X60f6Go2UUI1x2gUNzSrgGsZfjjIwNtN7hHR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu21D2t5Tyw8VgO1CepKS+TmO35myx-e9vBvH1L7YlLTa6PTzQOvVyLtg-aivG1G+r4NgRPo4DXtTWtBfahnVeJ27BEdMgTejvlnJYZYbHzAI3g0sszlIz1W4TJyjzUFux3CqVPzCnQ6FfvHJG3t9FrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtux5+0ddZwR4uz9syDa6svA+D+6y4y86lj3+bo8navuyK1NL5Vt7a6aYi3qzPNEG96JIgS9EpGHlHRrcgZCzKboWpGGAKpz+Pv0nnX+FDRTR5xQ8eqTtrnmq6VKSryV42+BuYC97JoDelQrDDJm1CDrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1500-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1500-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1500-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1500-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-itapevi-5-quartos-437-m/CA1500-ORIO",
   "titulo": "Casa com 5 quartos, 437 m², aluguel por R$ 20.000/mês ou à venda por R$ 4.000.000",
   "descricao": ".",
@@ -5125,7 +6137,9 @@
    "/static/imoveis/orion/CA1500-HORZ-1.jpg",
    "/static/imoveis/orion/CA1500-HORZ-2.jpg",
    "/static/imoveis/orion/CA1500-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0887-HORZ",
@@ -5177,7 +6191,9 @@
    "/static/imoveis/orion/CA0887-HORZ-1.jpg",
    "/static/imoveis/orion/CA0887-HORZ-2.jpg",
    "/static/imoveis/orion/CA0887-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0788-HORZ",
@@ -5218,7 +6234,9 @@
    "/static/imoveis/orion/CA0788-HORZ-1.jpg",
    "/static/imoveis/orion/CA0788-HORZ-2.jpg",
    "/static/imoveis/orion/CA0788-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1348-HORZ",
@@ -5258,7 +6276,9 @@
    "/static/imoveis/orion/CA1348-HORZ-1.jpg",
    "/static/imoveis/orion/CA1348-HORZ-2.jpg",
    "/static/imoveis/orion/CA1348-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1352-HORZ",
@@ -5299,7 +6319,9 @@
    "/static/imoveis/orion/CA1352-HORZ-1.jpg",
    "/static/imoveis/orion/CA1352-HORZ-2.jpg",
    "/static/imoveis/orion/CA1352-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0781-HORZ",
@@ -5349,7 +6371,9 @@
    "/static/imoveis/orion/CA0781-HORZ-1.jpg",
    "/static/imoveis/orion/CA0781-HORZ-2.jpg",
    "/static/imoveis/orion/CA0781-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0621-HORZ",
@@ -5396,7 +6420,9 @@
    "/static/imoveis/orion/CA0621-HORZ-1.jpg",
    "/static/imoveis/orion/CA0621-HORZ-2.jpg",
    "/static/imoveis/orion/CA0621-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1451-HORZ",
@@ -5436,7 +6462,9 @@
    "/static/imoveis/orion/CA1451-HORZ-1.jpg",
    "/static/imoveis/orion/CA1451-HORZ-2.jpg",
    "/static/imoveis/orion/CA1451-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0839-HORZ",
@@ -5486,7 +6514,9 @@
    "/static/imoveis/orion/CA0839-HORZ-1.jpg",
    "/static/imoveis/orion/CA0839-HORZ-2.jpg",
    "/static/imoveis/orion/CA0839-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0662-HORZ",
@@ -5534,7 +6564,9 @@
    "/static/imoveis/orion/CA0662-HORZ-1.jpg",
    "/static/imoveis/orion/CA0662-HORZ-2.jpg",
    "/static/imoveis/orion/CA0662-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1485-HORZ",
@@ -5582,7 +6614,9 @@
    "/static/imoveis/orion/CA1485-HORZ-1.jpg",
    "/static/imoveis/orion/CA1485-HORZ-2.jpg",
    "/static/imoveis/orion/CA1485-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1433-HORZ",
@@ -5633,10 +6667,65 @@
    "/static/imoveis/orion/CA1433-HORZ-1.jpg",
    "/static/imoveis/orion/CA1433-HORZ-2.jpg",
    "/static/imoveis/orion/CA1433-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1473-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-3-quartos-282-m/CA1473-ORIO",
+  "titulo": "Casa com 3 quartos, 282 m², aluguel por R$ 12.000/mês ou à venda por R$ 2.099.000",
+  "descricao": "Sobrado moderno com 3 dormitórios sendo um no térreo, todos com armários embutidos; sala grande em dois ambientes, estar e jantar, integrado com a cozinha e a área de churrasqueira; lavabo e lareira elétrica; despensa, área de serviço com armários, dormitório de empregada com banheiro; duas vagas cobertas e duas vagas descobertas.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pinheiros (Aldeia da Serra)",
+  "cidade": "Santana de Parnaíba",
+  "zona": "grande sao paulo",
+  "preco": 2099000.0,
+  "condominio": 1000.0,
+  "iptu": 3500.0,
+  "quartos": 3,
+  "suites": 0,
+  "banheiros": 4,
+  "vagas": 4,
+  "area": 282,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "lareira",
+   "piscina",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "banheiro de empregada",
+   "dependência de empregada",
+   "despensa",
+   "cozinha",
+   "área de serviço",
+   "quintal",
+   "lavabo"
+  ],
+  "campos_estimados": [
+   "rentabilidade"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2hV4cxj-E0RidEIRb2s5Wy-w6y1wuzEhh+r+K-VgqH6z9Pnep3u6500zIr6NVS1oqdaS9saBBx2UOx7FETMDqzQM31xuSaFuUPGU7BnW0BShltjsyh720flULev53Fhni+eBtmJlwqJSeXIH1lTPLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtux1c-MJg+TI5jvE2TJ6ali2sxpWsuIezkGGuo6jz4uLw5O-4BvnS0NsI1pX0PASTkp5sRcEAAXpIYeBVTBC6Z6jdM2FdgheGhxrBSosedDZlxyFjzC9sxV22Aoj0yHI0hwPgEdz29zyyUZijK19rKLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu11qy85Q9xITufdCepLj5XfX59qN4tm9vkCa-pHwsOKC9Z-ZA4Lh9thlwIOvGFOLgp9Lbf8ralElQqxAYT3JGpjdNn13-heAtHrkRaFWZltM-yRtsgVM5ASTYpOu830p-HC1UNCA9wiMcf7JHkdNJLxHR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg"
+  ],
+  "rentabilidade_estimada": 6.86,
+  "fotos": [
+   "/static/imoveis/orion/CA1473-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1473-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1473-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": "anunciado (venda e aluguel do mesmo imóvel)"
+ },
+ {
+  "codigo": "CA1473-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-3-quartos-282-m/CA1473-ORIO",
   "titulo": "Casa com 3 quartos, 282 m², aluguel por R$ 12.000/mês ou à venda por R$ 2.099.000",
   "descricao": "Sobrado moderno com 3 dormitórios sendo um no térreo, todos com armários embutidos; sala grande em dois ambientes, estar e jantar, integrado com a cozinha e a área de churrasqueira; lavabo e lareira elétrica; despensa, área de serviço com armários, dormitório de empregada com banheiro; duas vagas cobertas e duas vagas descobertas.",
@@ -5682,7 +6771,9 @@
    "/static/imoveis/orion/CA1473-HORZ-1.jpg",
    "/static/imoveis/orion/CA1473-HORZ-2.jpg",
    "/static/imoveis/orion/CA1473-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0272-HORZ",
@@ -5733,10 +6824,65 @@
    "/static/imoveis/orion/CA0272-HORZ-1.jpg",
    "/static/imoveis/orion/CA0272-HORZ-2.jpg",
    "/static/imoveis/orion/CA0272-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0360-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-3-quartos-300-m/CA0360-ORIO",
+  "titulo": "Casa com 3 quartos, 300 m², aluguel por R$ 9.500/mês ou à venda por R$ 1.990.000",
+  "descricao": "Sobrado de 300m² com 3 suítes em terreno plano de 522m²; Suite master com closet e banheira de hidro massagem, segunda suite com armário; sala em 3 ambientes com lavabo, lareira; cozinha ampla com armarios planejados, área de serviço, dependencia de empregada com banheiro; garagem coberta para 2 veículos e mais 4 veículos descobertos; aquecimento d água central à gás; amplo jardim nos fundos. Grande oportunidade,  venha conhecer.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Aldeia da Serra",
+  "cidade": "Santana de Parnaíba",
+  "zona": "grande sao paulo",
+  "preco": 1990000.0,
+  "condominio": 1443.0,
+  "iptu": 368.0,
+  "quartos": 3,
+  "suites": 3,
+  "banheiros": 5,
+  "vagas": 6,
+  "area": 300,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "lareira",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "banheiro de empregada",
+   "dependência de empregada",
+   "copa",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "quintal",
+   "banheira de hidromassagem",
+   "lavabo"
+  ],
+  "campos_estimados": [],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu314-o5svhMYnsRJZ6G-u3DY39mX0Ma7k2C-4JaGk7Hj2+LZfcGAzKMljuviKGKurqw8f4UtYmpzXuhkZzfqYK2aDXlU+We2qRyUYrIDYXJXw14Kvg5x5QG1crK3y2QThwKPW+r9ryeXEqTMIWFmEr9HR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu1xDi9xU+Q8TqccneqGvhyKw+6yPzMeZkE3K4czQsJr+8-+kYdrA1ts+24yrF0+z6KdaF4UcF2x0P9lHQAfwXduvJChzjSO1m2-jRoAfUkxi7wos1SANw1voQ6D3pgM+5Tj6EcjfjhCSbaP+JX9QTbMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtux02z+V+-08iv+AlfYOcmAiW-Le5yvSW9nuI2ZjdlajW5-zkYpbQ8KoPi7XBTHfw7-VnHt48E09OfM5beT3IAtmmBD1jkmGGqFrPaeFoeDJe0lxjyzBMmVCkULmJ80Up5gC6Nc7goAyPYKbDKGxETbMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA0360-HORZ-1.jpg",
+   "/static/imoveis/orion/CA0360-HORZ-2.jpg",
+   "/static/imoveis/orion/CA0360-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA0360-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-3-quartos-300-m/CA0360-ORIO",
   "titulo": "Casa com 3 quartos, 300 m², aluguel por R$ 9.500/mês ou à venda por R$ 1.990.000",
   "descricao": "Sobrado de 300m² com 3 suítes em terreno plano de 522m²; Suite master com closet e banheira de hidro massagem, segunda suite com armário; sala em 3 ambientes com lavabo, lareira; cozinha ampla com armarios planejados, área de serviço, dependencia de empregada com banheiro; garagem coberta para 2 veículos e mais 4 veículos descobertos; aquecimento d água central à gás; amplo jardim nos fundos. Grande oportunidade,  venha conhecer.",
@@ -5784,7 +6930,9 @@
    "/static/imoveis/orion/CA0360-HORZ-1.jpg",
    "/static/imoveis/orion/CA0360-HORZ-2.jpg",
    "/static/imoveis/orion/CA0360-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0658-HORZ",
@@ -5832,7 +6980,9 @@
    "/static/imoveis/orion/CA0658-HORZ-1.jpg",
    "/static/imoveis/orion/CA0658-HORZ-2.jpg",
    "/static/imoveis/orion/CA0658-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1513-HORZ",
@@ -5874,7 +7024,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/CA1513-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1467-HORZ",
@@ -5913,7 +7065,9 @@
    "/static/imoveis/orion/CA1467-HORZ-1.jpg",
    "/static/imoveis/orion/CA1467-HORZ-2.jpg",
    "/static/imoveis/orion/CA1467-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0432-HORZ",
@@ -5969,7 +7123,9 @@
    "/static/imoveis/orion/CA0432-HORZ-1.jpg",
    "/static/imoveis/orion/CA0432-HORZ-2.jpg",
    "/static/imoveis/orion/CA0432-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1476-HORZ",
@@ -6022,10 +7178,51 @@
    "/static/imoveis/orion/CA1476-HORZ-1.jpg",
    "/static/imoveis/orion/CA1476-HORZ-2.jpg",
    "/static/imoveis/orion/CA1476-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1470-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-3-quartos-360-m/CA1470-ORIO",
+  "titulo": "Casa com 3 quartos, 360 m², aluguel por R$ 15.000/mês ou à venda por R$ 3.420.000",
+  "descricao": "Casa retrofit",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pinheiros (Aldeia da Serra)",
+  "cidade": "Santana de Parnaíba",
+  "zona": "grande sao paulo",
+  "preco": 3420000.0,
+  "condominio": 1100.0,
+  "iptu": 495.0,
+  "quartos": 3,
+  "suites": 0,
+  "banheiros": 1,
+  "vagas": 0,
+  "area": 360,
+  "comodidades": [
+   "condomínio fechado",
+   "varanda gourmet"
+  ],
+  "campos_estimados": [
+   "banheiros"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxpHwfRKzS8YpcEEBIaHpzOC4L23t43Js0uE5dbbpo3m2uDBX+Tz7Ykw8YD2AHqrt7FoH8MYIV5XdbZ3fD66db+tEmlbv2mo93jMQZVKHHBegx53wAkVwEvmcMSU+28IynGHVsiBlD6HUKv3AVFlQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxpk8vtS2SYSz+kGdqfgkw6whJvO+4u+s1+LpbKItp3sydnFfPiblbpuzqjePG+m6K9faoEOGmNZfeRGSQbMfte4eWlM+hCC42TEQYBdczZu0gdosRV63HemX5G02Bs9hBikNd-nkhGhQqfeJkNdSbMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu1dM88Ns-08joME7XpSFgnaE9K+G+orClBS19LKTuJjW3+PmUefp8rgvzPHEKly8n-N8YPAWKVBJSdZ-WBvKfqfQPUdh5gOWmmiTVZZNYUNt-TwSrAd2nFG-bJT82HcU2TCdGu-6ljOvXfrLOkdlIs9HR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1470-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1470-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1470-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1470-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-3-quartos-360-m/CA1470-ORIO",
   "titulo": "Casa com 3 quartos, 360 m², aluguel por R$ 15.000/mês ou à venda por R$ 3.420.000",
   "descricao": "Casa retrofit",
@@ -6059,10 +7256,57 @@
    "/static/imoveis/orion/CA1470-HORZ-1.jpg",
    "/static/imoveis/orion/CA1470-HORZ-2.jpg",
    "/static/imoveis/orion/CA1470-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1526-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-3-quartos-360-m/CA1526-ORIO",
+  "titulo": "Casa com 3 quartos, 360 m², aluguel por R$ 16.000/mês ou à venda por R$ 2.500.000",
+  "descricao": "Sobrado moderno com vistas para mata, com 360 m² de área construida; 3 suites sendo a master com closet e hidromassagem; sala intima junto as suites; sala em dois grandes ambientes, com lavabo e ligação com a cozinha americana; área de serviço, despensa; salão de festas com cozinha e deposito; piscina com muita privacidade. Venha conhecer essa excelente residencia.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Aldeia da Serra",
+  "cidade": "Santana de Parnaíba",
+  "zona": "grande sao paulo",
+  "preco": 2500000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 3,
+  "suites": 3,
+  "banheiros": 5,
+  "vagas": 4,
+  "area": 360,
+  "comodidades": [
+   "churrasqueira",
+   "piscina",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "banheira de hidromassagem",
+   "lavabo",
+   "armários embutidos"
+  ],
+  "campos_estimados": [
+   "rentabilidade"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu3BG8os-4kgxtdc6frGsoDWVxIa47eCpkkeH4K2K4Jfs6+z-QcXulNAm1+uqSleF6Ik8T84qMxByfuJweRDXB4LeEnpxhQCJrFvMX4tsEjtwhD8Jn05OywKZWbqD+EYP-B+9IdHDlB-cQ673GERmOf1HR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg"
+  ],
+  "rentabilidade_estimada": 7.68,
+  "fotos": [
+   "/static/imoveis/orion/CA1526-HORZ-1.jpg"
+  ],
+  "rentabilidade_base": "anunciado (venda e aluguel do mesmo imóvel)"
+ },
+ {
+  "codigo": "CA1526-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-3-quartos-360-m/CA1526-ORIO",
   "titulo": "Casa com 3 quartos, 360 m², aluguel por R$ 16.000/mês ou à venda por R$ 2.500.000",
   "descricao": "Sobrado moderno com vistas para mata, com 360 m² de área construida; 3 suites sendo a master com closet e hidromassagem; sala intima junto as suites; sala em dois grandes ambientes, com lavabo e ligação com a cozinha americana; área de serviço, despensa; salão de festas com cozinha e deposito; piscina com muita privacidade. Venha conhecer essa excelente residencia.",
@@ -6100,7 +7344,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/CA1526-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0323-HORZ",
@@ -6155,7 +7401,9 @@
    "/static/imoveis/orion/CA0323-HORZ-1.jpg",
    "/static/imoveis/orion/CA0323-HORZ-2.jpg",
    "/static/imoveis/orion/CA0323-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0714-HORZ",
@@ -6206,7 +7454,9 @@
    "/static/imoveis/orion/CA0714-HORZ-1.jpg",
    "/static/imoveis/orion/CA0714-HORZ-2.jpg",
    "/static/imoveis/orion/CA0714-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1434-HORZ",
@@ -6249,7 +7499,9 @@
    "/static/imoveis/orion/CA1434-HORZ-1.jpg",
    "/static/imoveis/orion/CA1434-HORZ-2.jpg",
    "/static/imoveis/orion/CA1434-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1507-HORZ",
@@ -6283,7 +7535,9 @@
    "/static/imoveis/orion/CA1507-HORZ-1.jpg",
    "/static/imoveis/orion/CA1507-HORZ-2.jpg",
    "/static/imoveis/orion/CA1507-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1387-HORZ",
@@ -6323,7 +7577,9 @@
    "/static/imoveis/orion/CA1387-HORZ-1.jpg",
    "/static/imoveis/orion/CA1387-HORZ-2.jpg",
    "/static/imoveis/orion/CA1387-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0094-HORZ",
@@ -6373,7 +7629,9 @@
    "/static/imoveis/orion/CA0094-HORZ-1.jpg",
    "/static/imoveis/orion/CA0094-HORZ-2.jpg",
    "/static/imoveis/orion/CA0094-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0727-HORZ",
@@ -6418,10 +7676,57 @@
    "/static/imoveis/orion/CA0727-HORZ-1.jpg",
    "/static/imoveis/orion/CA0727-HORZ-2.jpg",
    "/static/imoveis/orion/CA0727-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1418-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos-292-m/CA1418-ORIO",
+  "titulo": "Casa com 4 dormitórios, 292 m² - venda por R$ 2.800.000,00 ou aluguel por R$ 18.000,00/mês - Morada dos Pinheiros (Aldeia da Serra) - Santana de Parnaíba/SP",
+  "descricao": "Condomínio conta com uma excelente academia. Ótimo imóvel para locação mobiliada ou parte dela e tambem para venda.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pinheiros (Aldeia da Serra)",
+  "cidade": "Santana de Parnaíba",
+  "zona": "grande sao paulo",
+  "preco": 2800000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 4,
+  "suites": 2,
+  "banheiros": 6,
+  "vagas": 4,
+  "area": 292,
+  "comodidades": [
+   "piscina",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "energia elétrica",
+   "despensa",
+   "cozinha",
+   "quintal"
+  ],
+  "campos_estimados": [
+   "rentabilidade"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2xc89lr4lJn18sDR7+HkXm19IyjotzcokCT3prHn6z-2vPYcJ7+mYQk0L-KG32MipNvdPIobRwiPcJiWj30X9aPEXRXmSiRkWL-EOd4SkFH7y8vsRp9-x66ZcS20WE2gzDgCqPBjhaXb63aEGJTQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu258gcxx-B4gjOoCYbLhoxDW466N2tSFvXWnxoLOnrTj7syiGczc7YET2qPcHgWHsbddbfE3ImJFWfZTGzfjXtqqEkVfqTOVhkXXXuMWXzFagi8IoCAPxValQcWMy2UvwySoF+7+p37WRrL+OVV1HOZHR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0ta9OJV5QsDk8c1U5+SgSWE4I6T+-HGswGx-qvSlavK2dGhUev+lJs+7ZetOACrvZJgcfF3Ih0ma+NAVz7vQr2wFmBj8z22gVvxXrJEaUt8xDgitzFp+WCgBKar+gMwxAf5WvPBix+xXbn5MUcBKLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": 7.71,
+  "fotos": [
+   "/static/imoveis/orion/CA1418-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1418-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1418-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": "anunciado (venda e aluguel do mesmo imóvel)"
+ },
+ {
+  "codigo": "CA1418-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos-292-m/CA1418-ORIO",
   "titulo": "Casa com 4 dormitórios, 292 m² - venda por R$ 2.800.000,00 ou aluguel por R$ 18.000,00/mês - Morada dos Pinheiros (Aldeia da Serra) - Santana de Parnaíba/SP",
   "descricao": "Condomínio conta com uma excelente academia. Ótimo imóvel para locação mobiliada ou parte dela e tambem para venda.",
@@ -6459,10 +7764,67 @@
    "/static/imoveis/orion/CA1418-HORZ-1.jpg",
    "/static/imoveis/orion/CA1418-HORZ-2.jpg",
    "/static/imoveis/orion/CA1418-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0460-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos-320-m/CA0460-ORIO",
+  "titulo": "Casa com 4 dormitórios, 320 m² - venda por R$ 1.800.000,00 ou aluguel por R$ 10.000,00/mês - Aldeia da Serra - Santana de Parnaíba/SP",
+  "descricao": "Imóvel para venda e locação em Aldeia da Serra, condomínio Morada das Flores, alameda tranquila, muito sossego e paz.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Aldeia da Serra",
+  "cidade": "Santana de Parnaíba",
+  "zona": "grande sao paulo",
+  "preco": 1800000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 4,
+  "suites": 2,
+  "banheiros": 3,
+  "vagas": 2,
+  "area": 320,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "lareira",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "banheiro de empregada",
+   "dependência de empregada",
+   "copa",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "lavabo",
+   "armários embutidos"
+  ],
+  "campos_estimados": [
+   "banheiros",
+   "rentabilidade"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNv9V887uNgvR4+qdEAB+We+TKo+r6GwMWlllWM1qTogO6Cy9-FYtngz6Ng3qrDSQD8uKhZGOEGKB1XXsx5egTOQ4GYMFtRgCmMhXnqFJpCUWd5-igPqjxa6FqQRpGdyVgt5C7wFKqA8HLJTP+4URYYX-lYCtoz5F9N4lGnUVdgqR9Qu4m9s2qFPub2JoCihipUBAow-56-X7-hkZaPK5RkVqk2dXwP61MDUbcUm+6GWehj7QEYoKGRUEnBwEKQ07JzJpypDIxKnPELw1mRT+ZPuRnul4eUjPOlakXSMU5hqu-A7fCxYqG0Sbexem-uzNsT+Y6adYhVIMjqT2lVECwkcC8=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNv7Vc37M1ivyxnw8gTbo+dpDOG-dSyxOrEhmub6rrss5XJ4sDUQpvU7oUm1qrxTQXxiJZ3WvMIDWsjauRqYjn2A6GeMWBxvj6vg2j6cuVPUVsQxgUyi05TgVS-QJaV6lsJ2j+UXuyB8nTQCaC5XwwWUawNEtEw7ldR7AL0SVpntREFocalqyCZPuL1b5Wiyi1eWxVo6JOmT73nmZ7AZphmFeUmKDQJ41sRS6oF0baQTPl08g0LueWPU0LKw1yN17R1JJ6pWIwanqNRn1uVSeYa6028k9XE1636ZkiOZ1EgqefIp+ezPKCtXvjvZGarwtVB5pLLbZAZK4-kQSRKQjQtc2IO.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNv0hhegeoy3AcyvMBHWuOR4gvd6Yua4M+uq1yy3aLPtu3L6Mahfsvk450f06PhS36+6ohgT9A3LURFePNdfBLUY6qeG2Zjvgu0m2-gQOZaUWYN2DE0rRR+9UmGbKqz8FITjj78U6mE7y7TEvCsRRZDX7RLAtMx8E0Q4hqyW0xy8lAF7Inv5XaBOayqM8zpi38UQ0Uq65etW7Hh1pTOJdVrCuQjO3IP8VsEXewG1e2CX+Bw8gtF+ryZUEHcw1uS07ZzJMj9XN4alPdVxVuXGuFJv0+4lYyRjaCkO0+bbwxqqq2d+Kzueq-sWPemNiTukJYQtMeaIc8ZacipHSQfASZq.jpg"
+  ],
+  "rentabilidade_estimada": 6.67,
+  "fotos": [
+   "/static/imoveis/orion/CA0460-HORZ-1.jpg",
+   "/static/imoveis/orion/CA0460-HORZ-2.jpg",
+   "/static/imoveis/orion/CA0460-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": "anunciado (venda e aluguel do mesmo imóvel)"
+ },
+ {
+  "codigo": "CA0460-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos-320-m/CA0460-ORIO",
   "titulo": "Casa com 4 dormitórios, 320 m² - venda por R$ 1.800.000,00 ou aluguel por R$ 10.000,00/mês - Aldeia da Serra - Santana de Parnaíba/SP",
   "descricao": "Imóvel para venda e locação em Aldeia da Serra, condomínio Morada das Flores, alameda tranquila, muito sossego e paz.",
@@ -6511,7 +7873,9 @@
    "/static/imoveis/orion/CA0460-HORZ-1.jpg",
    "/static/imoveis/orion/CA0460-HORZ-2.jpg",
    "/static/imoveis/orion/CA0460-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0891-HORZ",
@@ -6561,7 +7925,9 @@
    "/static/imoveis/orion/CA0891-HORZ-1.jpg",
    "/static/imoveis/orion/CA0891-HORZ-2.jpg",
    "/static/imoveis/orion/CA0891-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1454-HORZ",
@@ -6607,7 +7973,9 @@
    "/static/imoveis/orion/CA1454-HORZ-1.jpg",
    "/static/imoveis/orion/CA1454-HORZ-2.jpg",
    "/static/imoveis/orion/CA1454-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0961-HORZ",
@@ -6655,7 +8023,9 @@
    "/static/imoveis/orion/CA0961-HORZ-1.jpg",
    "/static/imoveis/orion/CA0961-HORZ-2.jpg",
    "/static/imoveis/orion/CA0961-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1152-HORZ",
@@ -6705,7 +8075,9 @@
    "/static/imoveis/orion/CA1152-HORZ-1.jpg",
    "/static/imoveis/orion/CA1152-HORZ-2.jpg",
    "/static/imoveis/orion/CA1152-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0231-HORZ",
@@ -6758,7 +8130,9 @@
    "/static/imoveis/orion/CA0231-HORZ-1.jpg",
    "/static/imoveis/orion/CA0231-HORZ-2.jpg",
    "/static/imoveis/orion/CA0231-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1062-HORZ",
@@ -6806,7 +8180,9 @@
    "/static/imoveis/orion/CA1062-HORZ-1.jpg",
    "/static/imoveis/orion/CA1062-HORZ-2.jpg",
    "/static/imoveis/orion/CA1062-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1464-HORZ",
@@ -6862,7 +8238,9 @@
    "/static/imoveis/orion/CA1464-HORZ-1.jpg",
    "/static/imoveis/orion/CA1464-HORZ-2.jpg",
    "/static/imoveis/orion/CA1464-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1103-HORZ",
@@ -6910,7 +8288,9 @@
    "/static/imoveis/orion/CA1103-HORZ-1.jpg",
    "/static/imoveis/orion/CA1103-HORZ-2.jpg",
    "/static/imoveis/orion/CA1103-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0210-HORZ",
@@ -6962,7 +8342,9 @@
    "/static/imoveis/orion/CA0210-HORZ-1.jpg",
    "/static/imoveis/orion/CA0210-HORZ-2.jpg",
    "/static/imoveis/orion/CA0210-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1488-HORZ",
@@ -6998,10 +8380,62 @@
    "/static/imoveis/orion/CA1488-HORZ-1.jpg",
    "/static/imoveis/orion/CA1488-HORZ-2.jpg",
    "/static/imoveis/orion/CA1488-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1017-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos-436-m/CA1017-ORIO",
+  "titulo": "Casa com 4 quartos, 436 m², aluguel por R$ 14.000/mês ou à venda por R$ 3.300.000",
+  "descricao": "Linda casa de esquina com muita privacidade. Em terreno de 623 m² casa com 435 m² sendo 4 suítes amplas com closet, máster com hidromassagem e sótão. Sala em 4 ambientes amplos, com lareira  e varanda; copa cozinha com despensa, área gourmet acoplada e amplo quintal com frutíferas; garagem coberta para 3 veículos.  Muito agradável, venha conhecer.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Morada dos Pinheiros (Aldeia da Serra)",
+  "cidade": "Santana de Parnaíba",
+  "zona": "grande sao paulo",
+  "preco": 3300000.0,
+  "condominio": 1569.0,
+  "iptu": 483.0,
+  "quartos": 4,
+  "suites": 4,
+  "banheiros": 5,
+  "vagas": 0,
+  "area": 435,
+  "comodidades": [
+   "condomínio fechado",
+   "lareira",
+   "ar-condicionado",
+   "esgoto",
+   "água encanada",
+   "energia elétrica",
+   "dependência de empregada",
+   "copa",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "quintal",
+   "banheira de hidromassagem",
+   "lavabo",
+   "armários embutidos"
+  ],
+  "campos_estimados": [],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNv7nc57MlQwx4BqsVFV+HhkDK25ITRw8+JommKp7jLo5-JhZPcd-qAzr4E1KOpJVuS6pJhGNl7FUFIZflnb0Kydrq3InpvoT-Q+G7SVLViZ1N01VE0nEgVxUOWbYeKp0Mzx32lMaKEkyCTcLG+G3hbQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNv8xZ3-ONn+DgbgtNCVpSOmia62KGj5+yrlHiRw4jq4LjUiZyla97Z6K8v66L3DmGSsYVdReJiLBhgPvh0fzjuDtqcJnN0vHy3m2-TT5d8fWZ-0icLggVN-0WfdrqPrwVv2B+DMauAqnWjdJn4BFIAQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnbk9Kawbnev1nxMNm9yHFhIP-MQkSx9WYNv8HZ5ge104jwAnM84Y4KynjGwm6O+68fG9HS-oZ7Tse-ChOzzYv3lxKs-jrLfMFKo7bNgfediFE9oOOp3cga7eNiSO0BzmgKDlBz9beRUYW1RxR4FlRQI5WageKmg3kQi0D21J8nDrR6ycqvYEGUJCr9KAt8stFhX+AKpSRdyvwwV7purs3PTcKG1MI36iGwAF0wy6oK5APevm5PPedV-GacxP3wP61NeW6wcmvuVAupw6QEZovrFTQeShQjQiOM3eYWuXNdKnbwBkQ-FH7RIuEy5xtbP0PP+OxmHYFRopLvM8KS4OfamGrSte2+jxctT+JLOLoRLK43kQSRVXWU1enAd7lK4+PTZ4hi6Mic=.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1017-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1017-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1017-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1017-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos-436-m/CA1017-ORIO",
   "titulo": "Casa com 4 quartos, 436 m², aluguel por R$ 14.000/mês ou à venda por R$ 3.300.000",
   "descricao": "Linda casa de esquina com muita privacidade. Em terreno de 623 m² casa com 435 m² sendo 4 suítes amplas com closet, máster com hidromassagem e sótão. Sala em 4 ambientes amplos, com lareira  e varanda; copa cozinha com despensa, área gourmet acoplada e amplo quintal com frutíferas; garagem coberta para 3 veículos.  Muito agradável, venha conhecer.",
@@ -7046,10 +8480,67 @@
    "/static/imoveis/orion/CA1017-HORZ-1.jpg",
    "/static/imoveis/orion/CA1017-HORZ-2.jpg",
    "/static/imoveis/orion/CA1017-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1508-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos-437-m/CA1508-ORIO",
+  "titulo": "Casa com 4 dormitórios, 437 m² - venda por R$ 5.500.000,00 ou aluguel por R$ 25.000,00/mês - Altavis Aldeia - Santana de Parnaíba/SP",
+  "descricao": "Casa em condomínio, Aldeia da Serra, Santana de Parnaíba, excelente loclização.O imóvel  casa de condomínio - quintas do ingaí possui 4 dormitórios, sendo 4 suítes, 5 banheiros, 3 vagas na garagem, venda por R$5.500.000,00, e locação por R$25.000,00, churrasqueira, piscina, ar-condicionado, área de serviço, lareira e está localizado na parte alta do condomínio, pouco fluxo de carros. Conta com armários.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Altavis Aldeia",
+  "cidade": "Santana de Parnaíba",
+  "zona": "grande sao paulo",
+  "preco": 5500000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 4,
+  "suites": 4,
+  "banheiros": 5,
+  "vagas": 6,
+  "area": 437,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "lareira",
+   "varanda",
+   "ar-condicionado",
+   "piscina",
+   "TV a cabo",
+   "esgoto",
+   "água encanada",
+   "elevador",
+   "rua pavimentada",
+   "energia elétrica",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "quintal",
+   "escritório",
+   "lavabo",
+   "armários embutidos"
+  ],
+  "campos_estimados": [],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0tO4OIzxSk+zeM0Z5WbsnWr+tqW3fzchXSHoZPM4ZHd3J-6UMTHjatl8YTQMniG7p5MevMlE0VkO8N8VTjJAYq-LmZtphy9t1-mQIJ9HjN10gE2nixn2l+fUJ2szndg4DydWtrD7xSASbjiLgRsKLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuwJ94tRyykcBzZQmAeDlmjW75LrO+PWagB2Z+7PI76jB18ntUvXD6toYyJbOOUO2iKlDGs4VEVB3QfZ5QDrkB5fFY1lunReXoR3xb6ZYSTts4hoisDNt71arepzpp2wAgh2GB+nTqT6pXJfoGn91QPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu1hJjfJU0SkzmJJEWqKjkCq6+by09fCrgUmT8q7popzi2PnnTOjk058436jBP1eekIg4GvImaGF9N9NIZxf1VZjdI3pTvWK3tkLjdr4fE3FPxRAwuRxwyHqhWomsz1Qt2GSiBKjChiy+XoziKlx1KLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1508-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1508-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1508-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1508-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos-437-m/CA1508-ORIO",
   "titulo": "Casa com 4 dormitórios, 437 m² - venda por R$ 5.500.000,00 ou aluguel por R$ 25.000,00/mês - Altavis Aldeia - Santana de Parnaíba/SP",
   "descricao": "Casa em condomínio, Aldeia da Serra, Santana de Parnaíba, excelente loclização.O imóvel  casa de condomínio - quintas do ingaí possui 4 dormitórios, sendo 4 suítes, 5 banheiros, 3 vagas na garagem, venda por R$5.500.000,00, e locação por R$25.000,00, churrasqueira, piscina, ar-condicionado, área de serviço, lareira e está localizado na parte alta do condomínio, pouco fluxo de carros. Conta com armários.",
@@ -7099,7 +8590,9 @@
    "/static/imoveis/orion/CA1508-HORZ-1.jpg",
    "/static/imoveis/orion/CA1508-HORZ-2.jpg",
    "/static/imoveis/orion/CA1508-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0326-HORZ",
@@ -7155,7 +8648,9 @@
    "/static/imoveis/orion/CA0326-HORZ-1.jpg",
    "/static/imoveis/orion/CA0326-HORZ-2.jpg",
    "/static/imoveis/orion/CA0326-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1474-HORZ",
@@ -7192,7 +8687,9 @@
    "/static/imoveis/orion/CA1474-HORZ-1.jpg",
    "/static/imoveis/orion/CA1474-HORZ-2.jpg",
    "/static/imoveis/orion/CA1474-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0864-HORZ",
@@ -7247,7 +8744,9 @@
    "/static/imoveis/orion/CA0864-HORZ-1.jpg",
    "/static/imoveis/orion/CA0864-HORZ-2.jpg",
    "/static/imoveis/orion/CA0864-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1487-HORZ",
@@ -7284,10 +8783,69 @@
    "/static/imoveis/orion/CA1487-HORZ-1.jpg",
    "/static/imoveis/orion/CA1487-HORZ-2.jpg",
    "/static/imoveis/orion/CA1487-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0133-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos-600-m/CA0133-ORIO",
+  "titulo": "Casa com 4 quartos, 600 m², aluguel por R$ 27.200 ou à venda por R$ 4.300.000",
+  "descricao": "Excelente sobrado de esquina com 788 m² mais área não edificante de mais de 120 m², com um lindo jardim. Casa com 4 suítes, sala com pé direito duplo, linda área gourmet, piscina coberta e aquecida com aquecimento solar, 3 vagas cobertas de garagem.  Na parte alta do Residencial e com vistas. Venha conhecer.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Aldeia da Serra",
+  "cidade": "Santana de Parnaíba",
+  "zona": "grande sao paulo",
+  "preco": 4300000.0,
+  "condominio": 2180.0,
+  "iptu": 7800.0,
+  "quartos": 4,
+  "suites": 4,
+  "banheiros": 5,
+  "vagas": 3,
+  "area": 600,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "piscina",
+   "TV a cabo",
+   "varanda gourmet",
+   "esgoto",
+   "água encanada",
+   "rua pavimentada",
+   "energia elétrica",
+   "banheiro de empregada",
+   "dependência de empregada",
+   "copa",
+   "despensa",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "escritório",
+   "lavabo",
+   "armários embutidos"
+  ],
+  "campos_estimados": [
+   "banheiros",
+   "rentabilidade"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9bJDwnnoqbn5d3mkz3xeJGNhUVRJJrgcly1BcIE0+1wgiYk-uEZ5y5ZEAef55XLWgNTFvIfJghm81sOP5uqDjuqnd+qP5dAW--+iQw7x64U7aPF-Yx5SNrBTHECyBN-YelppjHPI7FqHHeIcEzIRlRh4wkgIgBGmWNL+vV4sxzm+WbSfoSKKFeb4CFhBGOkbWYovvwAM7kL3RAcx7FxUv9-ivnWQPvP3cc7-jmELBx10r934DOi2zMGXKpk7SKl8Pn0M5lZBW-QU1aqEFesotVgO+aPMDRec1F+Si+0zc4TvAIlagLFDyEzREaAQvwyn1NuHlq+vbwA=.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2g34N1P3xt7nZdJZb6ggymF0oe-2uahnW2G8b-nsuja+Yb+DM3n+ds2+IHzKXLxjrM1ROA3HndZd7laFRvwX4KtHiBLkT+1kR-fE7gDf00PxA01uw1J-3KFUYWP7ERugzm6L62B8SWeULr-WkNcTbMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2h8jOpA70gsn8gyX52X4SWe1ZmqvPqBj1688ojJmJHghNPITsbFlZ46gaG2LFeIspZGHvUcOF5pXdZVHhqxVIHQBmd9+2ezhFzHZYNAG1NNjgtosC8PyVarBoSe8kFq5g2-O9ThlnWJEbm+W25TQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg"
+  ],
+  "rentabilidade_estimada": 7.59,
+  "fotos": [
+   "/static/imoveis/orion/CA0133-HORZ-1.jpg",
+   "/static/imoveis/orion/CA0133-HORZ-2.jpg",
+   "/static/imoveis/orion/CA0133-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": "anunciado (venda e aluguel do mesmo imóvel)"
+ },
+ {
+  "codigo": "CA0133-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos-600-m/CA0133-ORIO",
   "titulo": "Casa com 4 quartos, 600 m², aluguel por R$ 27.200 ou à venda por R$ 4.300.000",
   "descricao": "Excelente sobrado de esquina com 788 m² mais área não edificante de mais de 120 m², com um lindo jardim. Casa com 4 suítes, sala com pé direito duplo, linda área gourmet, piscina coberta e aquecida com aquecimento solar, 3 vagas cobertas de garagem.  Na parte alta do Residencial e com vistas. Venha conhecer.",
@@ -7338,10 +8896,61 @@
    "/static/imoveis/orion/CA0133-HORZ-1.jpg",
    "/static/imoveis/orion/CA0133-HORZ-2.jpg",
    "/static/imoveis/orion/CA0133-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1512-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos/CA1512-ORIO",
+  "titulo": "Casa com 4 quartos, aluguel por R$ 12.500/mês ou à venda por R$ 2.300.000",
+  "descricao": "Condomínio: New Ville. Esta bela casa de 375 m² conta com 4 quartos (sendo 1 suíte com hidromassagem e closet) no andar superior, além de entrada principal com hall, sala de lareira, TV e escritório no segundo andar. O térreo possui conceito aberto integrando sala de jantar, cozinha equipada com ilha em Marmoglass, forno de pizza a lenha, adega e espaço gourmet com churrasqueira a gás. A área externa conta com garagem para 2 carros, jardim com árvores frutíferas, deck de madeira, Spa para 5 pessoas e área de serviço completa com despensa. O imóvel inclui ainda amplo salão de jogos/festas, oficina de ferramentas, aquecimento solar, iluminação em LED, ar-condicionado nos quartos, recente pintura total, excelente insolação e linda vista do pôr do sol.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Suru",
+  "cidade": "Santana de Parnaíba",
+  "zona": "grande sao paulo",
+  "preco": 2300000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 4,
+  "suites": 0,
+  "banheiros": 1,
+  "vagas": 0,
+  "area": 375,
+  "comodidades": [
+   "condomínio fechado",
+   "churrasqueira",
+   "lareira",
+   "ar-condicionado",
+   "varanda gourmet",
+   "esgoto",
+   "água encanada",
+   "energia elétrica",
+   "cozinha",
+   "lavanderia",
+   "quintal",
+   "armários embutidos"
+  ],
+  "campos_estimados": [
+   "banheiros"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2tt6c1uvyYTits7AubmlyTc9LSk59e+t36kpaHs55Ds1dnhWvzCzq8vwfSrG3GUoqJZWoEhFHxoUOVoGE3qfK2SZVhtggSOi0bWRrQeZkF31V4LoT5s4VGHc4Sb9FsRxy2DFdPB8T7VfPneKkNlQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0Zr3sxv+Qo8vPQ7frSchgel59yT3vfG83SN5ZrItLzr1dLQdcrC9pxv66n8M1eVnvN6cYcKEBF8P7AgRgexYIXZGCJckwOTmliWUaFEBjFu1g8Omw4OlGS8ecS88wA27H+7Ldfdkw7XaPnbLVplQPlLANk18QdW9hinR0InpwcW5JO3vSCAaKyyLIOvkiMYDwYu6oa6SeKv15TFJsonDqooL34J41sRFqAe2beFX6J24QkLuOfUB1+EkBnHl+8kYMGwX9xBnqIclQnDHbZI7EzpxISVjPH6PRnSMgA6oOmcq-rnNfv6TKvseGerj9xRppPXOcsVNYShTyoHQnlkYmhR5RW29rnGsACzMWqH.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxlq+4gwwRgHwpE7TJ7ngwei+JWk++vcq1-O+470oLT3x-ygfP2bmYAg-ZWsDVSstos0VPccGk9Ibt5Uf0PyVIKOJ2hXgQKpt3+UbblPRVBWzSINiBlg9Xm5cYim5nki2nC9JMnG8HW9Z-rHIEVDHrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/CA1512-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1512-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1512-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "CA1512-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-santana-de-parnaiba-4-quartos/CA1512-ORIO",
   "titulo": "Casa com 4 quartos, aluguel por R$ 12.500/mês ou à venda por R$ 2.300.000",
   "descricao": "Condomínio: New Ville. Esta bela casa de 375 m² conta com 4 quartos (sendo 1 suíte com hidromassagem e closet) no andar superior, além de entrada principal com hall, sala de lareira, TV e escritório no segundo andar. O térreo possui conceito aberto integrando sala de jantar, cozinha equipada com ilha em Marmoglass, forno de pizza a lenha, adega e espaço gourmet com churrasqueira a gás. A área externa conta com garagem para 2 carros, jardim com árvores frutíferas, deck de madeira, Spa para 5 pessoas e área de serviço completa com despensa. O imóvel inclui ainda amplo salão de jogos/festas, oficina de ferramentas, aquecimento solar, iluminação em LED, ar-condicionado nos quartos, recente pintura total, excelente insolação e linda vista do pôr do sol.",
@@ -7385,7 +8994,9 @@
    "/static/imoveis/orion/CA1512-HORZ-1.jpg",
    "/static/imoveis/orion/CA1512-HORZ-2.jpg",
    "/static/imoveis/orion/CA1512-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1360-HORZ",
@@ -7434,7 +9045,9 @@
    "/static/imoveis/orion/CA1360-HORZ-1.jpg",
    "/static/imoveis/orion/CA1360-HORZ-2.jpg",
    "/static/imoveis/orion/CA1360-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1423-HORZ",
@@ -7479,7 +9092,9 @@
    "/static/imoveis/orion/CA1423-HORZ-1.jpg",
    "/static/imoveis/orion/CA1423-HORZ-2.jpg",
    "/static/imoveis/orion/CA1423-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0654-HORZ",
@@ -7514,7 +9129,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/CA0654-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA0653-HORZ",
@@ -7550,7 +9167,9 @@
   "fotos": [
    "/static/imoveis/orion/CA0653-HORZ-1.jpg",
    "/static/imoveis/orion/CA0653-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1456-HORZ",
@@ -7589,10 +9208,57 @@
    "/static/imoveis/orion/CA1456-HORZ-1.jpg",
    "/static/imoveis/orion/CA1456-HORZ-2.jpg",
    "/static/imoveis/orion/CA1456-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1478-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/casa-sao-paulo-5-quartos-450-m/CA1478-ORIO",
+  "titulo": "Casa com 5 quartos, 450 m², aluguel por R$ 20.000/mês ou à venda por R$ 2.600.000",
+  "descricao": "Charmosa residência alta de 4 suites em 500m² no Planalto Paulista, com piscina, churrasqueira e amplo quintal. Espaço ideal para sua família desfrutar de conforto e lazer, aceitando pets no seu novo lar.",
+  "tipo": "casa",
+  "categoria": "residential",
+  "finalidade": "venda",
+  "bairro": "Planalto Paulista",
+  "cidade": "São Paulo",
+  "zona": "zona sul",
+  "preco": 2600000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 5,
+  "suites": 4,
+  "banheiros": 4,
+  "vagas": 0,
+  "area": 450,
+  "comodidades": [
+   "churrasqueira",
+   "piscina",
+   "cozinha",
+   "lavanderia",
+   "área de serviço",
+   "quintal",
+   "banheira de hidromassagem",
+   "lavabo"
+  ],
+  "campos_estimados": [
+   "rentabilidade"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0tH9MpWuQpnt+ZJU7O1swa64JSM9oqunRjMxYrnnOnxzc+uc-b8kLhg-IPYJQa26IU6YMQEP0cjbN57TjvvT4KeAyd2vTWK9lvgU5pxaWxS9Q0WizFv-1CTeqLy3U8wxxy9JtzxuxS7HZvbMGVrTbMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxh57Pg+3jsBsZM2AuKf5ya9+N6f-YeC9xyT9JPTkpfrieS6ZN3485s924fsKmzx9vQ7fNkgBG1dRfcqXxDrWoWOB2hh+Sa1qWrjYeFUYFtk7yw0wQd0516gXoicy0Uw+gWYO6nYgSqmEP3dOlh-CrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxdiy99WzBZvjJsjGbGRnSu95IvJy9uAslvJ0rmJu43kzfH4c5-OkJB60KOrP3CUj4V9A8Y3bHh0UNBiHD-1Z4mhYSFunzeKmE7wfv5dZEZa3joPoRwAwXSVX4P89log3w+BL67lnQGzQq3lJ2RVM7dHR9ox7ltMqBezU0J8p0oF7Jq1qTLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFJnqoBlhDBHbJI7hi9lNbFhPekOxvUZwc8pr-KqfHiNKj7HaGlJiWgj54Ms8+IIcVNJMS2A2EHHjRnLyFRsVL6v7mF4k35IGDJpE8=.jpg"
+  ],
+  "rentabilidade_estimada": 9.23,
+  "fotos": [
+   "/static/imoveis/orion/CA1478-HORZ-1.jpg",
+   "/static/imoveis/orion/CA1478-HORZ-2.jpg",
+   "/static/imoveis/orion/CA1478-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": "anunciado (venda e aluguel do mesmo imóvel)"
+ },
+ {
+  "codigo": "CA1478-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/casa-sao-paulo-5-quartos-450-m/CA1478-ORIO",
   "titulo": "Casa com 5 quartos, 450 m², aluguel por R$ 20.000/mês ou à venda por R$ 2.600.000",
   "descricao": "Charmosa residência alta de 4 suites em 500m² no Planalto Paulista, com piscina, churrasqueira e amplo quintal. Espaço ideal para sua família desfrutar de conforto e lazer, aceitando pets no seu novo lar.",
@@ -7630,7 +9296,9 @@
    "/static/imoveis/orion/CA1478-HORZ-1.jpg",
    "/static/imoveis/orion/CA1478-HORZ-2.jpg",
    "/static/imoveis/orion/CA1478-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1355-HORZ",
@@ -7672,7 +9340,9 @@
    "/static/imoveis/orion/CA1355-HORZ-1.jpg",
    "/static/imoveis/orion/CA1355-HORZ-2.jpg",
    "/static/imoveis/orion/CA1355-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CA1408-HORZ",
@@ -7725,7 +9395,9 @@
    "/static/imoveis/orion/CA1408-HORZ-1.jpg",
    "/static/imoveis/orion/CA1408-HORZ-2.jpg",
    "/static/imoveis/orion/CA1408-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CH0075-HORZ",
@@ -7764,7 +9436,9 @@
    "/static/imoveis/orion/CH0075-HORZ-1.jpg",
    "/static/imoveis/orion/CH0075-HORZ-2.jpg",
    "/static/imoveis/orion/CH0075-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CH0037-HORZ",
@@ -7801,7 +9475,9 @@
    "/static/imoveis/orion/CH0037-HORZ-1.jpg",
    "/static/imoveis/orion/CH0037-HORZ-2.jpg",
    "/static/imoveis/orion/CH0037-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CH0079-HORZ",
@@ -7838,7 +9514,9 @@
    "/static/imoveis/orion/CH0079-HORZ-1.jpg",
    "/static/imoveis/orion/CH0079-HORZ-2.jpg",
    "/static/imoveis/orion/CH0079-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "CH0049-HORZ",
@@ -7879,10 +9557,51 @@
    "/static/imoveis/orion/CH0049-HORZ-1.jpg",
    "/static/imoveis/orion/CH0049-HORZ-2.jpg",
    "/static/imoveis/orion/CH0049-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "GA0055-HORZ",
+  "url": "https://www.orionimoveis.com.br/imovel/galpao-barueri-1-000-m/GA0055-ORIO",
+  "titulo": "Galpão, 1.000 m², aluguel por R$ 25.000/mês ou à venda por R$ 4.000.000",
+  "descricao": ".",
+  "tipo": "galpao",
+  "categoria": "commercial",
+  "finalidade": "venda",
+  "bairro": "Chácaras Marco",
+  "cidade": "Barueri",
+  "zona": "grande sao paulo",
+  "preco": 4000000.0,
+  "condominio": null,
+  "iptu": null,
+  "quartos": 0,
+  "suites": 0,
+  "banheiros": 1,
+  "vagas": 0,
+  "area": 1000,
+  "comodidades": [
+   "cozinha",
+   "escritório"
+  ],
+  "campos_estimados": [
+   "banheiros"
+  ],
+  "fotos_origem": [
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu2dFyMtcoxp7kuoyfZ6HtQ6a+ped686HpkCa3IvJk7j909igAczd7JAh17z3CwOpnJ5CXOIAEl9VWfZlWhDyb9a9F1hhoWic-GPNYbB7SXRn0BEeyDN25nqjArOR7VQr9X3+KevHhD6mUa2jOHFTJLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu3xZ9ohH4AZlmPAQB5CsoA6176OX3dOXi1u9w46M7qj66PvBQcL0x7A0-o6qQ0Sng4k5Q8EdGkp+ZPRrQTfNBd+jE3lpgxXcp1zBdbd5Qm5N9iYughlw9nCSeLiz-F9u+iu7D-74sg7WdIziPnUBLLMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg",
+   "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxZq0-ZF1gYdm-Q-Q4Sel3So7NTL++27rHSq853X4IiD6d-NAYL1k4sR17XMMViTuKdhftc8EGAmPM4hTlnVX7yFDF5Bggiz-mvSUpJ+e3RlzicvwDcO3XagUr6bznkU+3yHUvzcsCirYYriOUxeSbMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9KlaECiA3FG7RK7BjplIbH1q34OR-SZ1Ju8u3O+6G5avf3EP3zOWSjh5ZGpM3WINxaa5qoCiQJEGZ4M3BJqR7x+LeLr1KrOGnK6Q==.jpg"
+  ],
+  "rentabilidade_estimada": null,
+  "fotos": [
+   "/static/imoveis/orion/GA0055-HORZ-1.jpg",
+   "/static/imoveis/orion/GA0055-HORZ-2.jpg",
+   "/static/imoveis/orion/GA0055-HORZ-3.jpg"
+  ],
+  "rentabilidade_base": null
+ },
+ {
+  "codigo": "GA0055-HORZ-L",
   "url": "https://www.orionimoveis.com.br/imovel/galpao-barueri-1-000-m/GA0055-ORIO",
   "titulo": "Galpão, 1.000 m², aluguel por R$ 25.000/mês ou à venda por R$ 4.000.000",
   "descricao": ".",
@@ -7916,7 +9635,9 @@
    "/static/imoveis/orion/GA0055-HORZ-1.jpg",
    "/static/imoveis/orion/GA0055-HORZ-2.jpg",
    "/static/imoveis/orion/GA0055-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "GA0041-HORZ",
@@ -7954,7 +9675,9 @@
    "/static/imoveis/orion/GA0041-HORZ-1.jpg",
    "/static/imoveis/orion/GA0041-HORZ-2.jpg",
    "/static/imoveis/orion/GA0041-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "GA0054-HORZ",
@@ -7994,7 +9717,9 @@
    "/static/imoveis/orion/GA0054-HORZ-1.jpg",
    "/static/imoveis/orion/GA0054-HORZ-2.jpg",
    "/static/imoveis/orion/GA0054-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "LO0117-HORZ",
@@ -8024,7 +9749,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/LO0117-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "LO0063-HORZ",
@@ -8058,7 +9785,9 @@
    "/static/imoveis/orion/LO0063-HORZ-1.jpg",
    "/static/imoveis/orion/LO0063-HORZ-2.jpg",
    "/static/imoveis/orion/LO0063-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "PR0008-HORZ",
@@ -8094,7 +9823,9 @@
    "/static/imoveis/orion/PR0008-HORZ-1.jpg",
    "/static/imoveis/orion/PR0008-HORZ-2.jpg",
    "/static/imoveis/orion/PR0008-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "PR0017-HORZ",
@@ -8131,7 +9862,9 @@
    "/static/imoveis/orion/PR0017-HORZ-1.jpg",
    "/static/imoveis/orion/PR0017-HORZ-2.jpg",
    "/static/imoveis/orion/PR0017-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "RE0001-HORZ",
@@ -8170,7 +9903,9 @@
    "/static/imoveis/orion/RE0001-HORZ-1.jpg",
    "/static/imoveis/orion/RE0001-HORZ-2.jpg",
    "/static/imoveis/orion/RE0001-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0167-HORZ",
@@ -8204,7 +9939,9 @@
    "/static/imoveis/orion/SA0167-HORZ-1.jpg",
    "/static/imoveis/orion/SA0167-HORZ-2.jpg",
    "/static/imoveis/orion/SA0167-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0143-HORZ",
@@ -8238,7 +9975,9 @@
    "/static/imoveis/orion/SA0143-HORZ-1.jpg",
    "/static/imoveis/orion/SA0143-HORZ-2.jpg",
    "/static/imoveis/orion/SA0143-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0155-HORZ",
@@ -8270,7 +10009,9 @@
    "/static/imoveis/orion/SA0155-HORZ-1.jpg",
    "/static/imoveis/orion/SA0155-HORZ-2.jpg",
    "/static/imoveis/orion/SA0155-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0165-HORZ",
@@ -8305,7 +10046,9 @@
    "/static/imoveis/orion/SA0165-HORZ-1.jpg",
    "/static/imoveis/orion/SA0165-HORZ-2.jpg",
    "/static/imoveis/orion/SA0165-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0169-HORZ",
@@ -8340,7 +10083,9 @@
    "/static/imoveis/orion/SA0169-HORZ-1.jpg",
    "/static/imoveis/orion/SA0169-HORZ-2.jpg",
    "/static/imoveis/orion/SA0169-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0164-HORZ",
@@ -8374,7 +10119,9 @@
    "/static/imoveis/orion/SA0164-HORZ-1.jpg",
    "/static/imoveis/orion/SA0164-HORZ-2.jpg",
    "/static/imoveis/orion/SA0164-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0124-HORZ",
@@ -8406,7 +10153,9 @@
    "/static/imoveis/orion/SA0124-HORZ-1.jpg",
    "/static/imoveis/orion/SA0124-HORZ-2.jpg",
    "/static/imoveis/orion/SA0124-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0134-HORZ",
@@ -8442,7 +10191,9 @@
    "/static/imoveis/orion/SA0134-HORZ-1.jpg",
    "/static/imoveis/orion/SA0134-HORZ-2.jpg",
    "/static/imoveis/orion/SA0134-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0153-HORZ",
@@ -8476,7 +10227,9 @@
    "/static/imoveis/orion/SA0153-HORZ-1.jpg",
    "/static/imoveis/orion/SA0153-HORZ-2.jpg",
    "/static/imoveis/orion/SA0153-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0166-HORZ",
@@ -8510,7 +10263,9 @@
    "/static/imoveis/orion/SA0166-HORZ-1.jpg",
    "/static/imoveis/orion/SA0166-HORZ-2.jpg",
    "/static/imoveis/orion/SA0166-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0168-HORZ",
@@ -8544,7 +10299,9 @@
    "/static/imoveis/orion/SA0168-HORZ-1.jpg",
    "/static/imoveis/orion/SA0168-HORZ-2.jpg",
    "/static/imoveis/orion/SA0168-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0162-HORZ",
@@ -8574,7 +10331,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/SA0162-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "SA0163-HORZ",
@@ -8606,7 +10365,9 @@
   "fotos": [
    "/static/imoveis/orion/SA0163-HORZ-1.jpg",
    "/static/imoveis/orion/SA0163-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "ST0001-HORZ",
@@ -8640,7 +10401,9 @@
    "/static/imoveis/orion/ST0001-HORZ-1.jpg",
    "/static/imoveis/orion/ST0001-HORZ-2.jpg",
    "/static/imoveis/orion/ST0001-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0904-HORZ",
@@ -8674,7 +10437,9 @@
    "/static/imoveis/orion/TE0904-HORZ-1.jpg",
    "/static/imoveis/orion/TE0904-HORZ-2.jpg",
    "/static/imoveis/orion/TE0904-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0864-HORZ",
@@ -8710,7 +10475,9 @@
   "fotos": [
    "/static/imoveis/orion/TE0864-HORZ-1.jpg",
    "/static/imoveis/orion/TE0864-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1172-HORZ",
@@ -8743,7 +10510,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1172-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1454-HORZ",
@@ -8777,7 +10546,9 @@
    "/static/imoveis/orion/TE1454-HORZ-1.jpg",
    "/static/imoveis/orion/TE1454-HORZ-2.jpg",
    "/static/imoveis/orion/TE1454-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0690-HORZ",
@@ -8816,7 +10587,9 @@
    "/static/imoveis/orion/TE0690-HORZ-1.jpg",
    "/static/imoveis/orion/TE0690-HORZ-2.jpg",
    "/static/imoveis/orion/TE0690-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0622-HORZ",
@@ -8846,7 +10619,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE0622-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1455-HORZ",
@@ -8884,7 +10659,9 @@
    "/static/imoveis/orion/TE1455-HORZ-1.jpg",
    "/static/imoveis/orion/TE1455-HORZ-2.jpg",
    "/static/imoveis/orion/TE1455-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1461-HORZ",
@@ -8916,7 +10693,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1461-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1444-HORZ",
@@ -8946,7 +10725,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1444-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1464-HORZ",
@@ -8982,7 +10763,9 @@
   "fotos": [
    "/static/imoveis/orion/TE1464-HORZ-1.jpg",
    "/static/imoveis/orion/TE1464-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1042-HORZ",
@@ -9014,7 +10797,9 @@
   "fotos": [
    "/static/imoveis/orion/TE1042-HORZ-1.jpg",
    "/static/imoveis/orion/TE1042-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1255-HORZ",
@@ -9053,7 +10838,9 @@
    "/static/imoveis/orion/TE1255-HORZ-1.jpg",
    "/static/imoveis/orion/TE1255-HORZ-2.jpg",
    "/static/imoveis/orion/TE1255-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1402-HORZ",
@@ -9081,7 +10868,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1402-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1171-HORZ",
@@ -9113,7 +10902,9 @@
   "fotos": [
    "/static/imoveis/orion/TE1171-HORZ-1.jpg",
    "/static/imoveis/orion/TE1171-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1376-HORZ",
@@ -9152,7 +10943,9 @@
    "/static/imoveis/orion/TE1376-HORZ-1.jpg",
    "/static/imoveis/orion/TE1376-HORZ-2.jpg",
    "/static/imoveis/orion/TE1376-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1189-HORZ",
@@ -9182,7 +10975,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1189-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1470-HORZ",
@@ -9216,7 +11011,9 @@
    "/static/imoveis/orion/TE1470-HORZ-1.jpg",
    "/static/imoveis/orion/TE1470-HORZ-2.jpg",
    "/static/imoveis/orion/TE1470-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1269-HORZ",
@@ -9252,7 +11049,9 @@
   "fotos": [
    "/static/imoveis/orion/TE1269-HORZ-1.jpg",
    "/static/imoveis/orion/TE1269-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0653-HORZ",
@@ -9282,7 +11081,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE0653-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1430-HORZ",
@@ -9316,7 +11117,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1430-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1462-HORZ",
@@ -9354,7 +11157,9 @@
    "/static/imoveis/orion/TE1462-HORZ-1.jpg",
    "/static/imoveis/orion/TE1462-HORZ-2.jpg",
    "/static/imoveis/orion/TE1462-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0640-HORZ",
@@ -9384,7 +11189,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE0640-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0652-HORZ",
@@ -9414,7 +11221,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE0652-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1217-HORZ",
@@ -9453,7 +11262,9 @@
    "/static/imoveis/orion/TE1217-HORZ-1.jpg",
    "/static/imoveis/orion/TE1217-HORZ-2.jpg",
    "/static/imoveis/orion/TE1217-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1216-HORZ",
@@ -9493,7 +11304,9 @@
    "/static/imoveis/orion/TE1216-HORZ-1.jpg",
    "/static/imoveis/orion/TE1216-HORZ-2.jpg",
    "/static/imoveis/orion/TE1216-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1453-HORZ",
@@ -9526,7 +11339,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1453-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0584-HORZ",
@@ -9560,7 +11375,9 @@
    "/static/imoveis/orion/TE0584-HORZ-1.jpg",
    "/static/imoveis/orion/TE0584-HORZ-2.jpg",
    "/static/imoveis/orion/TE0584-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1284-HORZ",
@@ -9596,7 +11413,9 @@
    "/static/imoveis/orion/TE1284-HORZ-1.jpg",
    "/static/imoveis/orion/TE1284-HORZ-2.jpg",
    "/static/imoveis/orion/TE1284-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1480-HORZ",
@@ -9631,7 +11450,9 @@
    "/static/imoveis/orion/TE1480-HORZ-1.jpg",
    "/static/imoveis/orion/TE1480-HORZ-2.jpg",
    "/static/imoveis/orion/TE1480-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1409-HORZ",
@@ -9661,7 +11482,9 @@
   "fotos": [
    "/static/imoveis/orion/TE1409-HORZ-1.jpg",
    "/static/imoveis/orion/TE1409-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1388-HORZ",
@@ -9697,7 +11520,9 @@
   "fotos": [
    "/static/imoveis/orion/TE1388-HORZ-1.jpg",
    "/static/imoveis/orion/TE1388-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0850-HORZ",
@@ -9735,7 +11560,9 @@
    "/static/imoveis/orion/TE0850-HORZ-1.jpg",
    "/static/imoveis/orion/TE0850-HORZ-2.jpg",
    "/static/imoveis/orion/TE0850-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1381-HORZ",
@@ -9773,7 +11600,9 @@
    "/static/imoveis/orion/TE1381-HORZ-1.jpg",
    "/static/imoveis/orion/TE1381-HORZ-2.jpg",
    "/static/imoveis/orion/TE1381-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1467-HORZ",
@@ -9805,7 +11634,9 @@
    "/static/imoveis/orion/TE1467-HORZ-1.jpg",
    "/static/imoveis/orion/TE1467-HORZ-2.jpg",
    "/static/imoveis/orion/TE1467-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1090-HORZ",
@@ -9837,7 +11668,9 @@
    "/static/imoveis/orion/TE1090-HORZ-1.jpg",
    "/static/imoveis/orion/TE1090-HORZ-2.jpg",
    "/static/imoveis/orion/TE1090-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1479-HORZ",
@@ -9869,7 +11702,9 @@
    "/static/imoveis/orion/TE1479-HORZ-1.jpg",
    "/static/imoveis/orion/TE1479-HORZ-2.jpg",
    "/static/imoveis/orion/TE1479-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1380-HORZ",
@@ -9903,7 +11738,9 @@
   "fotos": [
    "/static/imoveis/orion/TE1380-HORZ-1.jpg",
    "/static/imoveis/orion/TE1380-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1400-HORZ",
@@ -9940,7 +11777,9 @@
    "/static/imoveis/orion/TE1400-HORZ-1.jpg",
    "/static/imoveis/orion/TE1400-HORZ-2.jpg",
    "/static/imoveis/orion/TE1400-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1414-HORZ",
@@ -9974,7 +11813,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1414-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1415-HORZ",
@@ -10008,7 +11849,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1415-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1275-HORZ",
@@ -10040,7 +11883,9 @@
    "/static/imoveis/orion/TE1275-HORZ-1.jpg",
    "/static/imoveis/orion/TE1275-HORZ-2.jpg",
    "/static/imoveis/orion/TE1275-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1383-HORZ",
@@ -10077,7 +11922,9 @@
    "/static/imoveis/orion/TE1383-HORZ-1.jpg",
    "/static/imoveis/orion/TE1383-HORZ-2.jpg",
    "/static/imoveis/orion/TE1383-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0815-HORZ",
@@ -10107,7 +11954,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE0815-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0727-HORZ",
@@ -10146,7 +11995,9 @@
    "/static/imoveis/orion/TE0727-HORZ-1.jpg",
    "/static/imoveis/orion/TE0727-HORZ-2.jpg",
    "/static/imoveis/orion/TE0727-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0705-HORZ",
@@ -10180,7 +12031,9 @@
    "/static/imoveis/orion/TE0705-HORZ-1.jpg",
    "/static/imoveis/orion/TE0705-HORZ-2.jpg",
    "/static/imoveis/orion/TE0705-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1426-HORZ",
@@ -10214,7 +12067,9 @@
    "/static/imoveis/orion/TE1426-HORZ-1.jpg",
    "/static/imoveis/orion/TE1426-HORZ-2.jpg",
    "/static/imoveis/orion/TE1426-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1427-HORZ",
@@ -10248,7 +12103,9 @@
    "/static/imoveis/orion/TE1427-HORZ-1.jpg",
    "/static/imoveis/orion/TE1427-HORZ-2.jpg",
    "/static/imoveis/orion/TE1427-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1466-HORZ",
@@ -10280,7 +12137,9 @@
    "/static/imoveis/orion/TE1466-HORZ-1.jpg",
    "/static/imoveis/orion/TE1466-HORZ-2.jpg",
    "/static/imoveis/orion/TE1466-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1097-HORZ",
@@ -10318,7 +12177,9 @@
    "/static/imoveis/orion/TE1097-HORZ-1.jpg",
    "/static/imoveis/orion/TE1097-HORZ-2.jpg",
    "/static/imoveis/orion/TE1097-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1098-HORZ",
@@ -10356,7 +12217,9 @@
    "/static/imoveis/orion/TE1098-HORZ-1.jpg",
    "/static/imoveis/orion/TE1098-HORZ-2.jpg",
    "/static/imoveis/orion/TE1098-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1077-HORZ",
@@ -10390,7 +12253,9 @@
    "/static/imoveis/orion/TE1077-HORZ-1.jpg",
    "/static/imoveis/orion/TE1077-HORZ-2.jpg",
    "/static/imoveis/orion/TE1077-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1078-HORZ",
@@ -10420,7 +12285,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1078-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1079-HORZ",
@@ -10454,7 +12321,9 @@
    "/static/imoveis/orion/TE1079-HORZ-1.jpg",
    "/static/imoveis/orion/TE1079-HORZ-2.jpg",
    "/static/imoveis/orion/TE1079-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1227-HORZ",
@@ -10487,7 +12356,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1227-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1362-HORZ",
@@ -10525,7 +12396,9 @@
    "/static/imoveis/orion/TE1362-HORZ-1.jpg",
    "/static/imoveis/orion/TE1362-HORZ-2.jpg",
    "/static/imoveis/orion/TE1362-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1477-HORZ",
@@ -10562,7 +12435,9 @@
    "/static/imoveis/orion/TE1477-HORZ-1.jpg",
    "/static/imoveis/orion/TE1477-HORZ-2.jpg",
    "/static/imoveis/orion/TE1477-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0664-HORZ",
@@ -10592,7 +12467,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE0664-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1482-HORZ",
@@ -10629,7 +12506,9 @@
    "/static/imoveis/orion/TE1482-HORZ-1.jpg",
    "/static/imoveis/orion/TE1482-HORZ-2.jpg",
    "/static/imoveis/orion/TE1482-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1416-HORZ",
@@ -10668,7 +12547,9 @@
    "/static/imoveis/orion/TE1416-HORZ-1.jpg",
    "/static/imoveis/orion/TE1416-HORZ-2.jpg",
    "/static/imoveis/orion/TE1416-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1326-HORZ",
@@ -10705,7 +12586,9 @@
    "/static/imoveis/orion/TE1326-HORZ-1.jpg",
    "/static/imoveis/orion/TE1326-HORZ-2.jpg",
    "/static/imoveis/orion/TE1326-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1107-HORZ",
@@ -10742,7 +12625,9 @@
    "/static/imoveis/orion/TE1107-HORZ-1.jpg",
    "/static/imoveis/orion/TE1107-HORZ-2.jpg",
    "/static/imoveis/orion/TE1107-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1336-HORZ",
@@ -10780,7 +12665,9 @@
    "/static/imoveis/orion/TE1336-HORZ-1.jpg",
    "/static/imoveis/orion/TE1336-HORZ-2.jpg",
    "/static/imoveis/orion/TE1336-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1478-HORZ",
@@ -10812,7 +12699,9 @@
   "fotos": [
    "/static/imoveis/orion/TE1478-HORZ-1.jpg",
    "/static/imoveis/orion/TE1478-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1437-HORZ",
@@ -10845,7 +12734,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1437-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0661-HORZ",
@@ -10875,7 +12766,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE0661-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1481-HORZ",
@@ -10907,7 +12800,9 @@
   "fotos": [
    "/static/imoveis/orion/TE1481-HORZ-1.jpg",
    "/static/imoveis/orion/TE1481-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1408-HORZ",
@@ -10941,7 +12836,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1408-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1407-HORZ",
@@ -10980,7 +12877,9 @@
    "/static/imoveis/orion/TE1407-HORZ-1.jpg",
    "/static/imoveis/orion/TE1407-HORZ-2.jpg",
    "/static/imoveis/orion/TE1407-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1419-HORZ",
@@ -11019,7 +12918,9 @@
    "/static/imoveis/orion/TE1419-HORZ-1.jpg",
    "/static/imoveis/orion/TE1419-HORZ-2.jpg",
    "/static/imoveis/orion/TE1419-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1279-HORZ",
@@ -11055,7 +12956,9 @@
   "fotos": [
    "/static/imoveis/orion/TE1279-HORZ-1.jpg",
    "/static/imoveis/orion/TE1279-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0908-HORZ",
@@ -11087,7 +12990,9 @@
   "fotos": [
    "/static/imoveis/orion/TE0908-HORZ-1.jpg",
    "/static/imoveis/orion/TE0908-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0909-HORZ",
@@ -11119,7 +13024,9 @@
   "fotos": [
    "/static/imoveis/orion/TE0909-HORZ-1.jpg",
    "/static/imoveis/orion/TE0909-HORZ-2.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1347-HORZ",
@@ -11157,7 +13064,9 @@
    "/static/imoveis/orion/TE1347-HORZ-1.jpg",
    "/static/imoveis/orion/TE1347-HORZ-2.jpg",
    "/static/imoveis/orion/TE1347-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE1468-HORZ",
@@ -11187,7 +13096,9 @@
   ],
   "fotos": [
    "/static/imoveis/orion/TE1468-HORZ-1.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  },
  {
   "codigo": "TE0606-HORZ",
@@ -11221,6 +13132,8 @@
    "/static/imoveis/orion/TE0606-HORZ-1.jpg",
    "/static/imoveis/orion/TE0606-HORZ-2.jpg",
    "/static/imoveis/orion/TE0606-HORZ-3.jpg"
-  ]
+  ],
+  "rentabilidade_estimada": null,
+  "rentabilidade_base": null
  }
 ]

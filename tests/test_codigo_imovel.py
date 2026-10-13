@@ -126,6 +126,11 @@ def test_card_e_legenda_mostram_o_codigo():
     for item, im in zip(_galeria_imoveis(imoveis), imoveis, strict=False):
         assert im["codigo"] in item["legenda"]
         # A legenda é o que aparece colado na foto no Telegram: sem quartos
-        # e área ela era mais pobre que o card de texto.
-        assert "quarto(s)" in item["legenda"]
+        # e área ela era mais pobre que o card de texto. Quarto só quando
+        # o imóvel tem: os mais baratos à venda são terrenos, e "0 quartos"
+        # numa legenda de terreno é dado errado.
         assert "m²" in item["legenda"]
+        if im["quartos"]:
+            assert "quarto" in item["legenda"]
+        else:
+            assert "quarto" not in item["legenda"]

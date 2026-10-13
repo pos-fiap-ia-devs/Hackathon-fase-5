@@ -303,27 +303,12 @@ _PERFIL_INVESTIDOR = (
 _RETORNO = re.compile(r"(\d+(?:[.,]\d+)?)\s*%")
 
 
-# Palavra dita pelo cliente -> valor do Literal de LeadQualification.tipo_imovel.
-# Ordem importa: "casa" aparece dentro de "casamento", e `\b` evita isso.
-_TIPOS = (
-    ("terreno", ("terreno", "terrenos", "lote", "lotes")),
-    ("apartamento", ("apartamento", "apartamentos", "apto")),
-    ("casa", ("casa", "casas", "sobrado", "sobrados")),
-    ("studio", ("studio", "estudio", "kitnet")),
-    ("cobertura", ("cobertura",)),
-    ("chacara", ("chacara", "chacaras", "sitio")),
-    ("galpao", ("galpao", "galpoes")),
-    ("loja", ("loja", "lojas")),
-    ("predio", ("predio", "predios")),
-    ("sala", ("sala comercial", "salas comerciais")),
-)
-
-
 def _tipo_imovel(texto: str) -> str | None:
-    for tipo, palavras in _TIPOS:
-        if any(re.search(rf"\b{re.escape(p)}\b", texto) for p in palavras):
-            return tipo
-    return None
+    """Mesmo detector do caminho real (agents/router.py): duas listas de
+    palavras divergiriam na primeira mudança."""
+    from app.agents.router import detectar_tipo_imovel  # noqa: PLC0415
+
+    return detectar_tipo_imovel(texto)
 
 
 def _extrair_qualificacao(texto: str, intencao_ja_conhecida: str | None = None) -> dict:

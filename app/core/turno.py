@@ -572,7 +572,10 @@ def _formatar_cards(imoveis: list[dict]) -> str:
             f"   {_preco_formatado(im)} · {_specs_do_imovel(im)}"
         )
         if im.get("rentabilidade_estimada"):
-            linha += f"\n   rentabilidade estimada: {im['rentabilidade_estimada']}% a.a."
+            # "bruta" e "estimada" sempre: o catálogo não publica
+            # rentabilidade, ela é calculada (scripts/importar_orion.py::
+            # marcar_investimento) e não desconta condomínio, IPTU nem vacância.
+            linha += f"\n   rentabilidade bruta estimada: {im['rentabilidade_estimada']}% a.a."
         # Codigo por ultimo, como rodape: o numero serve pra responder
         # AGORA ("quero o 2"), o codigo sobrevive a uma busca nova.
         if im.get("codigo"):

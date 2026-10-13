@@ -61,6 +61,8 @@ def _linha(item: dict) -> dict:
         "condominio": item.get("condominio"),
         "iptu": item.get("iptu"),
         "suites": item.get("suites"),
+        "rentabilidade_estimada": item.get("rentabilidade_estimada"),
+        "rentabilidade_base": item.get("rentabilidade_base"),
         "comodidades": item.get("comodidades") or [],
         "campos_estimados": item.get("campos_estimados") or [],
         "descricao": descricao,
@@ -119,12 +121,12 @@ def carregar(*, seco: bool = False, truncar: bool = False) -> dict[str, int]:
                 INSERT INTO imoveis
                     (codigo, titulo, tipo, finalidade, bairro, zona, cidade, preco,
                      quartos, banheiros, vagas, area, condominio, iptu, suites,
-                     comodidades, campos_estimados, descricao, fotos, origem, embedding)
+                     comodidades, campos_estimados, rentabilidade_estimada, rentabilidade_base, descricao, fotos, origem, embedding)
                 VALUES
                     (%(codigo)s, %(titulo)s, %(tipo)s, %(finalidade)s, %(bairro)s,
                      %(zona)s, %(cidade)s, %(preco)s, %(quartos)s, %(banheiros)s,
                      %(vagas)s, %(area)s, %(condominio)s, %(iptu)s, %(suites)s,
-                     %(comodidades)s, %(campos_estimados)s, %(descricao)s,
+                     %(comodidades)s, %(campos_estimados)s, %(rentabilidade_estimada)s, %(rentabilidade_base)s, %(descricao)s,
                      %(fotos)s, %(origem)s, %(embedding)s)
                 ON CONFLICT (codigo) DO UPDATE SET
                     titulo = EXCLUDED.titulo, tipo = EXCLUDED.tipo,
@@ -136,6 +138,8 @@ def carregar(*, seco: bool = False, truncar: bool = False) -> dict[str, int]:
                     iptu = EXCLUDED.iptu, suites = EXCLUDED.suites,
                     comodidades = EXCLUDED.comodidades,
                     campos_estimados = EXCLUDED.campos_estimados,
+                    rentabilidade_estimada = EXCLUDED.rentabilidade_estimada,
+                    rentabilidade_base = EXCLUDED.rentabilidade_base,
                     descricao = EXCLUDED.descricao, fotos = EXCLUDED.fotos,
                     origem = EXCLUDED.origem, embedding = EXCLUDED.embedding
                 """,

@@ -18,7 +18,9 @@ Sistema-prompt validado manualmente contra o servidor real, em duas rodadas:
 from typing import Literal
 
 from pydantic import BaseModel
+from pydantic.json_schema import SkipJsonSchema
 
+from app.agents.router import detectar_tipo_imovel
 from app.core.llm import chat_structured
 from app.core.traces import TraceInfo
 
@@ -43,21 +45,21 @@ class LeadQualification(BaseModel):
     intencao: Literal["compra", "aluguel", "investimento", "indefinido"] = "indefinido"
     regiao: str | None = None
     quartos: int | None = None
-    # Logo depois de `quartos` e antes dos precos, pelo mesmo motivo da ordem
-    # documentada acima: campo que aparece em frase curta ("quero um
-    # terreno") precisa vir cedo. Literal fechado, nao str livre -- o
-    # decodificador restrito so consegue emitir um destes valores, e o tipo
-    # vira chave de filtro SQL.
-    tipo_imovel: Literal[
-        "apartamento", "casa", "terreno", "studio", "cobertura",
-        "sala", "galpao", "loja", "predio", "chacara",
-    ] | None = None
     faixa_preco_min: int | None = None
     faixa_preco_max: int | None = None
     urgencia: Literal["alta", "media", "baixa"] | None = None
     perfil_investidor: str | None = None
     ticket: int | None = None
     expectativa_retorno: str | None = None
+    # Fora do schema que o LLM recebe (`SkipJsonSchema`), preenchido em
+    # codigo por `agents/router.py::detectar_tipo_imovel`. Duas tentativas
+    # de deixar o modelo extrair falharam contra o servidor real: sem regra
+    # no prompt ele devolvia null em 6 de 6 frases; com uma regra de 1
+    # linha, o cenario 1 do enunciado ("apartamento na zona sul") perdia a
+    # REGIAO em 3 de 3 -- o mesmo efeito de orcamento de atencao descrito
+    # acima. Continua no modelo pra o resto do sistema (merge, slots,
+    # busca) tratar como qualquer outro campo.
+    tipo_imovel: SkipJsonSchema[str | None] = None
 
 
 SYSTEM_PROMPT = """Voce e um extrator de dados para qualificacao de leads de uma \
@@ -73,8 +75,7 @@ falar em alugar -> compra
 Outras regras:
 - Leia o estado atual dos dados ja coletados e a ultima mensagem do cliente.
 - Devolva so os campos que a ultima mensagem confirma ou corrige.
-- Nunca invente valor que o cliente nao disse. Campo nao mencionado = null. \
-tipo_imovel so quando o cliente nomeia o tipo (sobrado = casa, lote = terreno).
+- Nunca invente valor que o cliente nao disse. Campo nao mencionado = null.
 - faixa_preco_min/max e ticket sao valores em reais (numero inteiro, sem "R$"). \
 Se intencao for compra/aluguel, um valor de preco unico vai em faixa_preco_max \
 (faixa_preco_min so com piso explicito, tipo "a partir de"). Se intencao for \
@@ -106,12 +107,16 @@ def extrair_slots(
     pergunta pendente fecha essa ambiguidade sem pedir pro LLM adivinhar."""
     contexto_pergunta = f'Pergunta que acabou de ser feita ao cliente: "{pergunta_pendente}"\n\n' if pergunta_pendente else ""
     user = f'{contexto_pergunta}Dados ja coletados: {slots_atuais}\n\nUltima mensagem do cliente: "{mensagem}"'
-    return chat_structured(
+    qualificacao, trace = chat_structured(
         agente="qualifier",
         system=SYSTEM_PROMPT,
         user=user,
         schema=LeadQualification,
     )
+    # Tipo em codigo, depois do modelo (ver comentario do campo).
+    if (tipo := detectar_tipo_imovel(mensagem)) is not None:
+        qualificacao.tipo_imovel = tipo
+    return qualificacao, trace
 
 
 def merge_slots(atuais: dict, novo: LeadQualification) -> dict:

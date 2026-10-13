@@ -399,7 +399,7 @@ def _banheiros(dados: dict, tipo: str, quartos: int) -> tuple[int, bool]:
     return max(suites + 1, 1), True
 
 
-def extrair(html: str, url: str) -> dict | None:
+def extrair(html: str, url: str, finalidade: str | None = None) -> dict | None:
     dados = payload_do_anuncio(html)
     if not dados:
         return None
@@ -411,7 +411,9 @@ def extrair(html: str, url: str) -> dict | None:
     # campo que a própria imobiliária usa, e um imóvel anunciado pras duas
     # coisas traz as duas aqui.
     propositos = [str(p).upper() for p in (dados.get("property_purposes") or [])]
-    aluguel = "FOR_RENT" in propositos
+    # `finalidade` explícita vem de `extrair_todas`, pro imóvel anunciado
+    # nas duas. Sem ela, vale o cadastro.
+    aluguel = (finalidade == "aluguel") if finalidade else ("FOR_RENT" in propositos)
     finalidade = "aluguel" if aluguel else "venda"
     preco = _faixa(dados.get("rent_price") if aluguel else dados.get("sale_price"))
     if preco <= 0:
@@ -467,10 +469,133 @@ def extrair(html: str, url: str) -> dict | None:
     }
 
 
+SUFIXO_ALUGUEL = "-L"
+
+
+def extrair_todas(html: str, url: str) -> list[dict]:
+    """Uma linha por FINALIDADE anunciada.
+
+    Um imóvel pode estar à venda e pra alugar ao mesmo tempo (28 dos 266, a
+    maioria casa de alto padrão). A versão anterior guardava só uma das
+    duas e, nesses casos, ficava com o aluguel: casas de R$ 2 a 6 milhões
+    entravam no banco como se só existissem pra locação, e quem queria
+    COMPRAR nunca as via.
+
+    Agora são duas linhas. A de venda mantém o código do anúncio
+    (`CA0066-HORZ`); a de aluguel ganha `-L` (`CA0066-HORZ-L`). Mesmo imóvel,
+    mesmas fotos, dois preços reais.
+
+    A linha de venda leva a rentabilidade BRUTA -- aluguel anual dividido
+    pelo preço de venda --, que é conta sobre dois valores publicados, não
+    número inventado. Vem marcada em `campos_estimados` porque não é dado
+    de cadastro: é derivada."""
+    dados = payload_do_anuncio(html)
+    if not dados:
+        return []
+
+    propositos = {str(p).upper() for p in (dados.get("property_purposes") or [])}
+    quer_venda = "FOR_SALE" in propositos and _faixa(dados.get("sale_price")) > 0
+    quer_aluguel = "FOR_RENT" in propositos and _faixa(dados.get("rent_price")) > 0
+
+    if quer_venda and quer_aluguel:
+        venda = extrair(html, url, "venda")
+        aluguel = extrair(html, url, "aluguel")
+        if not venda or not aluguel:
+            return [x for x in (venda, aluguel) if x]
+        aluguel["codigo"] = aluguel["codigo"] + SUFIXO_ALUGUEL
+        venda["rentabilidade_estimada"] = round(aluguel["preco"] * 12 / venda["preco"] * 100, 2)
+        venda["campos_estimados"] = [*venda["campos_estimados"], "rentabilidade"]
+        return [venda, aluguel]
+
+    unico = extrair(html, url)
+    return [unico] if unico else []
+
+
 def _tipo_pela_trilha(blocos: list[dict]) -> str:
     trilha = _trilha(blocos)
     bruto = _sem_acento(trilha[3] if len(trilha) > 3 else "").lower().strip()
     return TIPO_NORMALIZADO.get(bruto, bruto or "imovel")
+
+
+# ---------------------------------------------------------------- investimento
+
+# Quantos imóveis aparecem como "investimento" (aba Investir do site, selo
+# no card). Pedido do produto: uns 10, com apartamento e casa.
+INVESTIMENTO_ALVO = 10
+# Teto de apartamentos. O catálogo só tem 3 à venda, e só 1 com aluguel
+# comparável na mesma cidade -- o teto existe pra quando houver mais.
+INVESTIMENTO_APARTAMENTOS = 4
+# Mínimo de aluguéis comparáveis pra estimar. Com 1 ou 2 a mediana é o
+# próprio imóvel vizinho, não um preço de mercado.
+MIN_COMPARAVEIS = 3
+TIPOS_INVESTIMENTO = ("apartamento", "casa", "cobertura", "studio")
+
+
+def marcar_investimento(catalogo: list[dict]) -> list[dict]:
+    """Escolhe os imóveis de investimento e deixa a rentabilidade SÓ neles.
+
+    Nenhum número é inventado. Duas fontes, ambas sobre preço publicado:
+
+      * anunciado: o imóvel está à venda E pra alugar (`extrair_todas`) --
+        aluguel × 12 ÷ venda, com os dois valores do próprio anúncio.
+      * comparaveis: só pra apartamento, que quase nunca é anunciado nos dois.
+        Aluguel estimado = mediana de R$/m² dos apartamentos alugados na
+        mesma cidade × área; exige `MIN_COMPARAVEIS`. Sem comparável, o
+        imóvel fica de fora -- Guarujá e Mongaguá não entram por isso.
+
+    A escolha é determinística (maior rentabilidade primeiro), não sorteio:
+    rodar de novo dá a mesma lista, e a lista se explica."""
+    import statistics
+
+    por_cidade_tipo: dict[tuple[str, str], list[float]] = {}
+    for i in catalogo:
+        if i["finalidade"] == "aluguel" and i.get("area"):
+            por_cidade_tipo.setdefault((i["cidade"], i["tipo"]), []).append(i["preco"] / i["area"])
+
+    apartamentos = []
+    for i in catalogo:
+        if i["tipo"] != "apartamento" or i["finalidade"] != "venda" or not i.get("area"):
+            continue
+        comparaveis = por_cidade_tipo.get((i["cidade"], "apartamento"), [])
+        if len(comparaveis) < MIN_COMPARAVEIS:
+            continue
+        aluguel = statistics.median(comparaveis) * i["area"]
+        apartamentos.append((round(aluguel * 12 / i["preco"] * 100, 2), i, len(comparaveis)))
+
+    # Rentabilidade anunciada recalculada do PAR venda/aluguel do mesmo
+    # imóvel (`CA0066-HORZ` + `CA0066-HORZ-L`), não lida de
+    # `rentabilidade_estimada`: esta função apaga esse campo dos que não
+    # escolhe, e ler dele a tornava não idempotente -- a segunda aplicação
+    # sobre o mesmo catálogo achava 8 candidatas em vez de 27.
+    #
+    # Só residencial: a vitrine de investimento é de apartamento e casa. Um
+    # galpão com 7,5% entrava na lista por ter rentabilidade alta, e quem
+    # procura renda de aluguel residencial não está procurando galpão.
+    aluguel_por_codigo = {i["codigo"]: i for i in catalogo if i["finalidade"] == "aluguel"}
+    anunciados = []
+    for i in catalogo:
+        par = aluguel_por_codigo.get(i["codigo"] + SUFIXO_ALUGUEL)
+        if i["finalidade"] == "venda" and par and i["tipo"] in TIPOS_INVESTIMENTO and i["preco"]:
+            anunciados.append((round(par["preco"] * 12 / i["preco"] * 100, 2), i))
+
+    escolhidos: dict[str, tuple[float, str]] = {}
+    for taxa, i, n in sorted(apartamentos, key=lambda x: -x[0])[:INVESTIMENTO_APARTAMENTOS]:
+        escolhidos[i["codigo"]] = (taxa, f"comparaveis ({n} aluguéis de apartamento em {i['cidade']})")
+    for taxa, i in sorted(anunciados, key=lambda x: -x[0]):
+        if len(escolhidos) >= INVESTIMENTO_ALVO:
+            break
+        escolhidos.setdefault(i["codigo"], (taxa, "anunciado (venda e aluguel do mesmo imóvel)"))
+
+    for i in catalogo:
+        estimados = [c for c in i.get("campos_estimados", []) if c != "rentabilidade"]
+        if i["codigo"] in escolhidos:
+            taxa, base = escolhidos[i["codigo"]]
+            i["rentabilidade_estimada"], i["rentabilidade_base"] = taxa, base
+            estimados.append("rentabilidade")
+        else:
+            i["rentabilidade_estimada"], i["rentabilidade_base"] = None, None
+        i["campos_estimados"] = estimados
+    return catalogo
 
 
 # ---------------------------------------------------------------- fotos
@@ -536,17 +661,23 @@ def main() -> int:
             if resp is None:
                 falhas.append(url)
                 continue
-            imovel = extrair(resp.text, url)
-            if not imovel or not imovel["titulo"] or imovel["preco"] is None:
+            linhas = [i for i in extrair_todas(resp.text, url) if i["titulo"] and i["preco"] is not None]
+            if not linhas:
                 falhas.append(url)
                 continue
 
-            imovel["fotos"] = [] if args.sem_fotos else baixar_fotos(http, imovel)
-            catalogo.append(imovel)
+            # Fotos baixadas UMA vez por página: as duas linhas do mesmo
+            # imóvel mostram as mesmas imagens.
+            fotos = [] if args.sem_fotos else baixar_fotos(http, linhas[0])
+            for imovel in linhas:
+                imovel["fotos"] = fotos
+                catalogo.append(imovel)
+            imovel = linhas[0]
             if n % 10 == 0 or n == len(urls):
                 print(f"    {n}/{len(urls)}  {imovel['codigo']}  {imovel['bairro']}, {imovel['cidade']}")
             time.sleep(0.4)
 
+    catalogo = marcar_investimento(catalogo)
     DATASET.write_text(
         json.dumps(catalogo, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
     )
