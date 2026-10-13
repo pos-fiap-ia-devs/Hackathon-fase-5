@@ -99,7 +99,7 @@
   <li><strong>O fluxo é decidido em código; o texto, pelo LLM.</strong> Um roteador determinístico escolhe o próximo passo a partir dos dados já coletados. O modelo só escreve a frase daquele passo.</li>
   <li><strong>Fato crítico nunca é escrito pelo LLM.</strong> Preço, endereço, data e corretor são montados em código a partir do banco. Testes adversariais tentam fazer o agente mentir e verificam que ele não mente.</li>
 </ol>
-<div class="nota"><strong>Resultado:</strong> todos os requisitos obrigatórios do enunciado foram atendidos, assim como 7 dos 9 diferenciais. Ficaram de fora a integração com WhatsApp e o deploy publicado em cloud (há Dockerfile e Compose prontos). A suíte automatizada tem <strong>__TESTES_TOTAL__ testes</strong>, a maior parte de integração real contra o modelo e o banco, sem mocks.</div>
+<div class="nota"><strong>Resultado:</strong> todos os requisitos obrigatórios do enunciado foram atendidos, assim como 7 dos 9 diferenciais. Ficaram de fora a integração com WhatsApp e o deploy publicado em cloud (há Dockerfile e Compose prontos). A suíte automatizada tem <strong>371 testes</strong>, a maior parte de integração real contra o modelo e o banco, sem mocks.</div>
 </section>
 
 <section>
@@ -473,9 +473,9 @@ regra de negócio: sem orçamento informado, no máximo morno</pre>
 
 <section>
 <h2>11. Qualidade e testes</h2>
-<p>A suíte tem <strong>__TESTES_TOTAL__ testes</strong>. A maior parte é de integração real contra o Postgres e o Ollama, sem mocks: os bugs mais caros do projeto foram de formato de schema (<code>anyOf</code> devolvendo <code>null</code> em silêncio, chave <code>"intenção"</code> com acento, <code>think: false</code> ausente) e um mock os esconderia. Sem a infraestrutura, esses testes são pulados com o motivo e o comando para subir o serviço.</p>
-<pre>sem Docker e sem Ollama   →  __TESTES_SEM_INFRA__
-tudo no ar                →  __TESTES_COM_INFRA__</pre>
+<p>A suíte tem <strong>371 testes</strong>. A maior parte é de integração real contra o Postgres e o Ollama, sem mocks: os bugs mais caros do projeto foram de formato de schema (<code>anyOf</code> devolvendo <code>null</code> em silêncio, chave <code>"intenção"</code> com acento, <code>think: false</code> ausente) e um mock os esconderia. Sem a infraestrutura, esses testes são pulados com o motivo e o comando para subir o serviço.</p>
+<pre>sem o Postgres no ar      →  273 passed, 98 skipped em 9 s
+tudo no ar                →  371 passed em ~15 min</pre>
 <table>
   <tr><th style="width:32%">Teste</th><th>O que garante</th></tr>
   <tr><td><code>test_qualifier.py</code></td><td>Frases literais dos cenários do enunciado extraem intenção e slots corretos</td></tr>

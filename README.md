@@ -4,7 +4,7 @@ POC de um agente de IA generativa que atende, qualifica e agenda visitas com lea
 
 A Bia atende por Telegram (texto e áudio), chat web, widget embutido no site da imobiliária ou CLI. Os quatro canais passam pelo mesmo orquestrador. Ela entende se o lead quer comprar, alugar ou investir, qualifica com uma pergunta por mensagem, mostra imóveis reais do banco, agenda a visita com o corretor certo e volta a procurar quem some no meio da conversa. O corretor acompanha tudo num painel com score explicado, resumo e observabilidade.
 
-> **Estado da entrega:** funcional, rodando local com Docker Compose e Ollama nativo. **__TESTES_TOTAL__ testes passando** com toda a infraestrutura no ar. O modelo é local (`qwen3.5:9b`, por Metal). Não há integração com WhatsApp nem deploy publicado em cloud (ver [Limitações](#limitações-conhecidas)). Para avaliar em Windows ou Linux, use o [modo demonstração](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração).
+> **Estado da entrega:** funcional, rodando local com Docker Compose e Ollama nativo. **371 testes passando** com toda a infraestrutura no ar. O modelo é local (`qwen3.5:9b`, por Metal). Não há integração com WhatsApp nem deploy publicado em cloud (ver [Limitações](#limitações-conhecidas)). Para avaliar em Windows ou Linux, use o [modo demonstração](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração).
 
 📄 **Documento técnico em PDF:** [docs/DOCUMENTO_TECNICO.pdf](docs/DOCUMENTO_TECNICO.pdf) — arquitetura, IA utilizada, decisões e evidências num só arquivo.
 
@@ -357,8 +357,8 @@ pytest
 Boa parte da suíte é de integração real, contra o Postgres e o Ollama, sem mock: os bugs que mais custaram neste projeto foram de formato de schema, e um mock os esconderia. Sem a infraestrutura, esses testes **pulam** com o motivo e o comando na mensagem, em vez de falhar ([tests/conftest.py](tests/conftest.py)).
 
 ```
-sem Docker e sem Ollama   →  __TESTES_SEM_INFRA__
-tudo no ar                →  __TESTES_COM_INFRA__
+sem o Postgres no ar      →  273 passed, 98 skipped em 9 s
+tudo no ar                →  371 passed em ~15 min
 ```
 
 Destaques: [`test_adversarial.py`](tests/test_adversarial.py) (o agente não mente sobre preço nem concede desconto), [`test_sem_loop.py`](tests/test_sem_loop.py) (sem repetição infinita), [`test_injecao.py`](tests/test_injecao.py) (incluindo falsos positivos), [`test_qualifier.py`](tests/test_qualifier.py) (frases literais do enunciado).

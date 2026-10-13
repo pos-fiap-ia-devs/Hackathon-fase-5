@@ -1,8 +1,8 @@
 # Validação dos requisitos
 
 Cada item do enunciado do Tech Challenge — Fase 5, com **onde está no
-código** e **qual teste comprova**. Conferido contra `pytest` em 11/10/2026:
-**271 testes passando**, nenhum falhando.
+código** e **qual teste comprova**. Conferido contra `pytest` em 13/10/2026:
+**371 testes passando**, nenhum falhando.
 
 Os testes rodam contra o **Ollama e o Postgres reais**, sem mock — decisão
 explicada em [SOLID.md](SOLID.md) e [ARQUITETURA.md](../ARQUITETURA.md). Os
@@ -10,9 +10,8 @@ que dependem de serviço **pulam** com a razão e o comando na mensagem
 quando a infra não está de pé, em vez de falhar ([`tests/conftest.py`](../tests/conftest.py)):
 
 ```
-sem Docker e sem Ollama   →  207 passed, 64 skipped em 3,3s
-só com o Postgres          →  228 passed,  7 skipped
-tudo no ar                 →  271 passed
+sem o Postgres no ar  →  273 passed, 98 skipped em 9 s
+tudo no ar            →  371 passed em ~15 min
 ```
 
 Legenda: ✅ feito · ⚠️ parcial, com a limitação escrita · ❌ não feito.
