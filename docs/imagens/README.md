@@ -22,11 +22,12 @@ passa a mostrar uma tela que não existe mais.
 
 | Arquivo | O que mostra | Refazer quando muda |
 |---|---|---|
-| `dashboard.png` | Lista de leads ordenada por score, com o selo **quente/morno/frio**, status, intenção, região e canal | As colunas da tabela, o selo de prioridade, as faixas de `SCORE_QUENTE`/`SCORE_MORNO` em [`core/scoring.py`](../../app/core/scoring.py), o nav do painel |
+| `dashboard.png` | Painel: indicadores do topo, **funil** arrastável por etapa e lista de leads com o selo **quente/morno/frio** | As colunas da tabela, o selo de prioridade, as faixas de `SCORE_QUENTE`/`SCORE_MORNO` em [`core/scoring.py`](../../app/core/scoring.py), o nav do painel |
 | `lead-detalhe.png` | Detalhe do lead com o **score aberto**: cada parcela com pontos, máximo, barra e motivo, mais "falta perguntar" e o resumo pro corretor | A fórmula ou as parcelas do score; os rótulos de `CAMPOS_POR_INTENCAO`; o bloco de resumo; os slots exibidos |
 | `observabilidade.png` | Aba de traces: **custo real US$ 0,00** ao lado do contrafactual "se fosse nuvem", custo por conversa, latência p50/p95/pior, tokens/s e quebra por agente | Os cartões de indicador; as parcelas do custo em [`core/custo.py`](../../app/core/custo.py); os preços de referência do `.env`; as colunas da tabela por agente |
 | `chat-web.png` | Chat do lead no navegador, fim da conversa de compra: qualificação, cartões de imóveis com foto, preço e **código** (`CAM-0006`), e a confirmação da visita | O visual do chat ou da galeria; as frases do roteiro de compra; o formato do cartão de imóvel; o texto de confirmação de visita |
-| `widget.png` | A Bia embutida num site de imobiliária de terceiro: bolha flutuante e o chat aberto no iframe, com a marca do site | O `widget.js` (bolha, painel, cores); a página `/embed`; o cabeçalho com `data-brand` |
+| `site.png` | Site da Horizonte Imóveis (`site/`, porta 5500): hero, busca e destaques do catálogo real | O layout do site em `site/build.py` |
+| `widget.png` | A Bia embutida no site da imobiliária: o chat aberto no iframe, com a marca do site | O `widget.js` (bolha, painel, cores); a página `/embed`; o cabeçalho com `data-brand` |
 | `injection.png` | Observabilidade com uma tentativa de **prompt injection** marcada: tipo classificado e o texto cru que o cliente enviou | Os tipos de `_PADROES` em [`core/injecao.py`](../../app/core/injecao.py); os rótulos; o bloco na aba de traces |
 
 As fotos dos imóveis são **as do próprio anúncio**, do catálogo real de uma imobiliária parceira. Ficam em

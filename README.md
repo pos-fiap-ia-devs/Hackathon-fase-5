@@ -11,6 +11,22 @@ Os membros do grupo são compostos pelos seguintes alunos:
 
 Youtube:  https://www.youtube.com/watch?v=E5UAWlIyjjk
 
+## Testar agora (versão no ar)
+
+Tudo abaixo está rodando, não precisa instalar nada:
+
+| O quê | Onde | Acesso |
+|---|---|---|
+| 🤖 **Bot no Telegram** (texto e áudio) | [@ImobVendas_bot](https://t.me/ImobVendas_bot) | é só mandar "Oi" |
+| 📊 **Painel do corretor** | <http://168.0.198.45:8000> | usuário `admin@teste.com.br` · senha `1234567890` |
+| 🏠 **Site da imobiliária** (com a Bia no widget) | <http://168.0.198.45:5500> | aberto |
+
+Roteiro sugerido: abra o painel numa aba e converse com o bot no Telegram. O lead aparece no painel em tempo real, com score, funil, conversa e traces de cada turno.
+
+- **Compra ou aluguel:** "Quero alugar um apartamento de 2 quartos em Barueri até 5 mil". A Bia mostra os imóveis com fotos e agenda a visita com um corretor.
+- **Investimento:** "Quero investir, busco renda com aluguel, uns 2 milhões". A Bia mostra os imóveis com rentabilidade estimada e agenda a conversa com o especialista em investimentos.
+- **Voz:** mande um áudio no Telegram. A Bia transcreve e responde em áudio.
+
 
 A Bia atende por Telegram (texto e áudio), chat web, widget embutido no site da imobiliária ou CLI. Os quatro canais passam pelo mesmo orquestrador. Ela entende se o lead quer comprar, alugar ou investir, qualifica com uma pergunta por mensagem, mostra imóveis reais do banco, agenda a visita com o corretor certo e volta a procurar quem some no meio da conversa. O corretor acompanha tudo num painel com score explicado, resumo e observabilidade.
 
@@ -20,6 +36,7 @@ A Bia atende por Telegram (texto e áudio), chat web, widget embutido no site da
 
 ## Sumário
 
+- [Testar agora (versão no ar)](#testar-agora-versão-no-ar)
 - [Entregáveis do desafio](#entregáveis-do-desafio)
 - [Requisitos do enunciado, um a um](#requisitos-do-enunciado-um-a-um)
 - [O problema e a solução](#o-problema-e-a-solução)
@@ -133,14 +150,15 @@ O que diferencia a solução:
      refazê-la, está em docs/imagens/README.md; scripts/screenshots/ refaz todas
      com o mesmo enquadramento. -->
 
-| Dashboard do corretor | Detalhe do lead, com o score aberto |
+| Painel do corretor: indicadores, funil e leads em tempo real | Detalhe do lead, com o score aberto |
 |---|---|
-| ![Lista de leads com selo quente/morno/frio](docs/imagens/dashboard.png) | ![Score decomposto em parcelas, com o que falta perguntar](docs/imagens/lead-detalhe.png) |
+| ![Indicadores, funil arrastável e lista de leads com selo quente/morno/frio](docs/imagens/dashboard.png) | ![Score decomposto em parcelas, resumo pro corretor e conversa](docs/imagens/lead-detalhe.png) |
+| **Site da imobiliária** ([168.0.198.45:5500](http://168.0.198.45:5500)) | **A Bia embutida no site, atendendo** |
+| ![Site da Horizonte Imóveis com busca e destaques](docs/imagens/site.png) | ![Widget da Bia aberto no site, qualificando o lead](docs/imagens/widget.png) |
 | **Observabilidade: custo, p95 e injeções** | **Chat do lead, com galeria de imóveis** |
 | ![Custo real zero ao lado do contrafactual, latência p95 e tentativas de injection](docs/imagens/observabilidade.png) | ![Conversa com cartões de imóveis e fotos](docs/imagens/chat-web.png) |
 
-Mais telas: [a Bia embutida no site de uma imobiliária](docs/imagens/widget.png) ·
-[tentativa de prompt injection, marcada e classificada](docs/imagens/injection.png).
+Mais telas: [tentativa de prompt injection, marcada e classificada](docs/imagens/injection.png).
 
 ---
 
