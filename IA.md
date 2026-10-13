@@ -162,4 +162,4 @@ Três mudanças, nesta ordem de impacto:
 Não entrou: trocar por um modelo menor (`qwen2.5:7b`, já em disco) — reabriria o risco de todas as correções de prompt validadas contra o `qwen3.5`.
 - Taxa de resposta "ruim" (heurística de `_parece_resposta_ruim`) antes do guardrail de retry: ~2 em 5–6 respostas em teste manual a `temperature=0.4`. Depois do retry + `temperature=0.15`: 6/6 limpo nos testes registrados.
 
-Os testes que sustentam cada número estão em `tests/` — 347 passando, incluindo os adversariais contra o Ollama e o Postgres reais. A correspondência requisito a requisito está em [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md).
+Os testes que sustentam cada número estão em `tests/` — 371 passando, incluindo os adversariais contra o Ollama e o Postgres reais. A correspondência requisito a requisito está em [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md).

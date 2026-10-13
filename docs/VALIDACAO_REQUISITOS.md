@@ -1,8 +1,8 @@
 # Validação dos requisitos
 
 Cada item do enunciado do Tech Challenge — Fase 5, com **onde está no
-código** e **qual teste comprova**. Conferido contra `pytest` em 11/10/2026:
-**271 testes passando**, nenhum falhando.
+código** e **qual teste comprova**. Conferido contra `pytest` em 13/10/2026:
+**371 testes passando**, nenhum falhando.
 
 Os testes rodam contra o **Ollama e o Postgres reais**, sem mock — decisão
 explicada em [SOLID.md](SOLID.md) e [ARQUITETURA.md](../ARQUITETURA.md). Os
@@ -10,9 +10,8 @@ que dependem de serviço **pulam** com a razão e o comando na mensagem
 quando a infra não está de pé, em vez de falhar ([`tests/conftest.py`](../tests/conftest.py)):
 
 ```
-sem Docker e sem Ollama   →  207 passed, 64 skipped em 3,3s
-só com o Postgres          →  228 passed,  7 skipped
-tudo no ar                 →  271 passed
+sem o Postgres no ar  →  273 passed, 98 skipped em 9 s
+tudo no ar            →  371 passed em ~15 min
 ```
 
 Legenda: ✅ feito · ⚠️ parcial, com a limitação escrita · ❌ não feito.
@@ -71,7 +70,7 @@ Legenda: ✅ feito · ⚠️ parcial, com a limitação escrita · ❌ não feit
 | Segurança | ✅ | Login argon2id com convite de uso único; sessão server-side; PII mascarada antes de persistir; rate limit; token do bot suprimido do log; detecção e classificação de prompt injection em 4 tipos | 
 | Integração com CRM | ✅ | `POST /crm/leads` e `GET /crm/leads.csv` |
 | Voice AI | ✅ | **As duas metades, locais.** Entrada: áudio do Telegram transcrito com `mlx-whisper` via Metal. Saída: a Bia responde falando ([`core/tts.py`](../app/core/tts.py)) — `say` no macOS, `piper` no container, sem API paga. Responde em áudio para quem mandou áudio |
-| Deploy em cloud | ⚠️ | Dockerfile e compose prontos, app sobe containerizado. **Não há deploy publicado**: o Ollama precisa rodar nativo para ter Metal, e hospedar um 9B com GPU não cabe no escopo de uma POC |
+| Deploy em cloud | ✅ | Versão publicada em servidor remoto, acessível pela internet: bot no Telegram, painel em `:8000` e site em `:5500` (endereços no [README](../README.md#testar-agora-versão-no-ar)). Dockerfile e compose prontos para replicar |
 | Integração com WhatsApp | ❌ | Aprovação de número de negócio não cabe no prazo. O Telegram cobre o mesmo padrão de canal |
 
 Testes dos diferenciais: `test_security.py` · `test_auth.py` (13) ·
