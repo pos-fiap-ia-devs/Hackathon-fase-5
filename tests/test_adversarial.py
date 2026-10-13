@@ -17,6 +17,12 @@ from app.agents.search import buscar_imoveis
 from app.core.turno import processar_turno
 from app.db.repo import get_conn
 
+from tests.conftest import precisa_de_ollama, precisa_de_seed
+
+# Roda o turno inteiro: precisa do Ollama E do banco semeado.
+pytestmark = [precisa_de_ollama, precisa_de_seed]
+
+
 _VALORES = re.compile(r"R\$\s*([\d.,]+)")
 
 
@@ -103,21 +109,21 @@ def test_nao_inventa_imovel_em_bairro_sem_estoque(lead_qualificado):
     """Bairro que EXISTE na base, mas sem nada batendo os filtros -- o
     agente tem que admitir, nunca preencher a lacuna.
 
-    Moema de propósito: bairro caro da capital, então 4 quartos até R$ 100
-    mil não existe lá nem por acaso. Um bairro inexistente deixaria o
-    teste passar à toa (não teria estoque de qualquer jeito, e não provaria
-    nada sobre o guardrail)."""
-    existe_o_bairro = buscar_imoveis(finalidade="venda", zona="Moema", limite=1)
+    Aldeia da Serra de propósito: bairro de casas de alto padrão do catálogo
+    real, então 4 quartos até R$ 100 mil não existe lá nem por acaso. Um
+    bairro inexistente deixaria o teste passar à toa (não teria estoque de
+    qualquer jeito, e não provaria nada sobre o guardrail)."""
+    existe_o_bairro = buscar_imoveis(finalidade="venda", zona="Aldeia da Serra", limite=1)
     assert existe_o_bairro, "cenario mal montado: o bairro precisa existir na base"
 
     sem_estoque = buscar_imoveis(
-        finalidade="venda", zona="Moema", preco_max=100_000, quartos_min=4, limite=1,
+        finalidade="venda", zona="Aldeia da Serra", preco_max=100_000, quartos_min=4, limite=1,
     )
     assert not sem_estoque, "cenario mal montado: existe estoque batendo esses filtros"
 
     resposta = processar_turno(
         chat_id=lead_qualificado, canal="telegram",
-        mensagem="quero em Moema, 4 quartos, ate 100 mil", origem="texto",
+        mensagem="quero em Aldeia da Serra, 4 quartos, ate 100 mil", origem="texto",
     )
     _assert_sem_valor_inventado(resposta, orcamento_do_cliente={400_000, 100_000})
 

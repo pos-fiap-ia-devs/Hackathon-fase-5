@@ -1,0 +1,23 @@
+# Tudo que nao precisa entrar na imagem. Alem de deixar o build menor, isso
+# e seguranca: `.env` tem o token do bot e nao pode ser copiado pra dentro
+# de uma imagem que pode ser publicada.
+.env
+.venv/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.git/
+.gitignore
+*.log
+.run.pid
+.DS_Store
+tests/
+docs/
+*.md
+*.mp4
+uv.lock
+run.sh
+stop.sh
+docker-compose.yml

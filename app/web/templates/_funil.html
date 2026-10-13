@@ -1,0 +1,96 @@
+{# Quadro Kanban do funil. Uma coluna por etapa de `leads.status`
+   (repo.ETAPAS_FUNIL) -- o status já existia e governa o roteamento do
+   grafo, então o quadro não inventa estado novo: ele MOSTRA o que o
+   agente já decide.
+
+   `encerrado` e `perdido` ficam de fora: são saídas, não etapas. Com 85
+   leads encerrados na base, enfileirá-los aqui esconderia os 7 que
+   importam.
+
+   Estilo em app/web/static/painel.css (classes .coluna/.cartao/.pontos). #}
+{% if erro %}
+<p class="mb-3 rounded-lg px-3 py-2 text-xs" style="background:#fffbeb;color:#92400e">{{ erro }}</p>
+{% endif %}
+<div class="grid gap-4 overflow-x-auto pb-1" style="grid-template-columns: repeat({{ etapas|length }}, minmax(215px, 1fr))">
+    {% for etapa, rotulo in etapas %}
+    {% set leads = funil[etapa] %}
+    <div class="min-w-0 coluna" data-etapa="{{ etapa }}"
+         ondragover="event.preventDefault(); this.classList.add('alvo')"
+         ondragleave="this.classList.remove('alvo')"
+         ondrop="soltar(event, this)">
+        <div class="coluna-titulo">
+            <h3>{{ rotulo }}</h3>
+            <span class="coluna-contagem">{{ leads|length }}</span>
+        </div>
+
+        {# Rolagem por coluna: sem isso a etapa com mais leads estica a
+           página e deixa um vazio enorme ao lado das outras. #}
+        <div class="coluna-lista">
+            {% for l in leads %}
+            {# Clicar abre o mesmo painel de detalhe da lista -- um alvo
+               só pro HTMX, nenhuma tela duplicada. #}
+            <article draggable="true" data-lead="{{ l.id }}"
+                     ondragstart="event.dataTransfer.setData('text/plain', '{{ l.id }}'); this.classList.add('arrastando')"
+                     ondragend="this.classList.remove('arrastando')"
+                     hx-get="/dashboard/lead/{{ l.id }}" hx-target="#lead-detail" hx-swap="innerHTML"
+                     class="cartao {{ l.prioridade }}">
+                <div class="flex items-start gap-2">
+                    <span class="pontos {{ l.prioridade }} shrink-0 mt-0.5">{{ l.score }}</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="cartao-nome truncate">{{ l.nome or l.chat_id }}</p>
+                        <p class="cartao-meta truncate">
+                            {{ l.intencao or "sem intenção" }}
+                            {%- if l.regiao %} · {{ l.regiao }}{% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                {% if l.ultima_fala %}
+                {# A última fala do CLIENTE, não a do agente: é ela que diz
+                   onde a conversa parou. #}
+                <p class="cartao-fala line-clamp-2">“{{ l.ultima_fala }}”</p>
+                {% endif %}
+
+                <div class="mt-2 flex items-center gap-1.5 flex-wrap">
+                    <span class="etiqueta">{{ l.canal }}</span>
+                    {% if l.urgencia == 'alta' %}
+                    <span class="etiqueta alerta">urgente</span>
+                    {% endif %}
+                    {% if l.faixa_preco_max %}
+                    <span class="cartao-meta">até R$ {{ "{:,}".format(l.faixa_preco_max|int).replace(",", ".") }}</span>
+                    {% elif l.ticket %}
+                    <span class="cartao-meta">ticket R$ {{ "{:,}".format(l.ticket|int).replace(",", ".") }}</span>
+                    {% endif %}
+                </div>
+            </article>
+            {% else %}
+            <p class="rounded-lg px-2.5 py-5 text-center text-[11px]"
+               style="border:1px dashed var(--linha);color:var(--tinta-fraca)">nenhum</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<p id="funil-erro" hidden class="mt-3 rounded-lg px-3 py-2 text-xs" style="background:#fffbeb;color:#92400e"></p>
+
+<script>
+// Arrastar e soltar nativo do HTML, sem biblioteca -- o projeto nao tem
+// build de JS e nao vai ganhar um por causa disso.
+//
+// O servidor PODE RECUSAR: mover pra "Visita marcada" sem visita
+// registrada faria o agente falar de um compromisso que nao existe
+// (repo.mover_lead). Por isso o quadro so se atualiza com a resposta
+// dele, nunca otimisticamente -- mover na tela e o servidor negar seria
+// pior que esperar.
+function soltar(ev, coluna) {
+    ev.preventDefault();
+    coluna.classList.remove('alvo');
+    const lead = ev.dataTransfer.getData('text/plain');
+    if (!lead) return;
+    htmx.ajax('POST', `/dashboard/lead/${lead}/etapa`, {
+        target: '#funil', swap: 'innerHTML',
+        values: { etapa: coluna.dataset.etapa },
+    });
+}
+</script>

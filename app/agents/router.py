@@ -8,7 +8,8 @@ transforma esse rotulo em pergunta humanizada e o agente `responder`
 
 Ordem das perguntas segue literalmente os dois cenarios do PDF:
   cenario 1 (compra/aluguel): preco -> quartos -> regiao -> urgencia -> reuniao
-  cenario 2 (investimento): perfil -> ticket -> retorno -> especialista
+  cenario 2 (investimento): perfil -> ticket -> retorno -> opcoes no ticket
+    -> conversa agendada com especialista (core/turno.py::_encaminhar_especialista)
 """
 
 import re
@@ -160,6 +161,34 @@ def pediu_lista_de_regioes(mensagem: str | None) -> bool:
 def _normalizar(texto: str) -> str:
     sem_acento = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
     return re.sub(r"\s+", " ", sem_acento.lower()).strip()
+
+
+# "Quero ver outro imovel." Achado testando: logo depois das opcoes, a Bia
+# ignorava o pedido e insistia pra escolher entre as MESMAS 3; com a visita
+# ja marcada, prometia "vamos te enviar as opcoes assim que possivel" --
+# compromisso que nada no sistema cumpre. Detectado em codigo, como a
+# despedida, porque vale em qualquer ponto da conversa.
+_PEDIDOS_OUTRO_IMOVEL = (
+    "outro imovel", "outros imoveis", "outra opcao", "outras opcoes",
+    "mais opcoes", "ver outro", "ver outra", "ver outros", "ver outras",
+    "procurar outro", "procurar outra",
+    "buscar outro", "buscar outra", "outro apartamento", "outra casa",
+    "outro terreno", "outra cobertura", "outro studio", "outra sala",
+    "nova busca", "outra busca", "comecar de novo", "recomecar",
+)
+
+
+def pediu_outro_imovel(mensagem: str | None) -> bool:
+    """Cliente quer recomecar a busca por um imovel diferente."""
+    if not mensagem:
+        return False
+    normalizada = _normalizar(mensagem)
+    # "Quero outro horario" / "outra opcao de dia" e REMARCAR a visita, nao
+    # trocar de imovel -- disparar aqui limparia a busca de quem so queria
+    # mudar a data. Fala de tempo ganha.
+    if re.search(r"\b(horario|hora|horas|dia|dias|data|semana|manha|tarde|noite)\b", normalizada):
+        return False
+    return any(pedido in normalizada for pedido in _PEDIDOS_OUTRO_IMOVEL)
 
 
 _PERGUNTAS_QUEM_E = (
@@ -318,8 +347,78 @@ def pediu_para_ver_opcoes(mensagem: str | None) -> bool:
     return any(pedido in normalizada for pedido in _PEDIDOS_VER_OPCOES)
 
 
-def decidir_proximo(slots: dict, mensagem: str | None = None) -> str:
+# Tipos em que "quantos quartos?" nao faz sentido. O catalogo real tem 74
+# terrenos, galpoes, lojas e salas; sem esta regra o agente perguntaria
+# quartos pra quem quer terreno, e a busca (`quartos >= N`) devolveria vazio
+# porque terreno tem quartos = 0. Fonte unica: o roteador, o scoring, a
+# busca e os cards leem DAQUI.
+TIPOS_SEM_QUARTO = frozenset({"terreno", "galpao", "loja", "sala", "predio"})
+
+
+# Palavra dita pelo cliente -> tipo de imovel. Deteccao em CODIGO, nao no
+# LLM: testado contra o modelo real, o campo no schema sem regra no prompt
+# voltava null em 6 de 6 frases ("terreno em Barueri" inclusive), e com uma
+# regra de 1 linha no prompt o cenario 1 do enunciado perdia a REGIAO em 3
+# de 3. Palavra de tipo de imovel e vocabulario fechado -- nao precisa de
+# modelo. `\b` dos dois lados: "casa" nao pode casar com "casamento".
+TIPOS_POR_PALAVRA: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("terreno", ("terreno", "terrenos", "lote", "lotes")),
+    ("apartamento", ("apartamento", "apartamentos", "apto", "aptos")),
+    ("cobertura", ("cobertura", "coberturas")),
+    ("studio", ("studio", "studios", "estudio", "kitnet", "kitnete")),
+    ("casa", ("casa", "casas", "sobrado", "sobrados")),
+    ("chacara", ("chacara", "chacaras", "sitio")),
+    ("galpao", ("galpao", "galpoes")),
+    ("loja", ("loja", "lojas", "ponto comercial")),
+    ("predio", ("predio", "predios")),
+    ("sala", ("sala comercial", "salas comerciais", "escritorio", "conjunto comercial")),
+)
+
+
+def detectar_tipo_imovel(mensagem: str | None) -> str | None:
+    """Tipo que o cliente NOMEOU na mensagem, ou None. A primeira palavra
+    da ordem acima vence -- "apartamento ou casa" fica apartamento, que e o
+    que ele disse primeiro."""
+    if not mensagem:
+        return None
+    texto = _normalizar(mensagem)
+    achados = []
+    for tipo, palavras in TIPOS_POR_PALAVRA:
+        for palavra in palavras:
+            m = re.search(rf"\b{re.escape(palavra)}\b", texto)
+            if m:
+                achados.append((m.start(), tipo))
+    return min(achados)[1] if achados else None
+
+
+def tipo_sem_quarto(tipo: str | None) -> bool:
+    return (tipo or "") in TIPOS_SEM_QUARTO
+
+
+def quartos_do_filtro(slots: dict) -> int | None:
+    """Quartos como FILTRO de busca. Para tipo sem quarto devolve None,
+    mesmo que o cliente tenha dito um numero antes de mudar de ideia pra
+    terreno -- senao `quartos >= 2` eliminaria todo terreno (quartos = 0)."""
+    if tipo_sem_quarto(slots.get("tipo_imovel")):
+        return None
+    return slots.get("quartos")
+
+
+def decidir_proximo(
+    slots: dict, mensagem: str | None = None, dispensados: tuple[str, ...] = ()
+) -> str:
+    """`dispensados`: campos que o cliente ja se recusou (ou nao soube)
+    informar depois de 3 tentativas -- `core/graph.py` os acumula em
+    `leads.campos_dispensados`.
+
+    Continua funcao pura: a lista entra por parametro, nao por consulta ao
+    banco, entao o roteador segue testavel sem Postgres."""
     intencao = slots.get("intencao") or "indefinido"
+
+    def falta(campo: str, pergunta: str) -> bool:
+        """Campo pendente E ainda perguntavel. Sem a segunda metade, o
+        roteiro voltava pra mesma pergunta pra sempre."""
+        return slots.get(campo) is None and pergunta not in dispensados
 
     if intencao == "indefinido":
         return "perguntar_intencao"
@@ -334,9 +433,9 @@ def decidir_proximo(slots: dict, mensagem: str | None = None) -> str:
         # preco e quartos continuam obrigatorios antes de mostrar qualquer
         # coisa: sao os dois filtros que impedem a lista de sair generica
         # demais, e o PDF pede os dois explicitamente no Cenario 1.
-        if slots.get("faixa_preco_max") is None:
+        if falta("faixa_preco_max", "perguntar_preco"):
             return "perguntar_preco"
-        if slots.get("quartos") is None:
+        if not tipo_sem_quarto(slots.get("tipo_imovel")) and falta("quartos", "perguntar_quartos"):
             return "perguntar_quartos"
         # Atalho: com preco e quartos na mao, um pedido explicito de ver o
         # portfolio vale mais que terminar o questionario. Regiao/urgencia
@@ -345,20 +444,21 @@ def decidir_proximo(slots: dict, mensagem: str | None = None) -> str:
         # (core/turno.py::_apresentar_imoveis).
         if pediu_para_ver_opcoes(mensagem):
             return "buscar_imoveis"
-        if slots.get("regiao") is None:
+        if falta("regiao", "perguntar_regiao"):
             return "perguntar_regiao"
-        if slots.get("urgencia") is None:
+        if falta("urgencia", "perguntar_urgencia"):
             return "perguntar_urgencia"
         return "buscar_imoveis"
 
     if intencao == "investimento":
-        # Sem atalho aqui de proposito: o desfecho do Cenario 2 do PDF e
-        # encaminhar pra especialista, nao mostrar portfolio.
-        if slots.get("perfil_investidor") is None:
+        # Sem atalho aqui de proposito: o portfolio so aparece no fim do
+        # roteiro, dentro do ticket, e a escolha vira conversa agendada com
+        # o especialista (core/turno.py::_encaminhar_especialista).
+        if falta("perfil_investidor", "perguntar_perfil_investidor"):
             return "perguntar_perfil_investidor"
-        if slots.get("ticket") is None:
+        if falta("ticket", "perguntar_ticket"):
             return "perguntar_ticket"
-        if slots.get("expectativa_retorno") is None:
+        if falta("expectativa_retorno", "perguntar_expectativa_retorno"):
             return "perguntar_expectativa_retorno"
         return "encaminhar_especialista"
 

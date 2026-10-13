@@ -17,10 +17,16 @@ from app.core.llm import chat_structured
 from app.core.traces import TraceInfo
 
 CORRETORES = ["Ana Ribeiro", "Carlos Mendes", "Fernanda Souza"]
+# Cenario 2: investidor agenda com especialista, nao com corretor de visita.
+ESPECIALISTAS_INVESTIMENTO = ["Ricardo Alves", "Juliana Prado"]
 
 
 class EscolhaVisita(BaseModel):
     numero_escolhido: int | None = None
+    # Codigo publico do imovel (MOE-0001). Vem ANTES dos outros campos de
+    # texto de proposito: a ordem do schema afeta a extracao neste modelo
+    # (ver docstring de LeadQualification em agents/qualifier.py).
+    codigo_escolhido: str | None = None
     horario_texto: str | None = None
     nome: str | None = None
     telefone: str | None = None
@@ -34,6 +40,8 @@ Extraia:
 - numero_escolhido: qual numero (1, 2 ou 3) ele escolheu. So preencha se \
 ele claramente indicou um numero ou disse "o primeiro"/"o segundo"/"o \
 terceiro"/"esse ultimo", etc.
+- codigo_escolhido: o codigo do imovel, se ele citou um (formato LLL-0000, \
+por exemplo MOE-0001 ou VMA-0004). Copie exatamente como aparece.
 - horario_texto: quando ele quer visitar, EXATAMENTE como ele disse (ex: \
 "amanha de manha", "sabado a tarde"). So preencha se ele mencionar horario/dia.
 - nome: o nome do cliente, SO se a mensagem for claramente uma \
@@ -70,6 +78,11 @@ def escolher_corretor(lead_id: int) -> str:
     """Distribuicao redonda-robin simples, sem estado externo -- suficiente
     pro POC ("distribuir entre corretores" nao e requisito do PDF)."""
     return CORRETORES[lead_id % len(CORRETORES)]
+
+
+def escolher_especialista(lead_id: int) -> str:
+    """Mesmo rodizio deterministico de `escolher_corretor`."""
+    return ESPECIALISTAS_INVESTIMENTO[lead_id % len(ESPECIALISTAS_INVESTIMENTO)]
 
 
 class NovaPreferenciaHorario(BaseModel):

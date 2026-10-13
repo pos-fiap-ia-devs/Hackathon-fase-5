@@ -32,14 +32,19 @@ from app.agents.router import (
     TRATATIVA_POR_OBJECAO,
     detectar_objecao,
     eh_aceite_curto,
+    detectar_tipo_imovel,
     perguntou_quem_e,
+    quartos_do_filtro,
 )
 from app.agents.scheduler_agent import (
     escolher_corretor,
+    escolher_especialista,
     extrair_reagendamento,
     proximo_horario_util,
 )
 from app.agents.search import buscar_imoveis
+from app.core import injecao
+from app.core.config import get_settings
 from app.core.llm import LLMError, chat_text
 from app.core.memory import contexto_conversa
 from app.core.prompts import INSTRUCAO_PADRAO, INSTRUCOES_POR_ACAO, PERSONA, REGRAS
@@ -51,6 +56,45 @@ from app.db import repo
 logger = logging.getLogger(__name__)
 
 RESPOSTA_FALLBACK = "Desculpa, tive um probleminha aqui agora. Pode repetir o que voce disse?"
+
+
+class RespostaTurno(str):
+    """Texto do turno + a galeria de fotos que vai junto com ele.
+
+    Subclasse de `str` de proposito. Ate aqui o contrato do orquestrador
+    era "texto entra, texto sai" (secao 5.8) e os tres canais, a suite e o
+    chat web tratam o retorno de `processar_turno` como string. Foto so
+    existe num turno especifico (a apresentacao de imoveis); trocar o
+    retorno por uma tupla ou um dataclass obrigaria todo call site a
+    desempacotar algo que quase sempre vem vazio. Herdando de str, quem so
+    quer o texto continua funcionando sem mudar uma linha, e quem sabe
+    renderizar imagem (Telegram, chat web) le `.galeria`.
+
+    Formato de `galeria`: [{imovel_id, numero, legenda, fotos: [url, ...]}],
+    na mesma ordem e com a mesma numeracao dos cards.
+
+    `texto_sem_cards`: a MESMA resposta sem o bloco de cards -- so a frase
+    de abertura e a pergunta final. Existe porque canal que renderiza
+    imagem ja mostra titulo, preco, metragem e codigo DENTRO do cartao
+    (chat web/widget) ou na legenda do album (Telegram): repetir tudo em
+    texto logo acima e a mesma informacao duas vezes na tela. O CLI, que
+    nao tem imagem, continua usando o texto completo -- e por isso a
+    escolha e do canal, nao do orquestrador.
+
+    Vazio quando o turno nao apresenta imovel: ai nao ha card nenhum pra
+    tirar e os dois textos seriam iguais.
+    """
+
+    galeria: list[dict]
+    texto_sem_cards: str
+
+    def __new__(
+        cls, texto: str, galeria: list[dict] | None = None, texto_sem_cards: str = "",
+    ) -> "RespostaTurno":
+        obj = super().__new__(cls, texto)
+        obj.galeria = galeria or []
+        obj.texto_sem_cards = texto_sem_cards or texto
+        return obj
 
 
 def _persona_com_data(turno: int) -> str:
@@ -117,12 +161,36 @@ def processar_turno(*, chat_id: str, canal: str, mensagem: str, origem: str = "t
 
     turno = repo.contar_turnos(lead_id) + 1
 
-    repo.salvar_mensagem(lead_id, papel="user", conteudo=mensagem, origem=origem)
+    # Marca tentativa de prompt injection ANTES de processar -- e so
+    # marcacao, nao bloqueio: a mitigacao ja e estrutural (a mensagem vai
+    # como turno `user`, nunca concatenada no system prompt, e fato
+    # critico e montado em codigo). O atendimento segue normal; o que muda
+    # e que agora a tentativa aparece no painel em vez de passar batida.
+    suspeita = injecao.detectar(mensagem)
+    if suspeita:
+        logger.warning(
+            "suspeita de prompt injection (lead_id=%s, tipo=%s)", lead_id, suspeita
+        )
+    repo.salvar_mensagem(
+        lead_id, papel="user", conteudo=mensagem, origem=origem, suspeita_injecao=suspeita
+    )
 
-    resposta = processar_turno_grafo(lead, mensagem, turno=turno)
+    resposta, galeria, texto_sem_cards = processar_turno_grafo(lead, mensagem, turno=turno)
 
-    repo.salvar_mensagem(lead_id, papel="assistant", conteudo=resposta, origem="texto")
-    return resposta
+    # Galeria gravada NA mensagem, nao so devolvida ao canal: sem isso,
+    # recarregar o chat web mostraria a apresentacao de imoveis sem as
+    # fotos que o cliente recebeu, e o dashboard idem.
+    # Grava a versao SEM os cards quando ha galeria: os cards vao em
+    # `anexos`, e todo leitor do historico (chat web, widget, detalhe do
+    # lead no painel) renderiza `_galeria.html` junto. Guardar o texto
+    # completo faria a duplicacao voltar no reload da pagina -- a bolha
+    # repetiria o que o cartao logo abaixo ja mostra.
+    repo.salvar_mensagem(
+        lead_id, papel="assistant",
+        conteudo=texto_sem_cards if galeria else resposta,
+        origem="texto", anexos=galeria,
+    )
+    return RespostaTurno(resposta, galeria, texto_sem_cards)
 
 
 # ---------------------------------------------------------------- qualificacao (cenarios 1 e 2, antes do desfecho)
@@ -236,7 +304,12 @@ def _gerar_resposta(mensagem: str, slots: dict, proxima_acao: str, *, lead_id: i
     permite_nome = turno <= 1 or perguntou_quem_e(mensagem)
     try:
         texto, trace = chat_text(
-            agente=agente, system=system, user=user, slots=slots, permite_nome=permite_nome
+            agente=agente, system=system, user=user, slots=slots,
+            permite_nome=permite_nome,
+            # Guardrail estrutural: valor que o CLIENTE afirmou e que nao
+            # esta nos slots nao pode voltar na resposta (core/llm.py::
+            # _sanitizar_valor_do_cliente).
+            mensagem_cliente=mensagem,
         )
         registrar_trace(trace, lead_id=lead_id, turno=turno)
         return texto
@@ -274,6 +347,13 @@ def _gerar_frase(instrucao: str, *, lead_id: int, turno: int, fallback: str, slo
     fato. Sem essa checagem, a instrucao "nao cite preco" seria so mais
     uma regra de prompt -- exatamente o tipo de garantia que este projeto
     ja provou nao segurar (secao 5.3 do PLANO.md)."""
+    # Modo demonstracao (core/llm_demo.py): o `fallback` ja E a frase certa
+    # pra este caso, escrita a mao. Chamar o provedor de regras aqui so
+    # produziria texto generico pior que o fallback que ja esta na linha de
+    # baixo -- entao o atalho devolve a frase boa direto.
+    if get_settings().llm_demo:
+        return fallback
+
     system = _persona_com_data(turno)
     try:
         texto, trace = chat_text(agente="responder", system=system, user=instrucao, temperature=0.4, slots=slots)
@@ -290,13 +370,19 @@ def _gerar_frase(instrucao: str, *, lead_id: int, turno: int, fallback: str, slo
 
 # ---------------------------------------------------------------- cenario 1: busca + apresentacao (RAG, secao 5.4)
 
-def _apresentar_imoveis(lead_id: int, slots: dict, mensagem: str, *, turno: int) -> str:
+def _apresentar_imoveis(
+    lead_id: int, slots: dict, mensagem: str, *, turno: int
+) -> tuple[str, list[dict], str]:
+    """Devolve (texto, galeria). A galeria vem separada do texto porque
+    cada canal renderiza imagem do seu jeito (album no Telegram, <img> no
+    chat web, URL crua no CLI) -- o orquestrador nao sabe nada disso."""
     finalidade = "aluguel" if slots.get("intencao") == "aluguel" else "venda"
     resultados = buscar_imoveis(
         finalidade=finalidade,
         zona=slots.get("regiao"),
         preco_max=slots.get("faixa_preco_max"),
-        quartos_min=slots.get("quartos"),
+        quartos_min=quartos_do_filtro(slots),
+        tipo=slots.get("tipo_imovel"),
         limite=3,
     )
     score = calcular_score(slots)
@@ -310,10 +396,11 @@ def _apresentar_imoveis(lead_id: int, slots: dict, mensagem: str, *, turno: int)
         # _no_decidir_proximo` intercepta assim que a regiao e informada,
         # pra nao deixar o cliente responder mais perguntas achando que a
         # cidade dele esta ok. Aqui e sempre "existe, mas nao nessa faixa".
-        return (
+        vazio = (
             "Poxa, não encontrei nada com exatamente esses critérios agora. "
             "Quer tentar ajustar a faixa de preço ou a região?"
         )
+        return vazio, [], vazio
 
     repo.salvar_imoveis_apresentados(lead_id, [im["id"] for im in resultados])
     repo.atualizar_status_score(lead_id, score=score, status="aguardando_escolha")
@@ -331,11 +418,16 @@ def _apresentar_imoveis(lead_id: int, slots: dict, mensagem: str, *, turno: int)
         lead_id=lead_id, turno=turno, slots=slots,
         fallback="Encontrei essas opções pra você:",
     )
-    return (
-        f"{intro}\n\n{cards}\n\n"
-        "Qual te interessou -- pode dizer o número ou o bairro? E qual dia costuma "
-        "funcionar melhor pra uma visita?"
+    fechamento = (
+        "Qual te interessou -- pode dizer o número, o código ou o bairro? E qual dia "
+        "costuma funcionar melhor pra uma visita?"
     )
+    texto = f"{intro}\n\n{cards}\n\n{fechamento}"
+    # Sem o bloco de cards, pro canal que mostra o imovel como imagem --
+    # senao o cliente le titulo/preco/codigo em texto e ve tudo de novo
+    # logo abaixo, no cartao.
+    texto_sem_cards = f"{intro}\n\n{fechamento}"
+    return texto, _galeria_imoveis(resultados), texto_sem_cards
 
 
 def _cidades_atendidas(regiao_pedida: str, *, finalidade: str, lead_id: int, turno: int) -> str:
@@ -387,7 +479,7 @@ def _listar_regioes(lead_id: int, slots: dict, *, turno: int) -> str:
     regioes = repo.regioes_disponiveis(
         finalidade=finalidade,
         preco_max=slots.get("faixa_preco_max"),
-        quartos_min=slots.get("quartos"),
+        quartos_min=quartos_do_filtro(slots),
     )
 
     if not regioes:
@@ -415,7 +507,7 @@ def _listar_regioes(lead_id: int, slots: dict, *, turno: int) -> str:
         blocos += f"\n\n(e mais {len(por_cidade) - len(mostradas)} cidades)"
 
     filtro = []
-    if slots.get("quartos"):
+    if quartos_do_filtro(slots):
         filtro.append(f"{slots['quartos']} quarto(s)")
     if slots.get("faixa_preco_max"):
         valor = f"R$ {slots['faixa_preco_max']:,.0f}".replace(",", ".")
@@ -438,28 +530,112 @@ def _listar_regioes(lead_id: int, slots: dict, *, turno: int) -> str:
     return f"{intro}\n\n{blocos}\n\nQual dessas regiões faz mais sentido pra você?"
 
 
+def _preco_formatado(imovel: dict) -> str:
+    preco = f"R$ {imovel['preco']:,.0f}".replace(",", ".")
+    return preco + ("/mês" if imovel["finalidade"] == "aluguel" else "")
+
+
+def _specs_do_imovel(im: dict) -> str:
+    """Linha de especificacoes ("3 quartos · 2 banheiros · 350 m2"), montada
+    so com o que existe E e confiavel.
+
+    Dois cortes, ambos vindos do catalogo real:
+      * quarto/banheiro zero NAO aparece. Terreno tem quartos = 0, e "0
+        quarto(s)" num card de terreno e dado errado, nao dado neutro.
+      * campo marcado em `campos_estimados` NAO aparece. A imobiliaria deixa
+        `banheiros` em branco na maior parte dos anuncios e o importador o
+        estima por `suites + 1`; afirmar esse numero ao cliente seria a
+        alucinacao que o resto do projeto inteiro existe pra evitar. Estimado
+        serve pra busca e pro score, nunca pra frase."""
+    estimados = set(im.get("campos_estimados") or [])
+    partes = []
+    quartos = im.get("quartos") or 0
+    if quartos:
+        partes.append(f"{quartos} quarto{'s' if quartos != 1 else ''}")
+    banheiros = im.get("banheiros") or 0
+    if banheiros and "banheiros" not in estimados:
+        partes.append(f"{banheiros} banheiro{'s' if banheiros != 1 else ''}")
+    vagas = im.get("vagas") or 0
+    if vagas:
+        partes.append(f"{vagas} vaga{'s' if vagas != 1 else ''}")
+    if im.get("area"):
+        partes.append(f"{im['area']} m²")
+    return " · ".join(partes)
+
+
 def _formatar_cards(imoveis: list[dict]) -> str:
     """Card montado em codigo -- ver guardrail no docstring do modulo.
     Numeros (1, 2, 3) sao o que `_turno_escolha_visita` usa pra mapear a
     resposta do cliente de volta ao imovel, sem precisar repetir titulo."""
     linhas = []
     for i, im in enumerate(imoveis, start=1):
-        preco_fmt = f"R$ {im['preco']:,.0f}".replace(",", ".")
-        sufixo = "/mês" if im["finalidade"] == "aluguel" else ""
         linha = (
             f"{i}. {im['titulo']} — {im['bairro']}\n"
-            f"   {preco_fmt}{sufixo} · {im['quartos']} quarto(s) · "
-            f"{im['banheiros']} banheiro(s) · {im['area']}m²"
+            f"   {_preco_formatado(im)} · {_specs_do_imovel(im)}"
         )
         if im.get("rentabilidade_estimada"):
-            linha += f"\n   rentabilidade estimada: {im['rentabilidade_estimada']}% a.a."
+            # "bruta" e "estimada" sempre: o catálogo não publica
+            # rentabilidade, ela é calculada (scripts/importar_orion.py::
+            # marcar_investimento) e não desconta condomínio, IPTU nem vacância.
+            linha += f"\n   rentabilidade bruta estimada: {im['rentabilidade_estimada']}% a.a."
+        # Codigo por ultimo, como rodape: o numero serve pra responder
+        # AGORA ("quero o 2"), o codigo sobrevive a uma busca nova.
+        if im.get("codigo"):
+            linha += f"\n   Cód. {im['codigo']}"
         linhas.append(linha)
     return "\n\n".join(linhas)
 
 
+def _galeria_imoveis(imoveis: list[dict]) -> list[dict]:
+    """As fotos que vao JUNTO com os cards (pedido do usuario) -- uma
+    entrada por imovel, mesma ordem e mesmo numero do card, porque o
+    cliente responde "quero o 2" e a foto precisa carregar esse 2 junto.
+
+    Legenda montada aqui em codigo pelo mesmo motivo do card (secao 5.3):
+    titulo, bairro e preco nunca passam pelo LLM. Renderizar e papel de
+    cada canal -- album no Telegram, grade de miniaturas no chat web.
+
+    Imovel sem foto no banco simplesmente nao entra: o card dele continua
+    no texto, so nao tem imagem. E o mesmo principio do resto do projeto
+    (secao 5.6) -- dado que nao existe nao vira placeholder inventado.
+    """
+    galeria = []
+    for i, im in enumerate(imoveis, start=1):
+        fotos = list(im.get("fotos") or [])
+        if not fotos:
+            continue
+        galeria.append({
+            "imovel_id": im["id"],
+            "numero": i,
+            # Campos SEPARADOS, nao so a legenda pronta: canal que
+            # renderiza HTML (chat web, widget, painel) monta um cartao de
+            # verdade -- miniatura, titulo, preco em destaque, metragem e
+            # codigo -- em vez de imprimir uma linha de texto. O Telegram
+            # continua usando `legenda`, que e o que cabe numa foto.
+            "titulo": im["titulo"],
+            "preco": _preco_formatado(im),
+            "quartos": im["quartos"],
+            # Linha pronta de especificacoes (ver `_specs_do_imovel`): o
+            # template nao decide sozinho o que mostrar, senao reintroduz
+            # "0 quartos" e banheiro estimado.
+            "specs": _specs_do_imovel(im),
+            "area": im["area"],
+            "bairro": im["bairro"],
+            "cidade": im.get("cidade"),
+            "codigo": im.get("codigo"),
+            "legenda": (
+                f"{i}. {im['titulo']} — {im['bairro']}\n"
+                f"{_preco_formatado(im)} · {_specs_do_imovel(im)}"
+                + (f"\nCód. {im['codigo']}" if im.get("codigo") else "")
+            ),
+            "fotos": fotos,
+        })
+    return galeria
+
+
 # ---------------------------------------------------------------- cenario 2: encaminhamento a especialista
 
-def _encaminhar_especialista(lead_id: int, slots: dict, mensagem: str, *, turno: int) -> str:
+def _motivo_investimento(slots: dict) -> str:
     partes = []
     if slots.get("perfil_investidor"):
         partes.append(f"perfil: {slots['perfil_investidor']}")
@@ -467,13 +643,72 @@ def _encaminhar_especialista(lead_id: int, slots: dict, mensagem: str, *, turno:
         partes.append(f"ticket: R$ {slots['ticket']:,.0f}".replace(",", "."))
     if slots.get("expectativa_retorno"):
         partes.append(f"retorno esperado: {slots['expectativa_retorno']}")
-    motivo = "; ".join(partes) if partes else "sem detalhes adicionais"
+    return "; ".join(partes) if partes else "sem detalhes adicionais"
 
-    repo.criar_encaminhamento(lead_id, especialista="Equipe de Investimentos Horizonte", motivo=motivo)
+
+def eh_investimento(slots: dict | None) -> bool:
+    return (slots or {}).get("intencao") == "investimento"
+
+
+def _buscar_para_investimento(slots: dict) -> list[dict]:
+    """Do mais especifico pro mais aberto, sempre dentro do ticket:
+    imovel marcado pra investimento (tem rentabilidade estimada) e, se
+    nao houver nenhum nessa faixa, imovel a venda comum. Regiao entra so
+    se o cliente disse uma -- o roteiro de investimento nao pergunta.
+    Nunca passa do ticket: mostrar imovel acima do que o cliente disse
+    que pode investir seria ignorar a resposta dele."""
+    regioes = [slots.get("regiao"), None] if slots.get("regiao") else [None]
+    for so_investimento in (True, False):
+        for regiao in regioes:
+            resultados = buscar_imoveis(
+                finalidade="venda", zona=regiao, preco_max=slots.get("ticket"),
+                tipo=slots.get("tipo_imovel"), so_investimento=so_investimento, limite=3,
+            )
+            if resultados:
+                return resultados
+    return []
+
+
+def _encaminhar_especialista(
+    lead_id: int, slots: dict, mensagem: str, *, turno: int
+) -> tuple[str, list[dict], str]:
+    """Cenario 2. Antes de passar pro especialista, mostra as opcoes de
+    investimento que cabem no ticket (pedido do usuario) -- o cliente
+    escolhe uma e marca a conversa com o especialista pelo MESMO sub-fluxo
+    da visita (status `aguardando_escolha`, `_confirmar_visita`). Sem
+    nenhum imovel na faixa, o encaminhamento direto de antes continua
+    sendo a saida: o especialista ainda tem o que oferecer."""
+    resultados = _buscar_para_investimento(slots)
     score = calcular_score(slots)
+
+    if resultados:
+        repo.salvar_imoveis_apresentados(lead_id, [im["id"] for im in resultados])
+        repo.atualizar_status_score(lead_id, score=score, status="aguardando_escolha")
+        cards = _formatar_cards(resultados)
+        intro = _gerar_frase(
+            "O cliente quer investir e você vai mostrar agora "
+            f"{len(resultados)} opção(ões) de imóvel que cabem no que ele pretende investir. "
+            f'Última mensagem dele: "{mensagem}". Escreva SÓ 1 frase curta e natural '
+            "apresentando as opções -- se a última mensagem trouxer uma objeção ou "
+            "hesitação, trate ela primeiro. Não liste nada, não cite preço, percentual "
+            "nem endereço, isso vem logo depois.",
+            lead_id=lead_id, turno=turno, slots=slots,
+            fallback="Separei algumas opções de investimento pra você:",
+        )
+        fechamento = (
+            "Qual delas te interessou -- pode dizer o número, o código ou o bairro? "
+            "Nosso especialista em investimentos vai analisar com você o retorno e os "
+            "custos: qual dia e período ficam bons pra essa conversa?"
+        )
+        texto = f"{intro}\n\n{cards}\n\n{fechamento}"
+        return texto, _galeria_imoveis(resultados), f"{intro}\n\n{fechamento}"
+
+    repo.criar_encaminhamento(
+        lead_id, especialista="Equipe de Investimentos Horizonte", motivo=_motivo_investimento(slots)
+    )
     repo.atualizar_status_score(lead_id, score=score, status="encaminhado")
 
-    return _gerar_frase(
+    texto = _gerar_frase(
         "O cliente acabou de ser qualificado pra investimento e você vai encaminhar ele "
         "pra um especialista em investimentos da equipe, que vai entrar em contato em breve. "
         f'Última mensagem dele: "{mensagem}". Escreva uma mensagem curta e calorosa avisando '
@@ -487,6 +722,7 @@ def _encaminhar_especialista(lead_id: int, slots: dict, mensagem: str, *, turno:
             "opções alinhadas ao que você me contou. 🤝"
         ),
     )
+    return texto, [], texto
 
 
 # ---------------------------------------------------------------- pos-busca: escolha do imovel + horario da visita
@@ -532,7 +768,8 @@ def _parece_nome_de_bairro(texto: str, imoveis: list[dict]) -> bool:
 
 
 def _proxima_pergunta_agendamento(
-    *, tem_imovel: bool, tem_horario: bool, tem_nome: bool, tem_telefone: bool
+    *, tem_imovel: bool, tem_horario: bool, tem_nome: bool, tem_telefone: bool,
+    investimento: bool = False,
 ) -> str:
     tem_contato = tem_nome and tem_telefone
     if tem_imovel and tem_horario and not tem_contato:
@@ -543,6 +780,11 @@ def _proxima_pergunta_agendamento(
             return "Perfeito! Só me confirma um telefone pra contato?"
         return "Perfeito! Última coisa: pode me passar seu nome e um telefone pra contato?"
     if tem_imovel and not tem_horario:
+        if investimento:
+            return (
+                "Ótima escolha! Qual dia e período ficam bons pra você conversar com "
+                "nosso especialista em investimentos sobre ele?"
+            )
         return "Legal! E qual dia ou período costuma funcionar melhor pra você visitar?"
     if tem_horario and not tem_imovel:
         return "Entendido sobre o horário! Qual das opções te interessou -- pode ser o número (1, 2 ou 3) ou o bairro."
@@ -556,6 +798,20 @@ def _proxima_pergunta_agendamento(
 # perguntar) mora em core/graph.py como nos de um StateGraph. As funcoes
 # abaixo sao as pecas reutilizaveis.
 
+# Codigo publico do imovel na fala do cliente: "quero ver o MOE-0001".
+# Casado em codigo e nao so pelo LLM porque e formato fixo -- mesma
+# filosofia de agents/router.py: o que casa por string nao se pede pro
+# modelo classificar. Hifen opcional e caixa livre ("moe 0001" conta).
+_CODIGO_IMOVEL = re.compile(r"\b([a-zA-Z]{3})[\s-]?(\d{4})\b")
+
+
+def _codigo_na_mensagem(mensagem: str | None) -> str | None:
+    if not mensagem:
+        return None
+    achado = _CODIGO_IMOVEL.search(mensagem)
+    return f"{achado.group(1).upper()}-{achado.group(2)}" if achado else None
+
+
 def _resolver_escolha(lead: dict, mensagem: str, escolha) -> dict:
     """Parte 100% em codigo do sub-fluxo de agendamento: resolve imovel
     (numero ou bairro), horario, nome e telefone a partir do que ja foi
@@ -566,7 +822,14 @@ def _resolver_escolha(lead: dict, mensagem: str, escolha) -> dict:
     imoveis_apresentados = [im for i in ids_apresentados if (im := repo.get_imovel(i))]
 
     imovel_id = lead.get("visita_imovel_escolhido")
-    if escolha.numero_escolhido and 1 <= escolha.numero_escolhido <= len(ids_apresentados):
+    # Ordem: codigo > numero > texto livre. O codigo vem primeiro porque e
+    # o unico identificador NAO ambiguo -- o numero so faz sentido dentro
+    # da ultima lista apresentada, e o texto depende de casar bairro.
+    codigo = getattr(escolha, "codigo_escolhido", None) or _codigo_na_mensagem(mensagem)
+    por_codigo = repo.get_imovel_por_codigo(codigo) if codigo else None
+    if por_codigo:
+        imovel_id = por_codigo["id"]
+    elif escolha.numero_escolhido and 1 <= escolha.numero_escolhido <= len(ids_apresentados):
         imovel_id = ids_apresentados[escolha.numero_escolhido - 1]
     else:
         imovel_id = _resolver_por_texto(mensagem, imoveis_apresentados) or imovel_id
@@ -600,7 +863,14 @@ def _confirmar_visita(
     lead_id: int, *, imovel_id: int, horario_texto: str, nome: str, telefone: str, turno: int
 ) -> str:
     imovel = repo.get_imovel(imovel_id)
-    corretor = escolher_corretor(lead_id)
+    slots = repo.get_slots(lead_id)
+    investimento = eh_investimento(slots)
+    # Investidor marca com o especialista, nao com corretor de visita: a
+    # conversa e sobre retorno, custo e estrategia, o imovel e o ponto de
+    # partida. Fica na mesma tabela `visitas` (agenda, reagendamento e
+    # pos-desfecho ja funcionam) e TAMBEM vira encaminhamento, que e o que
+    # o painel conta como "investidores encaminhados".
+    corretor = escolher_especialista(lead_id) if investimento else escolher_corretor(lead_id)
 
     # data real calculada em codigo quando o texto tem um dia identificavel
     # ("quinta que vem", "dia 22", "amanha"); sem isso, so um placeholder
@@ -617,8 +887,12 @@ def _confirmar_visita(
     )
     # PII nunca em texto puro no banco (secao 7) -- telefone mascarado antes de gravar.
     repo.atualizar_contato(lead_id, nome=nome, telefone_mascarado=mascarar_telefone(telefone))
+    if investimento:
+        repo.criar_encaminhamento(
+            lead_id, especialista=corretor,
+            motivo=f"{_motivo_investimento(slots)}; imóvel de interesse: {imovel['codigo']}",
+        )
 
-    slots = repo.get_slots(lead_id)
     score = calcular_score(slots, visita_agendada=True)
     repo.atualizar_status_score(lead_id, score=score, status="visita_agendada")
     repo.salvar_escolha_visita_parcial(lead_id, imovel_id=None, horario_texto=None)  # limpa estado do sub-fluxo
@@ -626,22 +900,30 @@ def _confirmar_visita(
     primeiro_nome = nome.split(maxsplit=1)[0] if nome else ""
 
     intro = _gerar_frase(
-        f"A visita do cliente {primeiro_nome or ''} acabou de ser confirmada. Escreva SÓ uma "
+        f"O agendamento do cliente {primeiro_nome or ''} acabou de ser confirmado. Escreva SÓ uma "
         "frase curta e animada reagindo/confirmando -- os detalhes da visita (imóvel, corretor, "
         "data) vêm escritos por outro processo logo depois, então NÃO invente nem repita "
         "nenhum desses detalhes agora, só a reação.",
         lead_id=lead_id, turno=turno, slots=slots,
         fallback=f"Show, {primeiro_nome}!" if primeiro_nome else "Show!",
     )
+    if investimento:
+        compromisso = (
+            f"Agendei sua conversa com {corretor}, nosso especialista em investimentos, "
+            f"sobre o {imovel['titulo']} ({imovel['bairro']}, Cód. {imovel['codigo']})"
+        )
+    else:
+        compromisso = (
+            f"Marquei sua visita ao {imovel['titulo']} ({imovel['bairro']}, Cód. {imovel['codigo']}) com {corretor}"
+        )
     if data_resolvida:
         fatos = (
-            f"Marquei sua visita ao {imovel['titulo']} ({imovel['bairro']}) com {corretor}, "
-            f'para "{horario_texto}" -- {_formatar_data_extenso(data_resolvida)}. A equipe '
+            f'{compromisso}, para "{horario_texto}" -- {_formatar_data_extenso(data_resolvida)}. A equipe '
             "confirma o horário exato e te chama no telefone que você passou. 📅"
         )
     else:
         fatos = (
-            f"Marquei sua visita ao {imovel['titulo']} ({imovel['bairro']}) com {corretor}. "
+            f"{compromisso}. "
             f'Horário combinado: "{horario_texto}" — a equipe confirma o horário exato e te '
             "chama no telefone que você passou. 📅"
         )
@@ -667,6 +949,10 @@ def _resumo_desfecho(lead: dict) -> str:
             titulo = imovel["titulo"] if imovel else "imóvel não encontrado"
             bairro = imovel["bairro"] if imovel else ""
             horario_texto = visita.get("horario_solicitado") or "a confirmar"
+            if eh_investimento(repo.get_slots(lead_id)):
+                quem = "Conversa com especialista em investimentos agendada, sobre o imóvel"
+            else:
+                quem = "Visita confirmada:"
 
             # data_hora so e citavel quando recalculavel a partir do texto
             # ATUAL (idempotente, mesma funcao usada pra gravar) -- assim
@@ -675,11 +961,11 @@ def _resumo_desfecho(lead: dict) -> str:
             data_resolvida = _resolver_data(horario_texto)
             if data_resolvida:
                 return (
-                    f"Visita confirmada: {titulo} ({bairro}), corretor(a) {visita['corretor']}. "
+                    f"{quem} {titulo} ({bairro}), com {visita['corretor']}. "
                     f'Horário combinado: "{horario_texto}" -- {_formatar_data_extenso(data_resolvida)}.'
                 )
             return (
-                f"Visita confirmada: {titulo} ({bairro}), corretor(a) {visita['corretor']}. "
+                f"{quem} {titulo} ({bairro}), com {visita['corretor']}. "
                 f'Horário combinado: "{horario_texto}".'
             )
 
@@ -781,39 +1067,56 @@ def _formatar_data_falada(d: date) -> str:
     return f"{dia_semana}, {d.day} de {_NOMES_MES[d.month]} de {d.year}"
 
 
-_PALAVRAS_DIA = (
-    "segunda", "terca", "terça", "quarta", "quinta", "sexta", "sabado", "sábado",
-    "domingo", "amanha", "amanhã", "hoje",
+# \b (word boundary) em vez de substring nua -- achado no Telegram real:
+# "manha" (periodo) e substring de "amanha" (dia), entao "amanha" sozinho
+# batia como tendo dia E periodo juntos.
+_RE_DIA = re.compile(
+    r"\b(?:(?:pr[óo]xim[ao]\s+)?"
+    r"(?:(?:segunda|ter[çc]a|quarta|quinta|sexta)(?:[\s-]*feira)?|s[áa]bado|domingo)"
+    r"(?:\s+que\s+vem)?"
+    r"|amanh[ãa]|hoje|dia\s*\d{1,2}(?:/\d{1,2})?)\b",
+    re.IGNORECASE,
+)
+# hora explicita ("16h", "16h30", "as 16", "horario 16") ou periodo ("de manha")
+_RE_HORA = re.compile(
+    r"\b(?:(?:(?:[àa]s|hor[áa]rio)\s*)?\d{1,2}\s*h(?:\s*\d{2})?"
+    r"|(?:[àa]s|hor[áa]rio)\s*\d{1,2}(?::\d{2})?"
+    r"|(?:(?:de|pela|na|no|[àa])\s+)?(?:manh[ãa]|tarde|noite))\b",
+    re.IGNORECASE,
 )
 
 
 def _combinar_horario(atual: str | None, novo: str) -> str:
-    """Decide se `novo` complementa `atual` (fragmento curto -- so a hora,
-    ou so o dia) ou substitui tudo (o cliente ja deu dia + horario numa
-    tacada, entao "tarde" antigo esta obsoleto). Em CODIGO, nao pedindo
-    pro LLM julgar -- ver docstring de extrair_reagendamento pra o motivo.
+    """Mescla a preferencia nova com a antiga POR COMPONENTE: dia novo
+    substitui o dia antigo, horario/periodo novo substitui o antigo, e o
+    que o cliente nao mencionou agora fica. Em CODIGO, nao pedindo pro LLM
+    julgar -- ver docstring de extrair_reagendamento pra o motivo.
 
-    "completo" = a mensagem tem referencia de QUE DIA e de QUE HORARIO
-    juntas -- so entao ela se basta e pode substituir o que tinha antes.
-    "dia 22" sozinho (sem periodo/hora) so complementa "tarde"; "sexta de
-    manha" (dia + periodo) substitui "tarde" inteiro."""
+    "dia 22" sozinho mantem o "tarde" de antes; "sexta de manha" (dia +
+    periodo) substitui tudo.
+
+    Achado no Telegram real: a versao anterior so SUBSTITUIA quando a
+    mensagem trazia dia E horario juntos -- "pode alterar para sexta" com
+    visita "na quinta-feira" virava "na quinta-feira, sexta-feira", e
+    _resolver_data achava a quinta primeiro: o bot confirmava a mudanca
+    e gravava a data antiga."""
     if not atual:
         return novo
 
-    baixo = novo.lower()
-    # \b (word boundary) em vez de substring nua -- achado no Telegram real:
-    # "manha" (periodo) e substring de "amanha" (dia), entao "amanha"
-    # sozinho batia como tendo dia E periodo juntos, virando substituicao
-    # total quando deveria so mesclar.
-    tem_dia = bool(re.search(r"\b(" + "|".join(_PALAVRAS_DIA) + r")\b", baixo)) or bool(
-        re.search(r"\bdia\s*\d{1,2}\b", baixo)
-    )
-    tem_hora = bool(re.search(r"\b\d{1,2}\s*h\b", baixo)) or bool(re.search(r"\b(as|às|horario|hor[áa]rio)\s*\d{1,2}\b", baixo))
-    tem_periodo = bool(re.search(r"\b(manha|manhã|tarde|noite)\b", baixo))
+    novo_tem_dia = bool(_RE_DIA.search(novo))
+    novo_tem_hora = bool(_RE_HORA.search(novo))
+    if not (novo_tem_dia or novo_tem_hora):
+        return f"{atual}, {novo}"
 
-    if tem_dia and (tem_hora or tem_periodo):
-        return novo
-    return f"{atual}, {novo}"
+    # o que sobrevive do antigo: so os componentes que a mensagem nova NAO
+    # trouxe, na ordem em que apareciam
+    mantidos = []
+    if not novo_tem_dia:
+        mantidos += list(_RE_DIA.finditer(atual))
+    if not novo_tem_hora:
+        mantidos += list(_RE_HORA.finditer(atual))
+    mantidos.sort(key=lambda m: m.start())
+    return ", ".join([m.group(0) for m in mantidos] + [novo])
 
 
 def _parece_pergunta_sobre_data(mensagem: str) -> bool:
@@ -916,6 +1219,44 @@ def _contexto_data_mencionada(mensagem: str) -> str:
 _STATUS_DESFECHO_PRESERVADO = ("visita_agendada", "encaminhado")
 
 
+# Nome do tipo na frase "vamos procurar outro(a) ...", com o genero certo.
+_OUTRO_TIPO = {
+    "apartamento": "outro apartamento", "casa": "outra casa", "terreno": "outro terreno",
+    "studio": "outro studio", "cobertura": "outra cobertura", "sala": "outra sala comercial",
+    "galpao": "outro galpão", "loja": "outra loja", "predio": "outro prédio",
+    "chacara": "outra chácara",
+}
+
+
+def _recomecar_busca(lead: dict, mensagem: str) -> str:
+    """Cliente pediu outro imóvel: recomeça a busca e pergunta o tipo.
+
+    Texto montado em código, não pelo LLM. Antes desta função a resposta
+    vinha do modelo, e com a visita já marcada ele prometeu "vamos te
+    enviar as opções disponíveis assim que possível" -- um envio que nada
+    no sistema faz. Aqui não há promessa: a próxima mensagem do cliente já
+    é a nova busca.
+
+    Se o cliente já disse o tipo ("quero ver outra casa"), não se pergunta
+    de novo: segue direto pro preço, como o roteiro faria."""
+    lead_id = lead["id"]
+    tipo = detectar_tipo_imovel(mensagem)
+    repo.recomecar_busca(lead_id, tipo)
+
+    # Visita marcada não é desmarcada por pedir outro imóvel -- e o cliente
+    # precisa saber disso, senão pode achar que perdeu o horário.
+    visita = " A visita que você já marcou continua de pé." if repo.get_visita_ativa(lead_id) else ""
+    if tipo:
+        return (
+            f"Claro, vamos procurar {_OUTRO_TIPO.get(tipo, 'outro imóvel')}!{visita} "
+            "Qual faixa de preço você tem em mente?"
+        )
+    return (
+        f"Claro, vamos procurar outro imóvel!{visita} "
+        "Que tipo você quer ver agora: apartamento, casa, terreno ou sala comercial?"
+    )
+
+
 def _despedir(lead: dict, *, turno: int) -> str:
     """Fecha a conversa quando o cliente se despede (`router.py::
     pediu_para_encerrar`).
@@ -1001,3 +1342,122 @@ def _responder_generico_pos_desfecho(lead: dict, mensagem: str, *, turno: int) -
     except LLMError as e:
         registrar_trace(e.trace, lead_id=lead_id, turno=turno)
         return RESPOSTA_FALLBACK
+
+
+# ---------------------------------------------------------------- saidas de impasse
+#
+# Chamadas quando a MESMA decisao se repete 3 turnos seguidos
+# (core/graph.py::REPETICOES_ATE_ESCALAR). Nenhuma delas repergunta: ou
+# entrega o que da pra entregar com o que ja se sabe, ou passa pra um
+# humano. Insistir pela quarta vez e o que o cliente percebe como robo
+# quebrado -- e foi o que o print do Telegram mostrou.
+
+
+def _impasse_faixa(lead_id: int, slots: dict, *, turno: int) -> str:
+    """Cliente nao informa orcamento. Em vez de perguntar de novo, mostra
+    a faixa REAL da base e segue -- o numero sai do banco, nunca do LLM
+    (mesmo guardrail do card)."""
+    finalidade = "aluguel" if slots.get("intencao") == "aluguel" else "venda"
+    faixa = repo.faixa_de_precos(finalidade)
+    sufixo = "/mês" if finalidade == "aluguel" else ""
+
+    if not faixa or faixa["minimo"] is None:
+        return (
+            "Sem problema, não precisa cravar um valor agora. "
+            "Vou te mostrar o que tenho e a gente ajusta a partir daí."
+        )
+
+    minimo = f"R$ {int(faixa['minimo']):,}".replace(",", ".")
+    maximo = f"R$ {int(faixa['maximo']):,}".replace(",", ".")
+    return (
+        f"Sem problema, não precisa cravar um valor agora. Pra você se situar, "
+        f"o que tenho vai de {minimo}{sufixo} a {maximo}{sufixo}. "
+        "Me diz a região que te interessa que eu já te mostro algumas opções."
+    )
+
+
+def _impasse_sem_resultado(lead_id: int, slots: dict, *, turno: int) -> tuple[str, list[dict]]:
+    """A busca voltou vazia varias vezes com os mesmos criterios.
+
+    Repetir "nao encontrei nada, quer ajustar?" nao leva a lugar nenhum se
+    o cliente nao sabe O QUE ajustar. Aqui o filtro e afrouxado em ordem
+    de importancia -- primeiro o preco (o mais comum de estar irreal),
+    depois a regiao -- e a resposta DIZ o que foi afrouxado, pra nao
+    parecer que o sistema ignorou o pedido."""
+    finalidade = "aluguel" if slots.get("intencao") == "aluguel" else "venda"
+    base = {
+        "finalidade": finalidade,
+        "zona": slots.get("regiao"),
+        "quartos_min": quartos_do_filtro(slots),
+        "tipo": slots.get("tipo_imovel"),
+        "limite": 3,
+    }
+
+    tentativas = [
+        ("sem o teto de preço", {**base}),
+        ("sem o teto de preço e em outras regiões", {**base, "zona": None}),
+        ("com menos quartos", {**base, "zona": None, "quartos_min": None}),
+    ]
+    for explicacao, filtros in tentativas:
+        resultados = buscar_imoveis(**filtros)
+        if resultados:
+            repo.salvar_imoveis_apresentados(lead_id, [im["id"] for im in resultados])
+            repo.atualizar_status_score(
+                lead_id, score=calcular_score(slots), status="aguardando_escolha"
+            )
+            return (
+                f"Com exatamente esses critérios eu não tenho nada. Ampliei a busca "
+                f"{explicacao} e achei estas:\n\n{_formatar_cards(resultados)}\n\n"
+                "Alguma te serve? Se não, me diz o que é inegociável pra você."
+            ), _galeria_imoveis(resultados)
+
+    return (
+        "Procurei de várias formas e realmente não tenho nada parecido com o que "
+        "você precisa no momento. Posso pedir pra um corretor te chamar quando "
+        "entrar algo no perfil?"
+    ), []
+
+
+def _impasse_humano(lead_id: int, slots: dict, *, turno: int) -> str:
+    """Nem a intencao saiu depois de 3 tentativas. E o unico campo sem o
+    qual nao da pra fazer nada -- entao para de tentar e passa adiante."""
+    repo.atualizar_status_score(lead_id, score=calcular_score(slots), status="encaminhado")
+    return (
+        "Acho que vou te atrapalhar mais do que ajudar por aqui. 😅 "
+        "Vou pedir pra um corretor da equipe te chamar pessoalmente — "
+        "aí você explica do seu jeito o que procura."
+    )
+
+
+def _impasse_agendamento(lead_id: int, falta: str, *, turno: int) -> str:
+    """O cliente nao consegue (ou nao quer) fechar o agendamento.
+
+    Repetir "qual das opcoes te interessou?" pela quarta vez nao ajuda
+    quem ja respondeu "esse" e "aquele" -- ele acha que respondeu. Aqui a
+    lista volta COM OS CODIGOS, que e a forma nao ambigua de escolher, e
+    se nem isso resolver o lead vai pra um humano."""
+    if falta != "imovel":
+        repo.atualizar_status(lead_id, "encaminhado")
+        return (
+            "Vou deixar um corretor da equipe fechar isso com você por telefone, "
+            "fica mais rápido do que por aqui. Ele já tem o imóvel que te interessou. 👍"
+        )
+
+    lead = repo.get_lead(lead_id)
+    apresentados = [im for i in (lead.get("imoveis_apresentados") or []) if (im := repo.get_imovel(i))]
+    if not apresentados:
+        repo.atualizar_status(lead_id, "encaminhado")
+        return (
+            "Acho melhor um corretor te ajudar a escolher — vou pedir pra ele te chamar. 👍"
+        )
+
+    opcoes = "\n".join(
+        f"{i}. {im['titulo']} — {im['bairro']} · Cód. {im['codigo']}"
+        for i, im in enumerate(apresentados, start=1)
+    )
+    return (
+        "Desculpa, acho que me perdi. Pra não ter erro, me diz o CÓDIGO do que "
+        f"você quer ver:\n\n{opcoes}\n\n"
+        "É só mandar o código (ex: " + apresentados[0]["codigo"] + "). "
+        "Se preferir, peço pra um corretor te ligar."
+    )

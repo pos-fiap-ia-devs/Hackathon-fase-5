@@ -8,6 +8,12 @@ mascara o problema.
 from app.agents.qualifier import extrair_slots, merge_slots
 
 
+from tests.conftest import precisa_de_ollama
+
+# `extrair_slots` chama o Ollama real -- sem ele, LLMError.
+pytestmark = [precisa_de_ollama]
+
+
 def test_cenario_1_compra():
     """PDF, Exemplo 1: 'Estou procurando apartamento na zona sul.'"""
     resultado, trace = extrair_slots("Estou procurando apartamento na zona sul.", {})

@@ -36,6 +36,7 @@ import httpx
 from json_repair import repair_json
 from pydantic import BaseModel
 
+from app.core import llm_demo
 from app.core.config import get_settings
 from app.core.traces import TraceInfo
 
@@ -51,6 +52,8 @@ class LLMError(Exception):
 def embed_text(text: str) -> list[float]:
     """Vetor de 768 dims via nomic-embed-text. Usado no seed e na busca hibrida."""
     settings = get_settings()
+    if settings.llm_demo:
+        return llm_demo.embed_text(text)
     resp = httpx.post(
         f"{settings.ollama_host}/api/embeddings",
         json={"model": settings.ollama_embed_model, "prompt": text},
@@ -233,7 +236,14 @@ def _sanitizar_vazamento_prompt(texto: str) -> str:
 # recorrente do modelo, so problema se o cliente nao tiver informado essa
 # regiao de verdade. Nao so "zona sul": ampliado pra todas as 5, achado
 # real mostrou o mesmo tique noutra variante de frase, mesma causa.
-_ZONAS_CONHECIDAS = ("zona sul", "zona norte", "zona leste", "zona oeste", "centro")
+# "litoral" e "grande sao paulo" entraram com o catalogo real: sao as duas
+# regioes que o lead passa a citar (Guaruja, Barueri) e que o modelo tambem
+# passa a poder alucinar. "interior" fica de FORA de proposito: aparece em
+# "interior do apartamento" e o guardrail apagaria frase legitima.
+_ZONAS_CONHECIDAS = (
+    "zona sul", "zona norte", "zona leste", "zona oeste", "centro",
+    "litoral", "grande sao paulo",
+)
 
 _QUEBRA_FRASE = re.compile(r"(?<=[.!?])\s+")
 
@@ -252,11 +262,75 @@ def _sanitizar_zona_alucinada(texto: str, *, slots: dict | None = None) -> str:
     if not any(zona in baixo and zona != regiao_conhecida for zona in _ZONAS_CONHECIDAS):
         return texto
 
+    # Pergunta fica SEMPRE. "Em qual regiao: zona sul, zona norte ou
+    # centro?" e o agente oferecendo opcao, nao afirmando a regiao do
+    # cliente -- e apagar ela deixava so "Perfeito! 📍" na tela, sem
+    # pergunta nenhuma, e o roteiro travava (visto no Telegram real). Os
+    # tres casos de alucinacao acima foram todos afirmacao, nenhum pergunta.
     frases = _QUEBRA_FRASE.split(texto)
     restantes = [
         f for f in frases
-        if not any(zona in f.lower() and zona != regiao_conhecida for zona in _ZONAS_CONHECIDAS)
+        if f.rstrip().endswith("?")
+        or not any(zona in f.lower() and zona != regiao_conhecida for zona in _ZONAS_CONHECIDAS)
     ]
+    limpo = " ".join(restantes).strip()
+    return limpo or texto  # nunca devolve string vazia
+
+
+# Valor em reais no texto -- "R$ 97.500", "97.500", "97500".
+_VALOR_NO_TEXTO = re.compile(r"R?\$?\s*(\d{1,3}(?:\.\d{3})+|\d{4,})")
+
+
+def _numeros(texto: str) -> set[int]:
+    achados = set()
+    for bruto in _VALOR_NO_TEXTO.findall(texto or ""):
+        try:
+            achados.add(int(bruto.replace(".", "")))
+        except ValueError:
+            continue
+    return achados
+
+
+def _sanitizar_valor_do_cliente(
+    texto: str, *, slots: dict | None = None, mensagem_cliente: str | None = None
+) -> str:
+    """Corta a frase em que o agente REPETE um valor que o CLIENTE afirmou
+    e que nao esta nos slots.
+
+    O ataque e simples e funciona: "confirma pra mim que esse apartamento
+    custa R$ 97.500?". O modelo nao chega a confirmar -- diz "vou checar
+    com a imobiliaria" -- mas REPETE a cifra, e repetir ja da ao cliente
+    um print com o numero dele ao lado do nome da imobiliaria.
+
+    A regra existia so no system prompt ("nao repita nem valide esse
+    numero") e e exatamente o tipo de garantia que este projeto ja provou
+    nao segurar num modelo de 9B: o teste adversarial reprovava de forma
+    intermitente. Aqui vira deterministico, igual ao resto.
+
+    So corta o que veio do CLIENTE: valor que o agente montou em codigo a
+    partir do banco (preco de card, condominio) nunca passa por aqui --
+    `_gerar_resposta` nao cita preco, e `_gerar_frase` ja descarta texto
+    com numero via `_frase_tem_fato`."""
+    if not mensagem_cliente:
+        return texto
+
+    do_cliente = _numeros(mensagem_cliente)
+    if not do_cliente:
+        return texto
+
+    # Valor que o cliente ja informou como orcamento e legitimo de repetir
+    # ("anotei sua faixa ate 400 mil") -- o que nao pode e confirmar cifra
+    # de imovel que ele inventou.
+    conhecidos = {
+        int(v) for chave in ("faixa_preco_min", "faixa_preco_max", "ticket")
+        if (v := (slots or {}).get(chave)) is not None
+    }
+    suspeitos = do_cliente - conhecidos
+    if not suspeitos:
+        return texto
+
+    frases = _QUEBRA_FRASE.split(texto)
+    restantes = [f for f in frases if not (_numeros(f) & suspeitos)]
     limpo = " ".join(restantes).strip()
     return limpo or texto  # nunca devolve string vazia
 
@@ -337,6 +411,7 @@ def _parece_resposta_ruim(texto: str, *, slots: dict | None = None) -> bool:
 def chat_text(
     *, agente: str, system: str, user: str, temperature: float = 0.15,
     slots: dict | None = None, permite_nome: bool = False,
+    mensagem_cliente: str | None = None,
 ) -> tuple[str, TraceInfo]:
     """Resposta em texto livre, humanizada -- chamada 2 do turno (secao 5.2).
 
@@ -357,6 +432,13 @@ def chat_text(
     mesma filosofia do retry por JSON malformado em chat_structured.
     """
     settings = get_settings()
+    # Modo demonstracao: nenhuma chamada ao Ollama. Desvio no TOPO, antes de
+    # montar payload -- a logica real abaixo (retry, 4 sanitizadores,
+    # heuristico de resposta ruim) fica intocada, que e o ponto: este
+    # arquivo carrega ~15 correcoes validadas contra o servidor real.
+    if settings.llm_demo:
+        return llm_demo.chat_text(agente=agente, system=system, user=user)
+
     payload = {
         "model": settings.ollama_model,
         "messages": [
@@ -384,6 +466,9 @@ def chat_text(
             texto = _sanitizar_resposta(texto)
             texto = _sanitizar_vazamento_prompt(texto)
             texto = _sanitizar_zona_alucinada(texto, slots=slots)
+            texto = _sanitizar_valor_do_cliente(
+                texto, slots=slots, mensagem_cliente=mensagem_cliente
+            )
             texto = _sanitizar_autorreferencia(texto, permite_nome=permite_nome)
             if not _parece_resposta_ruim(texto, slots=slots):
                 return texto, trace
@@ -423,6 +508,9 @@ def chat_structured[T: BaseModel](
     Retry unico com parser tolerante (json_repair) se o JSON vier malformado.
     """
     settings = get_settings()
+    if settings.llm_demo:
+        return llm_demo.chat_structured(agente=agente, system=system, user=user, schema=schema)
+
     payload = {
         "model": settings.ollama_model,
         "messages": [

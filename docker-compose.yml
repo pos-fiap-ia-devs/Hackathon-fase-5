@@ -13,10 +13,47 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./app/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sdr -d sdr"]
+      # -h 127.0.0.1: num volume novo a imagem sobe um servidor TEMPORARIO
+      # so no socket unix pra rodar o initdb, derruba e sobe o definitivo.
+      # pg_isready pelo socket dava "healthy" nessa janela e a conexao TCP
+      # do host (porta 5433) caia com "server closed the connection".
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U sdr -d sdr"]
       interval: 3s
       timeout: 3s
       retries: 20
+
+  # Perfil `app`: `docker compose up -d` sozinho sobe só o banco (fluxo do
+  # run.sh, que roda o app nativo pra ter Metal no Ollama e no Whisper).
+  # `docker compose --profile app up -d --build` sobe o app containerizado.
+  app:
+    profiles: ["app"]
+    build: .
+    container_name: sdr_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    # O OLLAMA CONTINUA NO HOST, nativo -- dentro de container no macOS não
+    # há Metal e a inferência cai pra CPU. `host-gateway` é o que dá ao
+    # container uma rota até o Ollama do host.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      # Dentro da rede do compose o banco atende em db:5432, não no
+      # localhost:5433 publicado pro host.
+      DATABASE_URL: postgresql://sdr:sdr@db:5432/sdr
+      OLLAMA_HOST: http://host.docker.internal:11434
+      # mlx-whisper é Apple Metal, não instala em Linux: fica desligado
+      # aqui. Transcrição de áudio só rodando nativo (./run.sh).
+      STT_ENABLED: "false"
+    env_file:
+      # Token do Telegram e o resto da configuração. `required: false` pra
+      # que `docker compose up` funcione num clone recém-feito, antes de
+      # alguém copiar o .env.example.
+      - path: .env
+        required: false
 
 volumes:
   pgdata:

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Entrar · Horizonte SDR{% endblock %}
+
+{% block content %}
+<div class="max-w-sm mx-auto mt-10 sm:mt-16">
+    <h1 class="text-xl font-semibold mb-1">Entrar no painel</h1>
+    <p class="text-sm text-gray-500 mb-6">Acesso restrito à equipe da imobiliária.</p>
+
+    {% if erro %}
+    <div class="mb-4 rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
+        {{ erro }}
+    </div>
+    {% endif %}
+
+    <form method="post" action="/login" class="bloco p-5 space-y-4">
+        <div>
+            <label for="email" class="block text-sm font-medium mb-1">E-mail</label>
+            <input id="email" name="email" type="email" required autofocus autocomplete="username"
+                   class="campo w-full">
+        </div>
+        <div>
+            <label for="senha" class="block text-sm font-medium mb-1">Senha</label>
+            <input id="senha" name="senha" type="password" required autocomplete="current-password"
+                   class="campo w-full">
+        </div>
+        <button type="submit"
+                class="botao w-full">
+            Entrar
+        </button>
+    </form>
+
+    <p class="text-xs text-gray-400 mt-4 text-center">
+        Não tem conta? O acesso é por convite de um administrador.
+    </p>
+</div>
+{% endblock %}

@@ -38,3 +38,10 @@ def test_texto_limpo_fica_intacto():
 def test_nunca_devolve_vazio():
     texto = "Zona sul."
     assert _sanitizar_zona_alucinada(texto) == texto
+
+
+def test_pergunta_que_oferece_zonas_como_opcao_fica():
+    """Perguntar a regiao dando exemplos nao e alucinar a regiao do
+    cliente -- apagar a pergunta deixava so "Perfeito! 📍" e o roteiro travava."""
+    texto = "Perfeito! Em qual região você prefere, zona sul, zona norte ou centro? 📍"
+    assert _sanitizar_zona_alucinada(texto) == texto

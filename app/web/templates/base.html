@@ -4,20 +4,140 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Agente SDR Imobiliário{% endblock %}</title>
+    {# Estado da barra lateral ANTES de qualquer pintura: lido do
+       localStorage e escrito no <html>. Se fosse aplicado no final do
+       corpo, cada navegação mostraria a barra larga encolhendo. #}
+    <script>
+    try {
+        if (localStorage.getItem('rail') !== 'fechado')
+            document.documentElement.dataset.rail = 'aberto';
+    } catch (e) { document.documentElement.dataset.rail = 'aberto'; }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.3/dist/htmx.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    {# Inter: a mesma fonte do site da imobiliária. Duas telas do mesmo
+       produto com fontes diferentes é o que mais rápido denuncia que
+       foram feitas em momentos separados. #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;750&display=swap" rel="stylesheet">
+    {# DEPOIS do Tailwind: o sistema de design do painel sobrepõe os cinzas
+       de fábrica por ordem de cascata, sem precisar de `!important`. #}
+    <link rel="stylesheet" href="/static/painel.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+/* Indicador de "digitando". O turno leva 10-30s com o modelo local; sem
+   isto a tela fica IDENTICA depois do clique e o visitante conclui que
+   quebrou. O Telegram ja tinha o equivalente (`_manter_digitando`), o
+   chat web e o widget nao. */
+.digitando { display: none; padding: 2px 0; }
+.htmx-request .digitando,
+.digitando.htmx-request { display: block; }
+.digitando span {
+    display: inline-block;
+    width: 7px; height: 7px; margin-right: 3px;
+    border-radius: 50%;
+    background: #94a3b8;
+    animation: pulsa 1.2s infinite ease-in-out;
+}
+.digitando span:nth-child(2) { animation-delay: .18s; }
+.digitando span:nth-child(3) { animation-delay: .36s; }
+@keyframes pulsa {
+    0%, 60%, 100% { opacity: .25; transform: translateY(0); }
+    30%           { opacity: 1;   transform: translateY(-3px); }
+}
+/* Enquanto espera, o botao fica desabilitado de verdade (`hx-disabled-elt`
+   no form) -- aqui so o aspecto. */
+button[disabled] { opacity: .55; cursor: default; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
-    <nav class="bg-slate-800 text-white px-4 sm:px-6 py-3 flex flex-wrap gap-x-6 gap-y-2 items-center">
-        <span class="font-semibold">🏠 Horizonte SDR</span>
-        <a href="/dashboard" class="text-sm hover:underline">Dashboard</a>
-        <a href="/chat" class="text-sm hover:underline">Chat do lead</a>
-    </nav>
-    <main class="p-4 sm:p-6 max-w-6xl mx-auto">
+<body>
+{# Ícones em SVG inline: são sete, e uma fonte de ícones por CDN seria
+   mais uma dependência de rede numa tela que precisa abrir offline. #}
+{% macro icone(nome) -%}
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{%- if nome == 'painel' %}<rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/>
+{%- elif nome == 'funil' %}<rect x="3" y="4" width="5" height="16" rx="1.2"/><rect x="9.5" y="4" width="5" height="11" rx="1.2"/><rect x="16" y="4" width="5" height="14" rx="1.2"/>
+{%- elif nome == 'leads' %}<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/>
+{%- elif nome == 'traces' %}<path d="M3 12h4l3 8 4-16 3 8h4"/>
+{%- elif nome == 'chat' %}<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.6-.8L3 21l1.9-5.1A8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4Z"/>
+{%- elif nome == 'usuarios' %}<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>
+{%- elif nome == 'sair' %}<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>
+{%- elif nome == 'seta' %}<path d="m9 18 6-6-6-6"/>
+{%- endif %}
+</svg>
+{%- endmacro %}
+
+{% macro item(destino, chave, rotulo, icone_nome, atual) -%}
+<a href="{{ destino }}" class="rail-item {% if atual == chave %}ativo{% endif %}"
+   title="{{ rotulo }}">{{ icone(icone_nome) }}<span class="rail-rotulo">{{ rotulo }}</span></a>
+{%- endmacro %}
+
+<nav class="rail" aria-label="Navegação principal">
+    <div class="rail-marca">
+        {# Monograma, não emoji: o 🏠 era o detalhe mais "gerado" da tela. #}
+        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+            <rect width="26" height="26" rx="7" fill="#0e41d5"/>
+            <text x="13" y="18" text-anchor="middle" fill="#fff"
+                  font-family="Inter, sans-serif" font-size="13" font-weight="700">H</text>
+        </svg>
+        <span>Horizonte</span>
+    </div>
+
+    <button class="rail-toggle" type="button" onclick="alternarRail()"
+            aria-label="Recolher ou expandir a navegação">{{ icone('seta') }}</button>
+
+    <hr>
+    {# Âncoras para as seções do painel. Absolutas (e não `#funil`) pra que
+       funcionem também a partir do chat e da tela de usuários. #}
+    <div class="rail-grupo">Painel</div>
+    {{ item('/dashboard', 'dashboard', 'Visão geral', 'painel', pagina) }}
+    {{ item('/dashboard#funil', '', 'Funil', 'funil', pagina) }}
+    {{ item('/dashboard#leads', '', 'Leads', 'leads', pagina) }}
+    {{ item('/dashboard#traces', '', 'Observabilidade', 'traces', pagina) }}
+
+    <div class="rail-grupo">Canais</div>
+    {{ item('/chat', 'chat', 'Chat do lead', 'chat', pagina) }}
+
+    {# `usuario` so chega nas telas do painel. As publicas (login, registro,
+       chat do lead) nao definem a variavel -- o Jinja resolve como
+       indefinido/falso e o bloco inteiro some. #}
+    {% if usuario %}
+    {% if usuario.papel == 'admin' %}
+    <div class="rail-grupo">Equipe</div>
+    {{ item('/dashboard/usuarios', 'usuarios', 'Usuários', 'usuarios', pagina) }}
+    {% endif %}
+
+    <div class="rail-rodape">
+        <div class="rail-usuario">
+            <span class="rail-inicial">{{ usuario.nome[:1]|upper }}</span>
+            <span class="rail-rotulo">{{ usuario.nome }}</span>
+        </div>
+        <form method="post" action="/logout">
+            <button type="submit" class="rail-item w-full" title="Sair">
+                {{ icone('sair') }}<span class="rail-rotulo">Sair</span>
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</nav>
+
+<div class="conteudo">
+    <main class="px-5 sm:px-8 py-7 max-w-[1500px]">
         {% block content %}{% endblock %}
     </main>
+</div>
+
+<script>
+// Recolher/expandir. A preferência é por navegador, não por conta: é
+// decisão de espaço de tela, e quem abre o painel num monitor grande e
+// depois no notebook quer respostas diferentes.
+function alternarRail() {
+    var raiz = document.documentElement;
+    var aberto = raiz.dataset.rail === 'aberto';
+    if (aberto) delete raiz.dataset.rail; else raiz.dataset.rail = 'aberto';
+    try { localStorage.setItem('rail', aberto ? 'fechado' : 'aberto'); } catch (e) {}
+}
+</script>
 </body>
 </html>

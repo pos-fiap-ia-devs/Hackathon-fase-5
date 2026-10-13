@@ -1,0 +1,115 @@
+"""Aplica schema e semeia imóveis, se preciso. Idempotente.
+
+Existe pro entrypoint do container, que roda a cada `docker compose up` --
+mas serve igual fora do Docker, no lugar do par `psql -f schema.sql` +
+`python -m app.db.seed` do run.sh.
+
+Duas diferenças que importam em relação a chamar o seed direto:
+
+1. O schema é aplicado com psycopg, não com o binário `psql`. Dentro da
+   imagem isso evita instalar o postgresql-client inteiro só pra rodar um
+   arquivo .sql, e usa a mesma dependência que o app já tem.
+
+2. O seed carrega o catálogo real por UPSERT (`scripts/carregar_catalogo.py`)
+   e não trunca nada, então é seguro a cada boot: atualiza o que mudou,
+   preserva ids e visitas. Antes ele fazia `TRUNCATE imoveis ... CASCADE`,
+   que apagava a agenda dos corretores num restart, e por isso só rodava
+   com a tabela vazia. `--forcar` agora é o único caminho destrutivo.
+"""
+
+import argparse
+import logging
+import sys
+import time
+from pathlib import Path
+
+import psycopg
+
+from app.core.config import get_settings
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger("preparar_banco")
+
+SCHEMA = Path(__file__).resolve().parent.parent / "app" / "db" / "schema.sql"
+
+
+def _sem_comentarios(sql: str) -> str:
+    """Tira os comentários `--` antes de separar os comandos.
+
+    Necessário, não cosmético: o schema tem 71 linhas de comentário e
+    várias com ponto-e-vírgula dentro ("...centro; fora dela",
+    "repo.retomar_atendimento; se havia visita"). Separar em `;` sem
+    limpar isso corta comandos no meio e o Postgres recusa com
+    `syntax error at end of input`.
+
+    Só trata comentário de linha. Serve porque este arquivo não tem `/*
+    */` nem literal com `--` dentro (conferido) -- não é um parser de SQL
+    de uso geral.
+    """
+    return "\n".join(linha.split("--")[0] for linha in sql.splitlines())
+
+
+def aplicar_schema(url: str) -> None:
+    """O arquivo é escrito pra ser reaplicado: `CREATE TABLE` duplicado
+    falha e é ignorado (é o que o `|| true` do run.sh faz), e a cauda de
+    `ALTER TABLE ... IF NOT EXISTS` é o caminho pelo qual coluna nova chega
+    num banco que já existe. Por isso cada comando vai numa transação
+    própria -- num bloco só, o primeiro erro abortaria todo o resto.
+    """
+    sql = _sem_comentarios(SCHEMA.read_text())
+    aplicados = ignorados = 0
+    with psycopg.connect(url, autocommit=True) as conn:
+        for comando in filter(None, (c.strip() for c in sql.split(";"))):
+            try:
+                conn.execute(comando)
+                aplicados += 1
+            except psycopg.errors.DuplicateTable:
+                ignorados += 1
+            except psycopg.errors.DuplicateObject:  # índice já existente
+                ignorados += 1
+    logger.info("schema: %s comandos aplicados, %s já existiam", aplicados, ignorados)
+
+
+def imoveis_no_banco(url: str) -> int:
+    with psycopg.connect(url) as conn:
+        return conn.execute("SELECT count(*) FROM imoveis").fetchone()[0]
+
+
+def aguardar_banco(url: str, tentativas: int = 30) -> None:
+    """Logo depois do `docker compose up -d` a porta 5433 ja aceita conexao
+    (e o proxy do Docker), mas o Postgres pode estar no meio do initdb e
+    derruba a conexao. O INSTALL.md chama este script direto, sem esperar
+    o healthcheck -- entao a espera mora aqui."""
+    for i in range(1, tentativas + 1):
+        try:
+            with psycopg.connect(url, connect_timeout=3):
+                return
+        except psycopg.OperationalError:
+            if i == tentativas:
+                raise
+            logger.info("banco ainda subindo, tentando de novo (%s/%s)", i, tentativas)
+            time.sleep(1)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--forcar", action="store_true",
+        help="apaga os imóveis antes de carregar (TRUNCATE: leva as visitas junto)",
+    )
+    args = parser.parse_args()
+
+    url = get_settings().database_url
+    aguardar_banco(url)
+    aplicar_schema(url)
+
+    # Import tardio: carregar abre pool e pode falar com o Ollama pros
+    # embeddings. Custo à toa quando só se quer o schema.
+    from app.db.seed import run  # noqa: PLC0415
+
+    run(truncar=args.forcar)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

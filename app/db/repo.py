@@ -7,6 +7,7 @@ from functools import lru_cache
 from pgvector.psycopg import register_vector
 from psycopg import Connection
 from psycopg.rows import dict_row
+from psycopg.types.json import Jsonb
 from psycopg_pool import ConnectionPool
 
 from app.core.config import get_settings
@@ -45,6 +46,7 @@ def get_conn() -> Iterator[Connection]:
 SLOTS_CAMPOS = [
     "intencao", "faixa_preco_min", "faixa_preco_max", "quartos", "regiao",
     "urgencia", "perfil_investidor", "ticket", "expectativa_retorno",
+    "tipo_imovel",
 ]
 
 
@@ -88,11 +90,24 @@ def salvar_slots(lead_id: int, slots: dict) -> None:
         conn.commit()
 
 
-def salvar_mensagem(lead_id: int, *, papel: str, conteudo: str, origem: str = "texto") -> None:
+def salvar_mensagem(
+    lead_id: int, *, papel: str, conteudo: str, origem: str = "texto",
+    anexos: list[dict] | None = None, suspeita_injecao: str | None = None,
+) -> None:
+    """`anexos` guarda a galeria de fotos enviada junto com a mensagem
+    (core/turno.py::RespostaTurno). `Jsonb` explicito porque psycopg3
+    adapta lista Python pra ARRAY, nao pra jsonb.
+
+    `suspeita_injecao` e o tipo detectado por core/injecao.py (None =
+    limpa). Fica NA mensagem, nao numa tabela de evento a parte, porque a
+    tentativa so faz sentido lida junto com o que o cliente escreveu."""
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
-            "INSERT INTO mensagens (lead_id, papel, conteudo, origem) VALUES (%s, %s, %s, %s)",
-            (lead_id, papel, conteudo, origem),
+            """
+            INSERT INTO mensagens (lead_id, papel, conteudo, origem, anexos, suspeita_injecao)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            (lead_id, papel, conteudo, origem, Jsonb(anexos or []), suspeita_injecao),
         )
         conn.commit()
 
@@ -134,6 +149,40 @@ def atualizar_status(lead_id: int, status: str) -> None:
         conn.commit()
 
 
+# Criterio de "a regiao que o cliente disse casa com este imovel".
+#
+# UMA definicao, usada pela validacao (`regiao_existe`) e pela busca
+# (`agents/search.py`). Elas ja divergiram: a validacao passou a aceitar
+# "Sao Paulo (Capital)" e a busca continuou recusando, entao o agente
+# dizia "nao encontrei nada" pra uma regiao que ele mesmo tinha acabado
+# de aceitar. Duas copias da mesma regra e como isso acontece.
+#
+# Casa nos DOIS sentidos:
+#   - o termo do cliente dentro do dado   ("Moem" -> bairro "Moema")
+#   - o dado dentro do termo do cliente   ("Sao Paulo (Capital)" -> cidade
+#     "Sao Paulo"), porque o extrator devolve a regiao com qualificador
+#
+# `length >= 4` no segundo sentido evita o falso positivo barato: nome
+# curto casaria dentro de qualquer frase.
+#
+# Sem sinal de porcentagem aqui dentro, nem em comentario: o psycopg varre
+# a query inteira procurando placeholder e recusa a consulta.
+SQL_REGIAO_CASA = """(
+    zona = {termo}
+    OR unaccent(bairro) ILIKE unaccent({like})
+    OR unaccent(cidade) ILIKE unaccent({like})
+    OR (length(cidade) >= 4 AND strpos(lower(unaccent({termo})), lower(unaccent(cidade))) > 0)
+    OR (length(bairro) >= 4 AND strpos(lower(unaccent({termo})), lower(unaccent(bairro))) > 0)
+)"""
+
+
+def sql_regiao_casa(nome_termo: str, nome_like: str) -> str:
+    """Monta o criterio com os nomes de parametro que o chamador usa."""
+    return SQL_REGIAO_CASA.format(
+        termo=f"%({nome_termo})s", like=f"%({nome_like})s"
+    )
+
+
 def regiao_existe(termo: str) -> bool:
     """A regiao que o cliente citou existe na base, em qualquer preco?
 
@@ -144,13 +193,7 @@ def regiao_existe(termo: str) -> bool:
     mostrar onde atendemos."""
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
-            """
-            SELECT 1 FROM imoveis
-            WHERE zona = %(termo)s
-               OR unaccent(bairro) ILIKE unaccent(%(like)s)
-               OR unaccent(cidade) ILIKE unaccent(%(like)s)
-            LIMIT 1
-            """,
+            f"SELECT 1 FROM imoveis WHERE {sql_regiao_casa('termo', 'like')} LIMIT 1",
             {"termo": termo, "like": f"%{termo}%"},
         )
         return cur.fetchone() is not None
@@ -259,6 +302,47 @@ def retomar_atendimento(lead_id: int) -> None:
             WHERE id = %s
             """,
             (lead_id,),
+        )
+        conn.commit()
+
+
+def recomecar_busca(lead_id: int, tipo_imovel: str | None = None) -> None:
+    """Cliente pediu outro imovel: a busca recomeca do zero.
+
+    Sai o que descreve o imovel procurado (preco, quartos, regiao, urgencia,
+    tipo); fica quem e o cliente (intencao, nome, telefone, historico) e
+    tudo que ja foi decidido -- visita marcada mora na tabela `visitas` e
+    nao e tocada. Tambem zera o anti-laco (`acao_repeticoes`,
+    `campos_dispensados`): perguntas dispensadas na busca anterior podem
+    ser respondidas nesta."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE slots SET faixa_preco_min = NULL, faixa_preco_max = NULL,
+                quartos = NULL, regiao = NULL, urgencia = NULL,
+                tipo_imovel = %(tipo)s, atualizado_em = now()
+            WHERE lead_id = %(id)s
+            """,
+            {"id": lead_id, "tipo": tipo_imovel},
+        )
+        cur.execute(
+            """
+            UPDATE leads SET
+                status = CASE
+                    WHEN EXISTS (
+                        SELECT 1 FROM slots s
+                        WHERE s.lead_id = leads.id
+                          AND s.intencao IS NOT NULL AND s.intencao <> 'indefinido'
+                    ) THEN 'qualificando'
+                    ELSE 'novo'
+                END,
+                visita_imovel_escolhido = NULL, visita_horario_texto = NULL,
+                visita_nome_texto = NULL, visita_telefone_texto = NULL,
+                ultima_acao = NULL, acao_repeticoes = 0, campos_dispensados = '{}',
+                ultima_interacao_em = now()
+            WHERE id = %(id)s
+            """,
+            {"id": lead_id},
         )
         conn.commit()
 
@@ -528,7 +612,7 @@ def listar_leads(limite: int = 200) -> list[dict]:
             """
             SELECT l.id, l.chat_id, l.canal, l.nome, l.status, l.score,
                    l.criado_em, l.ultima_interacao_em,
-                   s.intencao, s.regiao, s.quartos, s.faixa_preco_max, s.urgencia
+                   s.intencao, s.regiao, s.quartos, s.faixa_preco_max, s.urgencia, s.ticket
             FROM leads l LEFT JOIN slots s ON s.lead_id = l.id
             ORDER BY l.score DESC, l.ultima_interacao_em DESC
             LIMIT %s
@@ -543,7 +627,8 @@ def listar_mensagens(lead_id: int) -> list[dict]:
     (get_historico e limitado, pensado pro prompt do LLM, nao pra tela)."""
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
-            "SELECT papel, conteudo, origem, criado_em FROM mensagens WHERE lead_id = %s ORDER BY criado_em",
+            "SELECT papel, conteudo, origem, anexos, suspeita_injecao, criado_em "
+            "FROM mensagens WHERE lead_id = %s ORDER BY criado_em",
             (lead_id,),
         )
         return cur.fetchall()
@@ -572,3 +657,499 @@ def listar_traces(lead_id: int | None = None, limite: int = 100) -> list[dict]:
                 (limite,),
             )
         return cur.fetchall()
+
+
+# ---------------------------------------------------------------- login do dashboard
+# Usuarios, sessoes e convites. Mesma regra do resto do arquivo: so
+# leitura/escrita, nenhuma decisao -- hash e geracao de token moram em
+# core/auth.py, a politica de quem pode o que mora em web/api.py.
+
+
+def contar_usuarios() -> int:
+    """Zero = instalacao nova, e `/registro` abre pro primeiro admin."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT count(*) AS n FROM usuarios")
+        return cur.fetchone()["n"]
+
+
+def criar_usuario(*, email: str, nome: str, senha_hash: str, papel: str) -> dict | None:
+    """None quando o e-mail ja existe -- o chamador transforma isso na
+    mensagem da tela, em vez de estourar IntegrityError na cara do usuario."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO usuarios (email, nome, senha_hash, papel)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (email) DO NOTHING
+            RETURNING id, email, nome, papel, ativo, criado_em
+            """,
+            (email, nome, senha_hash, papel),
+        )
+        usuario = cur.fetchone()
+        conn.commit()
+        return usuario
+
+
+def get_usuario_por_email(email: str) -> dict | None:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT id, email, nome, senha_hash, papel, ativo FROM usuarios WHERE email = %s",
+            (email,),
+        )
+        return cur.fetchone()
+
+
+def listar_usuarios() -> list[dict]:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT id, email, nome, papel, ativo, criado_em FROM usuarios ORDER BY criado_em"
+        )
+        return cur.fetchall()
+
+
+def atualizar_senha(usuario_id: int, senha_hash: str) -> None:
+    """Usado no rehash silencioso do login (core/auth.py::verificar_senha)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("UPDATE usuarios SET senha_hash = %s WHERE id = %s", (senha_hash, usuario_id))
+        conn.commit()
+
+
+def definir_usuario_ativo(usuario_id: int, ativo: bool) -> None:
+    """Desativar corta o acesso na hora: as sessoes do usuario somem junto.
+    E a razao de a sessao ser server-side e nao um JWT assinado."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("UPDATE usuarios SET ativo = %s WHERE id = %s", (ativo, usuario_id))
+        if not ativo:
+            cur.execute("DELETE FROM sessoes WHERE usuario_id = %s", (usuario_id,))
+        conn.commit()
+
+
+def criar_sessao(*, token_hash: str, usuario_id: int, expira_em) -> None:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO sessoes (token_hash, usuario_id, expira_em) VALUES (%s, %s, %s)",
+            (token_hash, usuario_id, expira_em),
+        )
+        conn.commit()
+
+
+def get_sessao(token_hash: str) -> dict | None:
+    """Sessao valida -> dados do usuario. Junta com `usuarios` pra que
+    usuario desativado nao passe nem se a linha da sessao sobrar."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT u.id, u.email, u.nome, u.papel, s.expira_em
+            FROM sessoes s JOIN usuarios u ON u.id = s.usuario_id
+            WHERE s.token_hash = %s AND s.expira_em > now() AND u.ativo
+            """,
+            (token_hash,),
+        )
+        return cur.fetchone()
+
+
+def apagar_sessao(token_hash: str) -> None:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM sessoes WHERE token_hash = %s", (token_hash,))
+        conn.commit()
+
+
+def limpar_sessoes_expiradas() -> int:
+    """Chamado no login -- barato, e evita um job so pra isso numa POC."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM sessoes WHERE expira_em <= now()")
+        apagadas = cur.rowcount
+        conn.commit()
+        return apagadas
+
+
+def criar_convite(*, token_hash: str, email: str, papel: str, criado_por: int, expira_em) -> None:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO convites (token_hash, email, papel, criado_por, expira_em)
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (token_hash, email, papel, criado_por, expira_em),
+        )
+        conn.commit()
+
+
+def get_convite_valido(token_hash: str) -> dict | None:
+    """So convite no prazo e ainda nao usado."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT token_hash, email, papel, expira_em FROM convites
+            WHERE token_hash = %s AND usado_em IS NULL AND expira_em > now()
+            """,
+            (token_hash,),
+        )
+        return cur.fetchone()
+
+
+def marcar_convite_usado(token_hash: str) -> bool:
+    """True so se ESTA chamada fechou o convite. O `usado_em IS NULL` no
+    WHERE faz o banco resolver a corrida de dois cadastros simultaneos com
+    o mesmo link -- quem chegar depois leva False e nao cria usuario."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE convites SET usado_em = now() WHERE token_hash = %s AND usado_em IS NULL",
+            (token_hash,),
+        )
+        fechou = cur.rowcount == 1
+        conn.commit()
+        return fechou
+
+
+def listar_convites_pendentes() -> list[dict]:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT email, papel, expira_em, criado_em FROM convites
+            WHERE usado_em IS NULL AND expira_em > now() ORDER BY criado_em DESC
+            """
+        )
+        return cur.fetchall()
+
+
+# ---------------------------------------------------------------- indicadores de observabilidade
+
+
+def resumo_traces(janela_horas: int = 24) -> dict:
+    """Agregado de `agent_traces` na janela -- o que vira os cartoes no topo
+    da aba de observabilidade.
+
+    p95 e nao media de proposito: media esconde a cauda, e a cauda e
+    exatamente o que o cliente sente. Com 9-10s de turno tipico, uma
+    chamada de 25s e a diferenca entre "pensando" e "travou".
+
+    `percentile_cont` interpola entre as duas amostras vizinhas; com
+    poucas chamadas o numero oscila, e por isso o template mostra a
+    contagem ao lado -- p95 de 7 chamadas nao e p95 de nada.
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT
+                count(*)                                           AS chamadas,
+                count(*) FILTER (WHERE erro IS NOT NULL)           AS erros,
+                coalesce(sum(prompt_tokens), 0)                    AS tokens_entrada,
+                coalesce(sum(completion_tokens), 0)                AS tokens_saida,
+                percentile_cont(0.5)  WITHIN GROUP (ORDER BY latencia_ms) AS p50_ms,
+                percentile_cont(0.95) WITHIN GROUP (ORDER BY latencia_ms) AS p95_ms,
+                max(latencia_ms)                                   AS pior_ms,
+                percentile_cont(0.5) WITHIN GROUP (ORDER BY tokens_por_s)
+                    FILTER (WHERE tokens_por_s IS NOT NULL)        AS tps_mediano
+            FROM agent_traces
+            WHERE criado_em > now() - make_interval(hours => %s)
+            """,
+            (janela_horas,),
+        )
+        return cur.fetchone()
+
+
+def resumo_traces_por_agente(janela_horas: int = 24) -> list[dict]:
+    """Mesmo recorte, quebrado por agente -- mostra QUEM custa caro. Medido
+    assim que o resumo e a memoria sairam do caminho critico do turno
+    (core/graph.py::_tarefas_de_fundo)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT
+                agente,
+                count(*)                                           AS chamadas,
+                percentile_cont(0.95) WITHIN GROUP (ORDER BY latencia_ms) AS p95_ms,
+                -- coalesce por campo, nao na soma: um unico NULL dentro de
+                -- `prompt_tokens + completion_tokens` anularia a linha toda.
+                sum(coalesce(prompt_tokens, 0) + coalesce(completion_tokens, 0)) AS tokens
+            FROM agent_traces
+            WHERE criado_em > now() - make_interval(hours => %s)
+            GROUP BY agente
+            ORDER BY count(*) DESC
+            """,
+            (janela_horas,),
+        )
+        return cur.fetchall()
+
+
+def contar_leads_atendidos(janela_horas: int = 24) -> int:
+    """Leads com ao menos uma chamada de LLM na janela -- denominador do
+    "custo por conversa". Conta `agent_traces`, nao `leads`: lead que
+    entrou pelo CRM e nunca conversou nao consumiu inferencia nenhuma e
+    baixaria a media artificialmente."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT count(DISTINCT lead_id) AS n FROM agent_traces
+            WHERE lead_id IS NOT NULL AND criado_em > now() - make_interval(hours => %s)
+            """,
+            (janela_horas,),
+        )
+        return cur.fetchone()["n"]
+
+
+def resumo_injecoes(janela_horas: int = 24) -> list[dict]:
+    """Tentativas de prompt injection na janela, por tipo (core/injecao.py).
+
+    Alimenta o cartao da aba de observabilidade. Lista vazia e o estado
+    normal e o template trata como tal -- "0 tentativas" e informacao boa,
+    nao ausencia de dado."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT suspeita_injecao AS tipo, count(*) AS tentativas
+            FROM mensagens
+            WHERE suspeita_injecao IS NOT NULL
+              AND criado_em > now() - make_interval(hours => %s)
+            GROUP BY suspeita_injecao
+            ORDER BY count(*) DESC
+            """,
+            (janela_horas,),
+        )
+        return cur.fetchall()
+
+
+def listar_mensagens_suspeitas(limite: int = 20) -> list[dict]:
+    """As tentativas em si, pro corretor ver o que foi escrito -- numero
+    agregado sem o texto nao deixa ninguem julgar se e falso positivo."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT lead_id, conteudo, suspeita_injecao, criado_em
+            FROM mensagens WHERE suspeita_injecao IS NOT NULL
+            ORDER BY criado_em DESC LIMIT %s
+            """,
+            (limite,),
+        )
+        return cur.fetchall()
+
+
+def get_imovel_por_codigo(codigo: str) -> dict | None:
+    """Imovel pelo codigo publico (MOE-0001). `upper()` porque o cliente
+    digita como quiser -- a coluna guarda sempre em maiuscula (seed)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT * FROM imoveis WHERE codigo = %s", (codigo.upper(),))
+        return cur.fetchone()
+
+
+def registrar_acao(lead_id: int, acao: str) -> int:
+    """Conta quantas vezes SEGUIDAS o roteador decidiu a mesma coisa.
+
+    Devolve a contagem ja atualizada (1 = primeira vez). Acao diferente
+    zera o contador -- o que importa e a insistencia consecutiva, nao o
+    total historico.
+
+    Existe porque `decidir_proximo` e funcao pura dos slots: cliente que
+    nao responde o que foi perguntado nao muda slot nenhum, e o agente
+    repetia a mesma pergunta indefinidamente."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE leads
+               SET acao_repeticoes = CASE WHEN ultima_acao = %(acao)s
+                                          THEN acao_repeticoes + 1 ELSE 1 END,
+                   ultima_acao = %(acao)s
+             WHERE id = %(lead_id)s
+            RETURNING acao_repeticoes
+            """,
+            {"acao": acao, "lead_id": lead_id},
+        )
+        linha = cur.fetchone()
+        conn.commit()
+        return linha["acao_repeticoes"] if linha else 1
+
+
+def faixa_de_precos(finalidade: str) -> dict | None:
+    """Menor e maior preco da base, pra situar o cliente que nao sabe
+    informar orcamento. Numero vem do banco, nunca do LLM (secao 5.6)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT min(preco) AS minimo, max(preco) AS maximo FROM imoveis WHERE finalidade = %s",
+            (finalidade,),
+        )
+        return cur.fetchone()
+
+
+def dispensar_campo(lead_id: int, pergunta: str) -> None:
+    """Marca que o cliente nao vai informar este campo. O roteiro para de
+    perguntar (agents/router.py::decidir_proximo) e segue com o que tem.
+
+    `array_append` condicionado ao `NOT ... = ANY(...)` pra nao duplicar:
+    o mesmo campo pode ser dispensado mais de uma vez numa corrida."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE leads
+               SET campos_dispensados = array_append(campos_dispensados, %(p)s)
+             WHERE id = %(lead_id)s
+               AND NOT (%(p)s = ANY(campos_dispensados))
+            """,
+            {"p": pergunta, "lead_id": lead_id},
+        )
+        conn.commit()
+
+
+def get_campos_dispensados(lead_id: int) -> tuple[str, ...]:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT campos_dispensados FROM leads WHERE id = %s", (lead_id,))
+        linha = cur.fetchone()
+        return tuple(linha["campos_dispensados"] or ()) if linha else ()
+
+
+# ---------------------------------------------------------------- painel: funil e indicadores
+
+# Etapas do funil, na ordem em que o lead anda. `encerrado` e `perdido`
+# NAO entram no quadro: sao saidas, nao etapas -- misturar os dois com as
+# colunas ativas faria 85 cartoes mortos esconderem os 7 que importam.
+ETAPAS_FUNIL = (
+    ("novo", "Novo"),
+    ("qualificando", "Qualificando"),
+    ("aguardando_escolha", "Escolhendo imóvel"),
+    ("visita_agendada", "Visita marcada"),
+    ("encaminhado", "Com especialista"),
+)
+
+
+def funil() -> dict[str, list[dict]]:
+    """Leads por etapa, pro quadro Kanban. Dentro da coluna, o de maior
+    score primeiro -- a pergunta do corretor e "por quem ligo agora"."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT l.id, l.chat_id, l.canal, l.nome, l.status, l.score,
+                   l.telefone_mascarado, l.ultima_interacao_em,
+                   s.intencao, s.regiao, s.quartos, s.faixa_preco_max, s.ticket, s.urgencia,
+                   r.texto AS resumo,
+                   (SELECT conteudo FROM mensagens m
+                     WHERE m.lead_id = l.id AND m.papel = 'user'
+                     ORDER BY m.criado_em DESC LIMIT 1) AS ultima_fala
+              FROM leads l
+              LEFT JOIN slots s   ON s.lead_id = l.id
+              LEFT JOIN resumos r ON r.lead_id = l.id
+             WHERE l.status = ANY(%s)
+             ORDER BY l.score DESC, l.ultima_interacao_em DESC
+            """,
+            ([etapa for etapa, _ in ETAPAS_FUNIL],),
+        )
+        linhas = cur.fetchall()
+
+    colunas: dict[str, list[dict]] = {etapa: [] for etapa, _ in ETAPAS_FUNIL}
+    for linha in linhas:
+        colunas[linha["status"]].append(linha)
+    return colunas
+
+
+def versao_painel() -> str:
+    """Impressao digital barata de tudo que o painel mostra. O navegador
+    pergunta isto a cada 2s e so recarrega os blocos quando muda -- e o
+    que deixa o painel "em tempo real" sem recarregar funil, tabela e
+    detalhe a cada poucos segundos a toa (e sem cancelar um arraste)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT concat_ws(':',
+                (SELECT max(id) FROM mensagens),
+                (SELECT max(id) FROM agent_traces),
+                (SELECT count(*) || '-' || coalesce(max(id), 0) FROM visitas),
+                (SELECT count(*) || '-' || coalesce(max(id), 0) FROM encaminhamentos),
+                (SELECT md5(coalesce(string_agg(id || status || score, ',' ORDER BY id), ''))
+                   FROM leads)
+            ) AS versao
+            """
+        )
+        return cur.fetchone()["versao"]
+
+
+def indicadores() -> dict:
+    """Os números do topo do painel. Todos saem de dado medido, nenhum é
+    estimativa -- mesma regra do painel de observabilidade."""
+    with get_conn() as conn, conn.cursor() as cur:
+        # Tempo até a 1a resposta: diferença entre a 1a fala do cliente e a
+        # 1a resposta do agente, por lead. É o indicador que o enunciado
+        # cita primeiro ("tempo de resposta elevado" perde lead).
+        cur.execute(
+            """
+            WITH primeira AS (
+                SELECT lead_id,
+                       min(criado_em) FILTER (WHERE papel = 'user')      AS cliente,
+                       min(criado_em) FILTER (WHERE papel = 'assistant') AS agente
+                  FROM mensagens GROUP BY lead_id
+            )
+            SELECT avg(EXTRACT(EPOCH FROM (agente - cliente))) AS segundos
+              FROM primeira WHERE cliente IS NOT NULL AND agente > cliente
+            """
+        )
+        resposta = cur.fetchone()["segundos"]
+
+        cur.execute(
+            """
+            SELECT
+                count(*) FILTER (WHERE l.status <> 'novo')                       AS atendidos,
+                count(*) FILTER (WHERE s.intencao IS NOT NULL
+                                   AND s.intencao <> 'indefinido')               AS qualificados,
+                (SELECT count(*) FROM visitas WHERE status = 'agendada')         AS visitas,
+                (SELECT count(*) FROM encaminhamentos)                           AS encaminhados,
+                -- Recuperado: recebeu follow-up e VOLTOU a falar depois dele.
+                -- É o cenário 3 do enunciado funcionando, medido.
+                (SELECT count(DISTINCT f.lead_id) FROM follow_up_jobs f
+                  WHERE f.status = 'enviado'
+                    AND EXISTS (SELECT 1 FROM mensagens m
+                                 WHERE m.lead_id = f.lead_id AND m.papel = 'user'
+                                   AND m.criado_em > f.executar_em))             AS recuperados
+              FROM leads l LEFT JOIN slots s ON s.lead_id = l.id
+            """
+        )
+        linha = cur.fetchone()
+
+    atendidos = linha["atendidos"] or 0
+    return {
+        "primeira_resposta_s": round(resposta) if resposta else None,
+        "taxa_qualificacao": round(100 * linha["qualificados"] / atendidos) if atendidos else 0,
+        "visitas": linha["visitas"],
+        "encaminhados": linha["encaminhados"],
+        "recuperados": linha["recuperados"],
+    }
+
+
+# Etapas que o corretor pode arrastar livremente: nenhuma delas faz o
+# grafo prometer algo ao cliente.
+ETAPAS_LIVRES = ("novo", "qualificando", "aguardando_escolha")
+
+# Estas duas mudam o RAMO do grafo e fazem o agente falar de um
+# compromisso concreto (`core/turno.py::_resumo_desfecho` cita data,
+# corretor e imovel). Sem o registro correspondente, o proximo turno do
+# cliente cairia num ramo que nao tem o que citar -- e o guardrail de nao
+# alucinar so funciona quando o dado real existe.
+ETAPAS_COM_REGISTRO = {
+    "visita_agendada": "visitas",
+    "encaminhado": "encaminhamentos",
+}
+
+
+def mover_lead(lead_id: int, etapa: str) -> str | None:
+    """Move o lead de etapa. Devolve None em caso de sucesso, ou a razao
+    da recusa -- que o painel mostra ao corretor.
+
+    Recusar e deliberado: o `status` nao e so rotulo de quadro, e o que
+    roteia o grafo (core/graph.py::_rota_por_status)."""
+    valido = {e for e, _ in ETAPAS_FUNIL}
+    if etapa not in valido:
+        return f"Etapa desconhecida: {etapa}"
+
+    tabela = ETAPAS_COM_REGISTRO.get(etapa)
+    with get_conn() as conn, conn.cursor() as cur:
+        if tabela:
+            cur.execute(f"SELECT 1 FROM {tabela} WHERE lead_id = %s LIMIT 1", (lead_id,))
+            if not cur.fetchone():
+                rotulo = dict(ETAPAS_FUNIL)[etapa]
+                return (
+                    f"Não dá pra mover para “{rotulo}”: não há "
+                    f"{'visita agendada' if tabela == 'visitas' else 'encaminhamento'} "
+                    "registrado para este lead. O agente passaria a falar de um "
+                    "compromisso que não existe."
+                )
+        cur.execute("UPDATE leads SET status = %s WHERE id = %s", (etapa, lead_id))
+        movidos = cur.rowcount
+        conn.commit()
+    return None if movidos else "Lead não encontrado."

@@ -1,35 +1,36 @@
-<div class="overflow-x-auto bg-white rounded-lg border">
-<table class="w-full min-w-[480px] text-sm">
-    <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+{# Estilo em app/web/static/painel.css (.tabela / .pontos / .rotulo-prio). #}
+<div class="bloco overflow-x-auto">
+<table class="tabela min-w-[480px]">
+    <thead>
         <tr class="whitespace-nowrap">
-            <th class="px-3 py-2 text-left">Score</th>
-            <th class="px-3 py-2 text-left">Lead</th>
-            <th class="px-3 py-2 text-left">Status</th>
-            <th class="px-3 py-2 text-left">Intenção</th>
-            <th class="px-3 py-2 text-left">Região</th>
-            <th class="px-3 py-2 text-left hidden xl:table-cell">Canal</th>
+            <th>Score</th>
+            <th>Lead</th>
+            <th>Status</th>
+            <th>Intenção</th>
+            <th>Região</th>
+            <th class="hidden xl:table-cell">Canal</th>
         </tr>
     </thead>
     <tbody>
         {% for l in leads %}
         <tr hx-get="/dashboard/lead/{{ l.id }}" hx-target="#lead-detail" hx-swap="innerHTML"
-            class="cursor-pointer hover:bg-slate-50 border-t whitespace-nowrap">
-            <td class="px-3 py-2">
-                <span class="inline-block w-10 text-center rounded px-1 py-0.5 text-xs font-bold text-white
-                    {% if l.score >= 70 %}bg-green-600{% elif l.score >= 40 %}bg-amber-500{% else %}bg-gray-400{% endif %}">
-                    {{ l.score }}
+            class="whitespace-nowrap">
+            <td>
+                {# Faixas iguais a SCORE_QUENTE/SCORE_MORNO de core/scoring.py.
+                   O rotulo diz por quem ligar primeiro; o numero sozinho nao dizia. #}
+                <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="pontos {{ l.prioridade }}">{{ l.score }}</span>
+                    <span class="rotulo-prio {{ l.prioridade }} hidden sm:inline">{{ l.prioridade }}</span>
                 </span>
             </td>
-            <td class="px-3 py-2 max-w-[180px] truncate" title="{{ l.nome or l.chat_id }}">{{ l.nome or l.chat_id }}</td>
-            <td class="px-3 py-2">
-                <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100">{{ l.status }}</span>
-            </td>
-            <td class="px-3 py-2">{{ l.intencao or "—" }}</td>
-            <td class="px-3 py-2">{{ l.regiao or "—" }}</td>
-            <td class="px-3 py-2 text-slate-500 hidden xl:table-cell">{{ l.canal }}</td>
+            <td class="max-w-[180px] truncate" title="{{ l.nome or l.chat_id }}" style="font-weight:600">{{ l.nome or l.chat_id }}</td>
+            <td><span class="pilula">{{ l.status|rotulo }}</span></td>
+            <td style="color:var(--tinta-media)">{{ l.intencao or "—" }}</td>
+            <td style="color:var(--tinta-media)">{{ l.regiao or "—" }}</td>
+            <td class="hidden xl:table-cell" style="color:var(--tinta-fraca)">{{ l.canal }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="6" class="px-3 py-6 text-center text-gray-400">Nenhum lead ainda.</td></tr>
+        <tr><td colspan="6" class="py-6 text-center" style="color:var(--tinta-fraca)">Nenhum lead ainda.</td></tr>
         {% endfor %}
     </tbody>
 </table>

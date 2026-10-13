@@ -2,8 +2,10 @@
 tunel/webhook caindo no meio da demo).
 
 Adapter fino: recebe update, chama o orquestrador de turno, manda a resposta
-de volta. Nao sabe nada de LLM, banco ou agentes -- so texto entra, texto
-sai. E o que faz "trocar de canal = escrever um adapter" ser verdade
+de volta. Nao sabe nada de LLM, banco ou agentes -- texto entra, texto (mais
+as fotos dos imoveis, quando o turno apresenta imoveis) sai; como isso vira
+album de fotos no Telegram e decisao deste arquivo, nao do orquestrador,
+que so devolve as URLs. E o que faz "trocar de canal = escrever um adapter" ser verdade
 (secao 5.8) -- este arquivo e o channels/cli.py chamam exatamente a mesma
 `processar_turno`.
 """
@@ -13,12 +15,15 @@ import logging
 import tempfile
 from pathlib import Path
 
-from telegram import Update
+import httpx
+
+from telegram import InputMediaPhoto, Update
 from telegram.constants import ChatAction
 from telegram.ext import Application, ContextTypes, MessageHandler, filters
 
 from app.core import followup, stt
 from app.core.config import get_settings
+from app.core import tts
 from app.core.turno import RESPOSTA_FALLBACK, processar_turno
 from app.db import repo
 
@@ -60,7 +65,111 @@ async def _on_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     finally:
         digitando.cancel()
 
-    await update.message.reply_text(resposta)
+    # Texto SEM o bloco de cards: a legenda de cada album ja traz titulo,
+    # preco, metragem e codigo do imovel. Mandar os dois e a mesma
+    # informacao duas vezes na tela do cliente.
+    conversa = getattr(resposta, "texto_sem_cards", resposta)
+    # Quem mandou audio recebe a resposta EM VOZ, no lugar do texto -- nao
+    # alem dele. A primeira versao mandava os dois, e o cliente recebia a
+    # mesma frase escrita e falada, uma atras da outra: nao e como uma
+    # pessoa responde. O texto so vai se a voz falhar, pra nunca deixar o
+    # cliente sem resposta. Os dados do imovel continuam por escrito, na
+    # legenda do album logo abaixo.
+    if not await _enviar_voz(context, telegram_chat_id, str(conversa), origem):
+        await update.message.reply_text(conversa)
+    # Fotos depois do texto: o cliente le a lista numerada e ve os albuns na
+    # mesma ordem logo abaixo. `getattr` porque o fallback de excecao acima
+    # e uma string comum, sem galeria.
+    await _enviar_galeria(context, telegram_chat_id, getattr(resposta, "galeria", []))
+
+
+async def _enviar_voz(
+    context: ContextTypes.DEFAULT_TYPE, telegram_chat_id: int, texto: str, origem: str
+) -> bool:
+    """Manda a resposta como mensagem de voz, quando faz sentido.
+
+    Devolve se a voz FOI enviada: quem chama manda o texto só quando ela
+    não foi (ver `_on_message`).
+
+    `to_thread` porque a sintese e subprocess bloqueante (say/piper +
+    ffmpeg) e seguraria o loop de eventos do bot -- mesmo motivo de
+    `_processar_em_thread`."""
+    if not tts.deve_falar(origem):
+        return False
+    try:
+        audio = await asyncio.to_thread(tts.sintetizar, texto)
+        if audio:
+            await context.bot.send_voice(chat_id=telegram_chat_id, voice=audio)
+            return True
+    except Exception:
+        logger.warning("falha enviando audio (chat=%s) -- segue so com texto",
+                       telegram_chat_id, exc_info=True)
+    return False
+
+
+async def _enviar_galeria(context: ContextTypes.DEFAULT_TYPE, telegram_chat_id: int, galeria: list[dict]) -> None:
+    """Um album por imovel (pedido do usuario: fotos junto com cada
+    casa/apartamento), legenda na primeira foto com o mesmo numero do card
+    -- e assim que o cliente liga a foto ao "quero o 2".
+
+    Falha aqui nunca derruba o turno: o texto com preco, bairro e numero ja
+    foi entregue: a foto e complemento. O caso realista de falha e o
+    Telegram nao conseguir baixar a URL da foto (ele busca a imagem pelo
+    proprio servidor), e um imovel sem album e melhor que um turno perdido."""
+    async with httpx.AsyncClient(timeout=20, follow_redirects=True) as http:
+        for item in galeria:
+            midias = []
+            for url in item["fotos"]:
+                imagem = await _carregar_foto(http, url)
+                if imagem:
+                    legenda = item["legenda"] if not midias else None
+                    midias.append(InputMediaPhoto(media=imagem, caption=legenda))
+            if not midias:
+                continue
+            try:
+                await context.bot.send_media_group(chat_id=telegram_chat_id, media=midias)
+            except Exception:
+                logger.warning(
+                    "falha enviando fotos do imovel %s (chat=%s) -- segue sem album",
+                    item.get("imovel_id"), telegram_chat_id, exc_info=True,
+                )
+
+
+# Raiz dos arquivos servidos em /static (app/web/static/). As fotos dos
+# imoveis moram aqui desde que o loremflickr passou a responder 401 e a
+# galeria sumiu de todos os canais sem ninguem notar.
+_STATIC = Path(__file__).resolve().parent.parent / "web" / "static"
+
+
+async def _carregar_foto(http: "httpx.AsyncClient", referencia: str) -> bytes | None:
+    """Bytes da foto, pra subir como upload comum em vez de passar a URL
+    pro Telegram buscar sozinho (depender do servidor deles seguir
+    redirect de terceiro seria apostar em comportamento fora do nosso
+    controle).
+
+    `referencia` e um caminho local (`/static/imoveis/...`) no caso normal
+    -- a leitura e de disco, sem rede. URL absoluta continua aceita pra
+    quem apontar `imoveis.fotos` pra um CDN de fotos reais depois."""
+    if referencia.startswith("/static/"):
+        caminho = _STATIC / referencia.removeprefix("/static/")
+        try:
+            # `resolve()` + checagem de prefixo: `fotos` vem do banco, e um
+            # caminho com `..` leria arquivo fora de static.
+            caminho = caminho.resolve()
+            if not caminho.is_relative_to(_STATIC.resolve()):
+                logger.warning("caminho de foto fora de /static, ignorado: %r", referencia)
+                return None
+            return await asyncio.to_thread(caminho.read_bytes)
+        except OSError:
+            logger.warning("falha lendo foto %s -- segue sem ela", referencia, exc_info=True)
+            return None
+    try:
+        r = await http.get(referencia)
+        r.raise_for_status()
+        return r.content
+    except Exception:
+        logger.warning("falha baixando foto %s -- segue sem ela", referencia, exc_info=True)
+        return None
 
 
 async def _manter_digitando(context: ContextTypes.DEFAULT_TYPE, telegram_chat_id: int) -> None:
@@ -98,6 +207,21 @@ async def _processar_em_thread(lead_chat_id: str, texto: str, origem: str = "tex
     )
 
 
+def _chat_id_telegram(chat_id: str) -> int | None:
+    """Id numerico do Telegram, ou None se o `chat_id` do lead nao for um.
+
+    Existe porque a guarda de `canal` nao basta: lead gravado com
+    canal='telegram' e chat_id nao-numerico (fixture de teste, import de
+    CRM malformado) fazia o `int()` estourar DENTRO do job do APScheduler.
+    Sem error handler registrado no ptb, a excecao subia a cada varredura
+    -- 30s de intervalo, para sempre, enchendo o log e impedindo que os
+    follow-ups legitimos DA MESMA RODADA fossem enviados."""
+    try:
+        return int(chat_id.removeprefix("tg:"))
+    except (ValueError, AttributeError):
+        return None
+
+
 async def _checar_followups(context: ContextTypes.DEFAULT_TYPE) -> None:
     """Job periodico (Etapa 6, cenario 3 do PDF) -- varre follow_up_jobs
     vencidos e envia as mensagens de reengajamento. So sabe empurrar
@@ -118,7 +242,16 @@ async def _checar_followups(context: ContextTypes.DEFAULT_TYPE) -> None:
         if not mensagem:
             continue
 
-        telegram_chat_id = int(job["chat_id"].removeprefix("tg:"))
+        telegram_chat_id = _chat_id_telegram(job["chat_id"])
+        if telegram_chat_id is None:
+            # Nao da pra entregar, e tentar de novo a cada 30s so repete o
+            # erro: cancela o job e segue pros proximos da rodada.
+            logger.warning(
+                "follow-up com chat_id nao-numerico, cancelando (lead_id=%s, chat_id=%r)",
+                job["lead_id"], job["chat_id"],
+            )
+            await asyncio.to_thread(repo.marcar_followup_cancelado, job["job_id"])
+            continue
         try:
             await context.bot.send_message(chat_id=telegram_chat_id, text=mensagem)
         except Exception:
@@ -136,11 +269,25 @@ async def _checar_inatividade(context: ContextTypes.DEFAULT_TYPE) -> None:
     for item in encerrados:
         if item["canal"] != "telegram":
             continue
-        telegram_chat_id = int(item["chat_id"].removeprefix("tg:"))
+        telegram_chat_id = _chat_id_telegram(item["chat_id"])
+        if telegram_chat_id is None:
+            logger.warning(
+                "encerramento com chat_id nao-numerico, ignorando (lead_id=%s, chat_id=%r)",
+                item["lead_id"], item["chat_id"],
+            )
+            continue
         try:
             await context.bot.send_message(chat_id=telegram_chat_id, text=item["mensagem"])
         except Exception:
             logger.exception("falha enviando encerramento por inatividade (lead_id=%s)", item["lead_id"])
+
+
+async def _on_error(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Sem isto o ptb logava 'No error handlers are registered' e despejava
+    o traceback inteiro a cada falha -- inclusive a cada varredura de
+    follow-up, de 30 em 30 segundos. Com o handler, a falha vira uma linha
+    de log nossa e o job continua."""
+    logger.exception("erro nao tratado no bot do Telegram", exc_info=context.error)
 
 
 def build_app() -> Application:
@@ -149,6 +296,7 @@ def build_app() -> Application:
     application.add_handler(
         MessageHandler((filters.TEXT & ~filters.COMMAND) | filters.VOICE | filters.AUDIO, _on_message)
     )
+    application.add_error_handler(_on_error)
     application.job_queue.run_repeating(_checar_followups, interval=settings.followup_scan_s, first=10)
     application.job_queue.run_repeating(_checar_inatividade, interval=settings.followup_scan_s, first=15)
     return application

@@ -7,9 +7,10 @@ __pycache__/
 .ruff_cache/
 *.log
 .run.pid
+.site.pid
 .DS_Store
 /tmp/
 *.mp4
-PITCH.md
 PLANO.md
-IA.md
+# Saida do gerador do site -- reconstruida por `python site/build.py`.
+site/dist/

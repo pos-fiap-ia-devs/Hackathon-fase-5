@@ -1,0 +1,49 @@
+{# Cartões dos imóveis apresentados (core/turno.py::_galeria_imoveis).
+
+   Cartão, não texto: os campos chegam separados (`titulo`, `preco`,
+   `quartos`, `area`, `bairro`, `codigo`) justamente pra que cada canal
+   renderize do seu jeito. O Telegram usa `legenda`, que é o que cabe numa
+   foto; aqui dá pra hierarquizar -- preço em destaque, specs em cinza,
+   código como rodapé -- e o cliente varre as três opções de relance.
+
+   Uma foto por cartão, não as três: numa lista de 3 imóveis, 9 miniaturas
+   viram parede de imagem e o preço some no meio. As outras continuam no
+   banco, pro detalhe do lead e pro álbum do Telegram. #}
+{% if galeria %}
+<div class="mt-2 space-y-2 max-w-md">
+    {% for item in galeria %}
+    <div class="flex gap-3 rounded-lg border bg-white p-2.5">
+        {% if item.fotos %}
+        <img src="{{ item.fotos[0] }}" alt="Foto do {{ item.titulo or 'imóvel' }}" loading="lazy"
+             class="w-20 h-20 shrink-0 object-cover rounded bg-slate-100">
+        {% endif %}
+        <div class="min-w-0 flex-1">
+            {# `item.titulo` só existe nas mensagens novas: conversa gravada
+               antes deste formato tem só `legenda`, e sem este fallback o
+               histórico do painel apareceria sem texto nenhum. #}
+            {% if item.titulo %}
+            <p class="font-semibold text-sm leading-snug break-words">{{ item.titulo }}</p>
+            <p class="text-base font-bold text-amber-700 mt-0.5">{{ item.preco }}</p>
+            {# `specs` vem pronta de core/turno.py::_specs_do_imovel: sem
+               "0 quartos" em terreno e sem banheiro estimado. Mensagens
+               antigas (gravadas antes do campo existir) caem no formato
+               anterior. #}
+            <p class="text-xs text-gray-500 mt-0.5">
+                {% if item.specs is defined %}{{ item.specs }}
+                {%- else %}{{ item.quartos }} quarto{{ "s" if item.quartos != 1 }}
+                {%- if item.area %} · {{ item.area }} m²{% endif %}{% endif %}
+            </p>
+            <p class="text-xs text-gray-500">
+                {{ item.bairro }}{% if item.cidade %}, {{ item.cidade }}{% endif %}
+            </p>
+            {% if item.codigo %}
+            <p class="text-xs text-gray-400 mt-0.5">Cód. {{ item.codigo }}</p>
+            {% endif %}
+            {% else %}
+            <p class="text-xs text-gray-500 break-words">{{ item.legenda }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

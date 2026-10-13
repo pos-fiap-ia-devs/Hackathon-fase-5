@@ -1,0 +1,380 @@
+/* Painel do corretor.
+ *
+ * MESMO sistema de design do site da imobiliária (site/style.css): uma cor
+ * de marca, uma escala de cinzas, sombra em vez de borda, escala
+ * tipográfica estreita. Produto só parece um produto quando as duas telas
+ * parecem a mesma empresa -- o painel estava em Tailwind cru, com os
+ * cinzas de fábrica, e isso é o que faz uma tela parecer gerada em vez de
+ * desenhada.
+ *
+ * Carregado DEPOIS do Tailwind CDN no base.html, então vence por ordem
+ * sem precisar de `!important`.
+ */
+
+:root {
+    --marca: #0e41d5;
+    --marca-escura: #0a32a6;
+    --marca-clara: #eef2ff;
+
+    --tinta: #0f172a;
+    --tinta-media: #475569;
+    --tinta-fraca: #94a3b8;
+
+    --linha: #e7ebf0;
+    --fundo: #ffffff;
+    --fundo-app: #f7f8fa;
+
+    --quente: #16a34a;
+    --morno: #d97706;
+    --frio: #94a3b8;
+
+    --raio: 12px;
+    --sombra: 0 1px 2px rgb(15 23 42 / .04), 0 6px 18px -10px rgb(15 23 42 / .14);
+    --sombra-alta: 0 2px 4px rgb(15 23 42 / .05), 0 14px 34px -14px rgb(15 23 42 / .24);
+}
+
+body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--fundo-app);
+    color: var(--tinta);
+    -webkit-font-smoothing: antialiased;
+    font-size: 14px;
+}
+
+/* ---------------------------------------------------------------- topo */
+
+.topo-app {
+    background: var(--fundo);
+    border-bottom: 1px solid var(--linha);
+    position: sticky; top: 0; z-index: 40;
+}
+.topo-app .marca {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-weight: 700; font-size: 15px; letter-spacing: -.015em;
+    color: var(--tinta);
+}
+/* Monograma em vez de emoji. Emoji num painel de trabalho é o detalhe que
+   mais denuncia protótipo. */
+.topo-app .simbolo {
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+    border-radius: 7px;
+    background: var(--marca); color: #fff;
+    font-size: 13px; font-weight: 700;
+}
+.topo-app a { color: var(--tinta-media); font-size: 13.5px; }
+.topo-app a:hover { color: var(--marca); }
+.topo-app a.ativo { color: var(--tinta); font-weight: 600; }
+
+.papel {
+    font-size: 10px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--marca);
+    border: 1px solid var(--marca);
+    border-radius: 999px;
+    padding: 2px 9px;
+}
+
+/* ---------------------------------------------------------------- hierarquia */
+
+body h1 { font-size: 27px; letter-spacing: -.03em; font-weight: 750; line-height: 1.15; }
+body h2 { font-size: 17px; letter-spacing: -.02em; font-weight: 700; }
+body h3 { font-weight: 700; }
+
+.secao-rotulo {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--tinta-fraca);
+}
+
+/* ---------------------------------------------------------------- cartões */
+
+.bloco {
+    background: var(--fundo);
+    border: 0;
+    border-radius: var(--raio);
+    box-shadow: var(--sombra);
+}
+
+/* Indicador do topo: número grande, rótulo pequeno, sem borda competindo. */
+.kpi { padding: 14px 16px; }
+.kpi-rotulo { font-size: 10.5px; font-weight: 700; letter-spacing: .07em;
+              text-transform: uppercase; color: var(--tinta-fraca); }
+.kpi-valor  { font-size: 27px; font-weight: 750; letter-spacing: -.03em; margin-top: 3px; line-height: 1.1; }
+.kpi-nota   { font-size: 11.5px; color: var(--tinta-media); margin-top: 2px; }
+
+/* ---------------------------------------------------------------- funil */
+
+.coluna-titulo {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 0 2px 8px;
+    border-bottom: 2px solid var(--linha);
+    margin-bottom: 10px;
+}
+.coluna-titulo h3 {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase;
+    color: var(--tinta-media);
+}
+.coluna-contagem {
+    font-size: 11px; font-weight: 700;
+    color: var(--tinta-fraca);
+    background: var(--fundo-app);
+    border-radius: 999px; padding: 1px 7px;
+}
+
+/* Altura limitada com rolagem PRÓPRIA: sem isso a coluna com 8 leads
+   estica a página inteira e as outras ficam com um vazio enorme ao lado --
+   era o defeito mais visível do quadro. */
+.coluna-lista {
+    display: flex; flex-direction: column; gap: 8px;
+    max-height: 62vh; overflow-y: auto;
+    padding: 2px 2px 6px;
+    scrollbar-width: thin;
+}
+
+.cartao {
+    background: var(--fundo);
+    border: 1px solid transparent;
+    border-left: 3px solid var(--linha);
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: var(--sombra);
+    cursor: grab;
+    transition: box-shadow .15s, transform .15s, border-color .15s;
+}
+.cartao:hover { box-shadow: var(--sombra-alta); transform: translateY(-1px); }
+.cartao:active { cursor: grabbing; }
+.cartao.arrastando { opacity: .35; }
+
+/* A faixa lateral carrega a temperatura -- lida de relance, sem precisar
+   decodificar o número. */
+.cartao.quente { border-left-color: var(--quente); }
+.cartao.morno  { border-left-color: var(--morno); }
+.cartao.frio   { border-left-color: var(--linha); }
+
+.cartao-nome { font-size: 13.5px; font-weight: 650; letter-spacing: -.01em; }
+.cartao-meta { font-size: 11.5px; color: var(--tinta-media); }
+.cartao-fala { font-size: 11.5px; color: var(--tinta-media); margin-top: 6px; font-style: italic; }
+
+.pontos {
+    min-width: 28px; text-align: center;
+    font-size: 11px; font-weight: 700;
+    border-radius: 6px; padding: 2px 5px;
+    color: #fff;
+}
+.pontos.quente { background: var(--quente); }
+.pontos.morno  { background: var(--morno); }
+.pontos.frio   { background: var(--frio); }
+
+.etiqueta {
+    font-size: 10px; font-weight: 600;
+    border-radius: 5px; padding: 2px 6px;
+    background: var(--fundo-app); color: var(--tinta-media);
+}
+.etiqueta.alerta { background: #fef2f2; color: #b91c1c; }
+
+.coluna.alvo .coluna-lista {
+    background: var(--marca-clara);
+    outline: 2px dashed #a5b4fc; outline-offset: 3px;
+    border-radius: 10px;
+}
+
+.line-clamp-2 {
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* ---------------------------------------------------------------- tabela */
+
+.tabela { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tabela thead th {
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase;
+    color: var(--tinta-fraca);
+    text-align: left; padding: 9px 12px;
+    background: transparent;
+    border-bottom: 1px solid var(--linha);
+}
+/* Linha divisória fina em vez de zebra: com 7 colunas a zebra virava
+   ruído e competia com a faixa de temperatura. */
+.tabela tbody tr { border-top: 1px solid var(--linha); }
+.tabela tbody tr[hx-get] { cursor: pointer; }
+.tabela tbody tr:first-child { border-top: 0; }
+.tabela tbody tr:hover { background: var(--marca-clara); }
+.tabela td { padding: 9px 12px; }
+
+.rotulo-prio { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.rotulo-prio.quente { color: var(--quente); }
+.rotulo-prio.morno  { color: var(--morno); }
+.rotulo-prio.frio   { color: var(--tinta-fraca); }
+
+.pilula {
+    font-size: 11px; font-weight: 600;
+    border-radius: 999px; padding: 2px 9px;
+    background: var(--fundo-app); color: var(--tinta-media);
+}
+
+/* ---------------------------------------------------------------- conversa */
+
+/* Bolhas do histórico no detalhe do lead. O azul do cliente é o AZUL DA
+   MARCA, não o `bg-blue-600` do Tailwind -- era a única cor forte da tela
+   e não combinava com nada. */
+.bolha { display: inline-block; padding: 6px 12px; border-radius: 12px;
+         max-width: 85%; text-align: left; overflow-wrap: break-word;
+         white-space: pre-line; font-size: 13px; }
+.bolha.cliente { background: var(--marca); color: #fff; border-bottom-right-radius: 4px; }
+.bolha.bia     { background: var(--fundo); color: var(--tinta);
+                 box-shadow: var(--sombra); border-bottom-left-radius: 4px; }
+
+.conversa { background: var(--fundo-app); border-radius: 10px; padding: 12px; }
+
+/* Barra de parcela do score: cor da marca, não cinza -- é o número que o
+   corretor usa pra decidir por quem ligar. */
+.barra       { background: var(--linha); border-radius: 999px; height: 5px; }
+.barra > div { background: var(--marca); border-radius: 999px; height: 5px; }
+
+/* Cabeçalho da tabela fixo: com a lista rolando dentro de uma altura
+   limitada, sem isto o corretor perde de vista o que cada coluna é. */
+.tabela thead th { position: sticky; top: 0; background: var(--fundo); z-index: 1; }
+
+/* ---------------------------------------------------------------- formulário */
+
+.campo {
+    background: var(--fundo);
+    border: 1px solid var(--linha);
+    border-radius: 9px;
+    padding: 9px 12px;
+    font-size: 14px;
+    color: var(--tinta);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+}
+.campo:focus { border-color: var(--marca); box-shadow: 0 0 0 3px rgb(14 65 213 / .12); }
+.campo::placeholder { color: var(--tinta-fraca); }
+
+.botao {
+    background: var(--marca); color: #fff;
+    border-radius: 9px; padding: 9px 18px;
+    font-size: 14px; font-weight: 600;
+    transition: background .15s;
+}
+.botao:hover:not([disabled]) { background: var(--marca-escura); }
+
+/* ---------------------------------------------------------------- barra lateral */
+
+/* Rail escuro fixo à esquerda, no lugar da barra horizontal. Recolhido
+   mostra só ícones (64px); expandido mostra os rótulos (212px). A
+   preferência fica em localStorage e é aplicada ANTES da pintura (script
+   no <head> do base.html), senão a barra abriria larga e encolheria na
+   frente do usuário a cada navegação.
+ *
+ * Navy, não a cor da marca: o azul #0e41d5 é o que marca o item ATIVO e o
+ * que destaca ação na tela. Se o rail inteiro fosse dele, não sobraria
+ * contraste pra nada. */
+:root { --rail: #14304d; --rail-larg: 64px; }
+:root[data-rail="aberto"] { --rail-larg: 212px; }
+
+.rail {
+    position: fixed; inset: 0 auto 0 0; z-index: 50;
+    width: var(--rail-larg);
+    background: var(--rail);
+    display: flex; flex-direction: column;
+    padding: 14px 0 12px;
+    transition: width .18s ease;
+    overflow: visible;
+}
+.rail-marca {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 18px 16px;
+    color: #fff; font-weight: 700; font-size: 15px; letter-spacing: -.015em;
+    white-space: nowrap;
+}
+.rail-marca svg { flex: 0 0 auto; }
+.rail hr { border: 0; border-top: 1px solid rgb(255 255 255 / .09); margin: 0 0 10px; }
+
+.rail-item {
+    display: flex; align-items: center; gap: 13px;
+    padding: 10px 0 10px 20px;
+    color: rgb(255 255 255 / .62);
+    font-size: 13.5px; white-space: nowrap;
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: color .12s, background .12s;
+}
+.rail-item svg { flex: 0 0 20px; }
+.rail-item:hover { color: #fff; background: rgb(255 255 255 / .06); }
+.rail-item.ativo {
+    color: #fff;
+    border-left-color: var(--marca);
+    background: rgb(14 65 213 / .22);
+}
+/* O rótulo some junto com a largura; `visibility` em vez de `display`
+   pro texto não reflowar no meio da transição. */
+.rail-rotulo { opacity: 1; transition: opacity .14s; }
+:root:not([data-rail="aberto"]) .rail-rotulo,
+:root:not([data-rail="aberto"]) .rail-marca span { opacity: 0; pointer-events: none; }
+
+.rail-grupo {
+    font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: rgb(255 255 255 / .33);
+    padding: 14px 0 5px 23px; white-space: nowrap;
+}
+:root:not([data-rail="aberto"]) .rail-grupo { opacity: 0; }
+
+/* Botão de recolher: metade pra fora da barra, como no exemplo. */
+.rail-toggle {
+    position: absolute; top: 18px; right: -11px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--rail); color: #fff;
+    border: 1px solid rgb(255 255 255 / .18);
+    display: grid; place-items: center;
+    cursor: pointer;
+}
+.rail-toggle svg { transition: transform .18s; }
+:root[data-rail="aberto"] .rail-toggle svg { transform: rotate(180deg); }
+
+.rail-rodape { margin-top: auto; padding: 10px 0 0; border-top: 1px solid rgb(255 255 255 / .09); }
+.rail-usuario {
+    display: flex; align-items: center; gap: 11px;
+    padding: 9px 0 9px 20px;
+    color: rgb(255 255 255 / .7); font-size: 13px; white-space: nowrap;
+}
+.rail-inicial {
+    flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--marca); color: #fff;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+}
+
+/* O conteúdo acompanha a largura do rail. */
+.conteudo { margin-left: var(--rail-larg); transition: margin-left .18s ease; }
+
+/* Em telas estreitas o rail fica sempre recolhido: 212px de 390px seriam
+   metade da tela. */
+@media (max-width: 640px) {
+    :root, :root[data-rail="aberto"] { --rail-larg: 56px; }
+    :root[data-rail="aberto"] .rail-rotulo,
+    :root[data-rail="aberto"] .rail-marca span,
+    :root[data-rail="aberto"] .rail-grupo { opacity: 0; }
+    .rail-item { padding-left: 16px; }
+}
+
+/* Âncoras do rail: sem folga, o título da seção encosta no topo da
+   janela e some atrás da margem. */
+#funil, #leads, #traces { scroll-margin-top: 24px; }
+html { scroll-behavior: smooth; }
+
+/* Recolhido, o recuo de 20px que alinha os rótulos deixa o ícone fora do
+   centro da faixa de 64px. Centraliza e tira o rótulo do fluxo, pra que
+   ele não ocupe largura enquanto está invisível. */
+:root:not([data-rail="aberto"]) .rail-item,
+:root:not([data-rail="aberto"]) .rail-usuario,
+:root:not([data-rail="aberto"]) .rail-marca {
+    padding-left: 0; padding-right: 0;
+    justify-content: center; gap: 0;
+}
+:root:not([data-rail="aberto"]) .rail-item { border-left-width: 0; border-right: 3px solid transparent; }
+:root:not([data-rail="aberto"]) .rail-item.ativo { border-right-color: var(--marca); }
+:root:not([data-rail="aberto"]) .rail-rotulo,
+:root:not([data-rail="aberto"]) .rail-marca span { width: 0; overflow: hidden; }

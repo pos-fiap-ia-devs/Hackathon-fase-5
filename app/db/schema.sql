@@ -9,12 +9,13 @@ CREATE EXTENSION IF NOT EXISTS unaccent;
 CREATE TABLE imoveis (
     id              SERIAL PRIMARY KEY,
     titulo          TEXT        NOT NULL,
-    tipo            TEXT        NOT NULL,   -- apartamento, casa, studio, cobertura, sala
+    tipo            TEXT        NOT NULL,   -- apartamento, casa, studio, cobertura, sala, terreno, galpao, loja, predio, chacara, resort
     finalidade      TEXT        NOT NULL,   -- venda | aluguel
     bairro          TEXT        NOT NULL,
     zona            TEXT        NOT NULL,   -- como o lead fala da regiao: na capital e
                                                 -- zona sul/norte/leste/oeste/centro; fora dela
-                                                -- e 'grande sao paulo' / 'interior' (app/db/seed.py)
+                                                -- e 'grande sao paulo' / 'interior' / 'litoral'
+                                                -- (app/db/seed.py e scripts/carregar_catalogo.py)
     cidade          TEXT        NOT NULL DEFAULT 'Sao Paulo',
     preco           NUMERIC(12,2) NOT NULL, -- venda: valor total | aluguel: mensal
     quartos         INT         NOT NULL,
@@ -25,6 +26,12 @@ CREATE TABLE imoveis (
     -- preenchido so nos imoveis marcados para investimento; alimenta o cenario 2
     rentabilidade_estimada NUMERIC(4,2),
     descricao       TEXT        NOT NULL,
+    -- 3 fotos por imovel (pedido do usuario), URLs escolhidas no seed de
+    -- acordo com o TIPO do imovel (app/db/seed.py::_fotos_do_imovel).
+    -- Array de texto e nao tabela propria: foto aqui e dado de exibicao,
+    -- sem atributo nenhum alem da ordem -- tabela filha so adicionaria
+    -- join em toda busca sem nada em troca.
+    fotos           TEXT[]      NOT NULL DEFAULT '{}',
     embedding       vector(768),
     busca           tsvector GENERATED ALWAYS AS (
                         to_tsvector('portuguese',
@@ -104,6 +111,11 @@ CREATE TABLE mensagens (
     papel      TEXT NOT NULL,                  -- user | assistant
     conteudo   TEXT NOT NULL,
     origem     TEXT NOT NULL DEFAULT 'texto',  -- texto | audio | followup
+    -- galeria enviada JUNTO com esta mensagem: [{imovel_id, legenda, fotos[]}].
+    -- Fica gravado na mensagem, nao so montado em memoria no turno, senao
+    -- recarregar o chat web (ou abrir o lead no dashboard) mostraria a
+    -- apresentacao de imoveis sem as fotos que o cliente recebeu.
+    anexos     JSONB NOT NULL DEFAULT '[]',
     criado_em  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -181,3 +193,109 @@ CREATE TABLE follow_up_jobs (
 );
 
 CREATE INDEX followup_due_idx ON follow_up_jobs (executar_em) WHERE status = 'pendente';
+
+-- ---------------------------------------------------------------- colunas novas em banco ja criado
+-- `run.sh` aplica este arquivo inteiro a cada subida e engole os erros
+-- (`|| true`): num banco que ja existe, todo CREATE TABLE acima falha por
+-- duplicidade e e ignorado -- o que significa que coluna nova adicionada la
+-- em cima NUNCA chegaria a um banco existente. Estes ALTERs idempotentes
+-- sao o caminho pelo qual ela chega, sem precisar dropar o volume.
+ALTER TABLE imoveis   ADD COLUMN IF NOT EXISTS fotos  TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE mensagens ADD COLUMN IF NOT EXISTS anexos JSONB  NOT NULL DEFAULT '[]';
+-- Tipo da tentativa de prompt injection (core/injecao.py), NULL = limpa.
+-- TEXT e nao BOOLEAN porque o painel mostra a quebra por tipo -- saber
+-- QUE houve tentativa vale menos que saber o que ela tentou fazer.
+ALTER TABLE mensagens ADD COLUMN IF NOT EXISTS suspeita_injecao TEXT;
+-- Codigo publico do imovel (MOE-0001). Identificador ESTAVEL pro cliente
+-- citar: o numero do card (1, 2, 3) e posicional e muda a cada busca --
+-- "quero o 2" amanha, depois de outra busca, aponta pra outro imovel. O
+-- codigo nao muda, aparece na foto, no card e na confirmacao da visita.
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS codigo TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS imoveis_codigo_idx ON imoveis (codigo);
+
+-- De onde veio cada imovel. `orion` = catalogo REAL de uma imobiliaria
+-- parceira (scripts/importar_orion.py): preco, area, descricao, fotos e
+-- endereco existem de verdade. `sintetico` = gerado por app/db/seed.py, em
+-- bairros reais mas com dado inventado. Os dois convivem porque o cenario
+-- canonico do enunciado ("apartamento na zona sul") nao existe no catalogo
+-- real -- e a mistura so e honesta se cada linha disser o que e.
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS origem TEXT NOT NULL DEFAULT 'sintetico';
+-- Campos que o catalogo real publica e o sintetico nao tinha.
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS suites INT;
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS iptu NUMERIC(10,2);
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS comodidades TEXT[] NOT NULL DEFAULT '{}';
+-- Campos que NAO vieram do cadastro e foram estimados (hoje: banheiros,
+-- que a imobiliaria deixa em zero na maior parte dos anuncios). O agente
+-- nao pode afirmar um destes como fato -- core/turno.py consulta esta
+-- coluna antes de citar o numero.
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS campos_estimados TEXT[] NOT NULL DEFAULT '{}';
+CREATE INDEX IF NOT EXISTS imoveis_origem_idx ON imoveis (origem);
+-- Como a rentabilidade foi obtida. O catalogo real nao publica rentabilidade;
+-- ela e CALCULADA, e quem le precisa saber de que: 'anunciado' = aluguel e
+-- venda do MESMO imovel, ambos publicados; 'comparaveis' = aluguel estimado
+-- pela mediana de R$/m2 de imoveis do mesmo tipo alugados na mesma cidade.
+ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS rentabilidade_base TEXT;
+-- Tipo que o cliente pediu (apartamento, casa, terreno...). NAO e perguntado:
+-- so se guarda quando ele diz. Serve a duas coisas -- filtrar a busca e
+-- saber que quarto nao se aplica (terreno, galpao, loja, sala, predio).
+ALTER TABLE slots ADD COLUMN IF NOT EXISTS tipo_imovel TEXT;
+
+-- Quantas vezes seguidas o roteador decidiu a MESMA coisa. `decidir_proximo`
+-- e funcao pura dos slots: se o cliente nao responde o que foi perguntado,
+-- os slots nao mudam, a acao nao muda, e o agente repete a mesma pergunta
+-- pra sempre. Medido com uma sonda: 6 de 6 cenarios de cliente pouco
+-- cooperativo travavam. Contar aqui e o que permite ESCALAR em vez de
+-- insistir (core/graph.py::_no_decidir_proximo).
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS ultima_acao TEXT;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS acao_repeticoes INT NOT NULL DEFAULT 0;
+-- Campos que o cliente NAO quis (ou nao soube) informar depois de 3
+-- tentativas. Sem isso, escalar so trocava um laco por outro: a pergunta
+-- parava de ser feita, mas o campo continuava faltando, entao a MESMA
+-- escalada disparava em todo turno seguinte. Dispensar e o que faz o
+-- roteiro seguir em frente de verdade (agents/router.py::decidir_proximo).
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS campos_dispensados TEXT[] NOT NULL DEFAULT '{}';
+
+-- ---------------------------------------------------------------- login do dashboard
+-- `IF NOT EXISTS` (e nao o CREATE TABLE puro la de cima) porque estas tabelas
+-- nasceram depois: num banco que ja existe, elas PRECISAM ser criadas, e o
+-- `|| true` do run.sh engoliria o erro de um CREATE TABLE sem a clausula.
+--
+-- O dashboard expoe telefone e conversa inteira de todo lead. Antes disso
+-- aqui, qualquer um em :8000/dashboard lia tudo.
+CREATE TABLE IF NOT EXISTS usuarios (
+    id         SERIAL PRIMARY KEY,
+    email      TEXT NOT NULL UNIQUE,
+    nome       TEXT NOT NULL,
+    -- Hash argon2id codificado no formato PHC: carrega algoritmo, parametros
+    -- e sal dentro da propria string. Por isso nao ha coluna de sal.
+    senha_hash TEXT NOT NULL,
+    papel      TEXT NOT NULL DEFAULT 'corretor',  -- admin | corretor
+    ativo      BOOLEAN NOT NULL DEFAULT TRUE,
+    criado_em  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Sessao server-side em vez de JWT: desativar um usuario precisa cortar o
+-- acesso NA HORA, e token assinado so expira sozinho. Aqui basta um DELETE.
+CREATE TABLE IF NOT EXISTS sessoes (
+    -- SHA-256 do token, nunca o token cru: quem ler o banco nao consegue se
+    -- passar por ninguem. Hash rapido e o certo aqui (token e aleatorio de
+    -- 256 bits, nao senha) -- argon2 so entra onde ha entropia baixa.
+    token_hash TEXT PRIMARY KEY,
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    expira_em  TIMESTAMPTZ NOT NULL,
+    criado_em  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS sessoes_expira_idx ON sessoes (expira_em);
+
+-- Convite por link, sem SMTP: o admin gera, copia e entrega o link por fora.
+-- Uso unico (`usado_em`) e com prazo (`expira_em`).
+CREATE TABLE IF NOT EXISTS convites (
+    token_hash TEXT PRIMARY KEY,
+    email      TEXT NOT NULL,
+    papel      TEXT NOT NULL DEFAULT 'corretor',
+    criado_por INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+    expira_em  TIMESTAMPTZ NOT NULL,
+    usado_em   TIMESTAMPTZ,
+    criado_em  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

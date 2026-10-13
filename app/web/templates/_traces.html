@@ -1,6 +1,144 @@
-<div class="overflow-x-auto bg-white rounded-lg border">
-<table class="w-full min-w-[760px] text-xs">
-    <thead class="bg-slate-100 text-slate-600 uppercase">
+{# Cartoes de indicador. Tudo aqui sai de `agent_traces`, que grava uma
+   linha por chamada de LLM com tokens e latencia MEDIDOS (eval_count /
+   eval_duration da resposta do Ollama), nunca estimados. #}
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
+
+    <div class="bloco p-4">
+        <div class="text-[11px] uppercase text-gray-400">Custo real · {{ janela_horas }}h</div>
+        <div class="text-2xl font-semibold text-emerald-600 mt-1">US$ 0,00</div>
+        <div class="text-[11px] text-gray-500 mt-1">
+            Inferência local: nenhum token sai da máquina.
+        </div>
+    </div>
+
+    <div class="bloco p-4">
+        <div class="text-[11px] uppercase text-gray-400">Se fosse nuvem</div>
+        <div class="text-2xl font-semibold mt-1">US$ {{ "%.4f"|format(custo.usd) }}</div>
+        <div class="text-[11px] text-gray-500 mt-1">
+            R$ {{ "%.3f"|format(custo.brl) }} ·
+            {{ "{:,}".format(custo.total_tokens).replace(",", ".") }} tokens
+        </div>
+    </div>
+
+    <div class="bloco p-4">
+        <div class="text-[11px] uppercase text-gray-400">Economia por conversa</div>
+        <div class="text-2xl font-semibold mt-1">US$ {{ "%.4f"|format(custo_por_conversa.usd) }}</div>
+        <div class="text-[11px] text-gray-500 mt-1">
+            {{ leads_atendidos }} lead{{ "s" if leads_atendidos != 1 }} atendido{{ "s" if leads_atendidos != 1 }} pela IA
+        </div>
+    </div>
+
+    {# Tentativas de injection. O zero e informacao, nao ausencia de dado:
+       significa que ninguem tentou na janela, e o painel diz isso. #}
+    <div class="bloco p-4">
+        <div class="text-[11px] uppercase text-gray-400">Prompt injection</div>
+        {% set total_injecoes = injecoes | sum(attribute="tentativas") %}
+        <div class="text-2xl font-semibold mt-1 {% if total_injecoes %}text-amber-600{% else %}text-gray-900{% endif %}">
+            {{ total_injecoes }}
+        </div>
+        <div class="text-[11px] text-gray-500 mt-1">
+            {% if total_injecoes %}
+            {% for i in injecoes %}{{ rotulos_injecao.get(i.tipo, i.tipo) }} ({{ i.tentativas }}){% if not loop.last %} · {% endif %}{% endfor %}
+            {% else %}
+            Nenhuma tentativa na janela.
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="bloco p-4">
+        <div class="text-[11px] uppercase text-gray-400">Latência p95</div>
+        <div class="text-2xl font-semibold mt-1">
+            {% if resumo.p95_ms %}{{ (resumo.p95_ms / 1000)|round(1) }}s{% else %}—{% endif %}
+        </div>
+        <div class="text-[11px] text-gray-500 mt-1">
+            mediana {% if resumo.p50_ms %}{{ (resumo.p50_ms / 1000)|round(1) }}s{% else %}—{% endif %} ·
+            pior {% if resumo.pior_ms %}{{ (resumo.pior_ms / 1000)|round(1) }}s{% else %}—{% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 mb-4">
+    <span><strong class="text-gray-700">{{ resumo.chamadas }}</strong> chamadas ao LLM</span>
+    <span>·</span>
+    <span>
+        <strong class="{% if resumo.erros %}text-red-600{% else %}text-gray-700{% endif %}">{{ resumo.erros }}</strong> com erro
+    </span>
+    <span>·</span>
+    <span>
+        <strong class="text-gray-700">{% if resumo.tps_mediano %}{{ resumo.tps_mediano|round(1) }}{% else %}—{% endif %}</strong> tokens/s (mediana)
+    </span>
+    {# p95 com amostra pequena interpola entre poucos pontos e oscila a
+       cada turno -- dizer isso vale mais que esconder o numero. #}
+    {% if resumo.chamadas and resumo.chamadas < 20 %}
+    <span class="text-amber-600">· amostra pequena, o p95 ainda oscila</span>
+    {% endif %}
+</div>
+
+{% if por_agente %}
+<div class="bloco p-4 mb-4">
+    <div class="text-[11px] uppercase text-gray-400 mb-2">Por agente · {{ janela_horas }}h</div>
+    <table class="w-full text-xs">
+        <thead class="text-gray-400">
+            <tr>
+                <th class="text-left font-normal pb-1">Agente</th>
+                <th class="text-right font-normal pb-1">Chamadas</th>
+                <th class="text-right font-normal pb-1">p95</th>
+                <th class="text-right font-normal pb-1">Tokens</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in por_agente %}
+            <tr class="border-t">
+                <td class="py-1 font-medium">{{ a.agente }}</td>
+                <td class="py-1 text-right">{{ a.chamadas }}</td>
+                <td class="py-1 text-right">{% if a.p95_ms %}{{ (a.p95_ms / 1000)|round(1) }}s{% else %}—{% endif %}</td>
+                <td class="py-1 text-right text-gray-500">{{ a.tokens or 0 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if injecoes_recentes %}
+<div class="bloco p-4 mb-4">
+    <div class="text-[11px] uppercase text-gray-400 mb-2">Tentativas de prompt injection</div>
+    <table class="w-full text-xs">
+        <tbody>
+            {% for m in injecoes_recentes %}
+            <tr class="border-t">
+                <td class="py-1 pr-2 text-gray-400 whitespace-nowrap align-top">
+                    {{ m.criado_em.strftime("%d/%m %H:%M") }}
+                </td>
+                <td class="py-1 pr-2 whitespace-nowrap align-top">#{{ m.lead_id }}</td>
+                <td class="py-1 pr-2 whitespace-nowrap align-top">
+                    <span class="inline-block rounded bg-amber-100 text-amber-800 px-1.5 py-0.5">
+                        {{ rotulos_injecao.get(m.suspeita_injecao, m.suspeita_injecao) }}
+                    </span>
+                </td>
+                {# O texto cru importa: numero agregado sem a frase nao deixa
+                   ninguem julgar se foi falso positivo. #}
+                <td class="py-1 text-gray-600 align-top">{{ m.conteudo }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="text-[11px] text-gray-400 mt-2">
+        Marcadas, não bloqueadas: a mitigação é estrutural (a mensagem do lead nunca entra no
+        system prompt, e preço/endereço/data são montados em código a partir do banco).
+        O atendimento segue normal — recusar cliente de verdade por falso positivo custa mais caro.
+    </p>
+</div>
+{% endif %}
+
+<p class="text-[11px] text-gray-400 mb-2">
+    "Se fosse nuvem" aplica US$ {{ preco_entrada }}/mi de entrada e US$ {{ preco_saida }}/mi de saída
+    aos tokens realmente medidos. Preço de referência, configurável no <code>.env</code> — não é cotação.
+</p>
+
+<div class="bloco overflow-auto max-h-[480px]">
+<table class="tabela w-full min-w-[760px]" style="font-size:12px">
+    <thead>
         <tr class="whitespace-nowrap">
             <th class="px-3 py-2 text-left">Quando</th>
             <th class="px-3 py-2 text-left">Lead</th>

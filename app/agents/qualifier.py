@@ -18,7 +18,9 @@ Sistema-prompt validado manualmente contra o servidor real, em duas rodadas:
 from typing import Literal
 
 from pydantic import BaseModel
+from pydantic.json_schema import SkipJsonSchema
 
+from app.agents.router import detectar_tipo_imovel
 from app.core.llm import chat_structured
 from app.core.traces import TraceInfo
 
@@ -49,6 +51,15 @@ class LeadQualification(BaseModel):
     perfil_investidor: str | None = None
     ticket: int | None = None
     expectativa_retorno: str | None = None
+    # Fora do schema que o LLM recebe (`SkipJsonSchema`), preenchido em
+    # codigo por `agents/router.py::detectar_tipo_imovel`. Duas tentativas
+    # de deixar o modelo extrair falharam contra o servidor real: sem regra
+    # no prompt ele devolvia null em 6 de 6 frases; com uma regra de 1
+    # linha, o cenario 1 do enunciado ("apartamento na zona sul") perdia a
+    # REGIAO em 3 de 3 -- o mesmo efeito de orcamento de atencao descrito
+    # acima. Continua no modelo pra o resto do sistema (merge, slots,
+    # busca) tratar como qualquer outro campo.
+    tipo_imovel: SkipJsonSchema[str | None] = None
 
 
 SYSTEM_PROMPT = """Voce e um extrator de dados para qualificacao de leads de uma \
@@ -96,12 +107,16 @@ def extrair_slots(
     pergunta pendente fecha essa ambiguidade sem pedir pro LLM adivinhar."""
     contexto_pergunta = f'Pergunta que acabou de ser feita ao cliente: "{pergunta_pendente}"\n\n' if pergunta_pendente else ""
     user = f'{contexto_pergunta}Dados ja coletados: {slots_atuais}\n\nUltima mensagem do cliente: "{mensagem}"'
-    return chat_structured(
+    qualificacao, trace = chat_structured(
         agente="qualifier",
         system=SYSTEM_PROMPT,
         user=user,
         schema=LeadQualification,
     )
+    # Tipo em codigo, depois do modelo (ver comentario do campo).
+    if (tipo := detectar_tipo_imovel(mensagem)) is not None:
+        qualificacao.tipo_imovel = tipo
+    return qualificacao, trace
 
 
 def merge_slots(atuais: dict, novo: LeadQualification) -> dict:
