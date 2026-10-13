@@ -77,7 +77,10 @@ echo "==> site da imobiliaria"
 # Estatico: o build le os imoveis do banco (ja de pe acima) e escreve
 # site/dist. Rapido e idempotente -- refaz do zero a cada subida, entao
 # imovel novo no seed aparece sem ninguem lembrar de rodar nada.
-python site/build.py >/dev/null
+# SITE_APP_URL: de onde o NAVEGADOR do visitante busca o widget.js e o
+# chat. Com o default (localhost) o site so funciona nesta maquina -- quem
+# abre pelo IP publico tentaria carregar a Bia do proprio computador.
+python site/build.py --app "${SITE_APP_URL:-http://localhost:8000}" >/dev/null
 nohup python -m http.server 5500 --directory site/dist > site.log 2>&1 &
 echo $! > .site.pid
 echo "   http://localhost:5500 (pid $(cat .site.pid))"

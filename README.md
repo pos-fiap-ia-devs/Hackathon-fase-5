@@ -150,14 +150,15 @@ O que diferencia a solução:
      refazê-la, está em docs/imagens/README.md; scripts/screenshots/ refaz todas
      com o mesmo enquadramento. -->
 
-| Dashboard do corretor | Detalhe do lead, com o score aberto |
+| Painel do corretor: indicadores, funil e leads em tempo real | Detalhe do lead, com o score aberto |
 |---|---|
-| ![Lista de leads com selo quente/morno/frio](docs/imagens/dashboard.png) | ![Score decomposto em parcelas, com o que falta perguntar](docs/imagens/lead-detalhe.png) |
+| ![Indicadores, funil arrastável e lista de leads com selo quente/morno/frio](docs/imagens/dashboard.png) | ![Score decomposto em parcelas, resumo pro corretor e conversa](docs/imagens/lead-detalhe.png) |
+| **Site da imobiliária** ([168.0.198.45:5500](http://168.0.198.45:5500)) | **A Bia embutida no site, atendendo** |
+| ![Site da Horizonte Imóveis com busca e destaques](docs/imagens/site.png) | ![Widget da Bia aberto no site, qualificando o lead](docs/imagens/widget.png) |
 | **Observabilidade: custo, p95 e injeções** | **Chat do lead, com galeria de imóveis** |
 | ![Custo real zero ao lado do contrafactual, latência p95 e tentativas de injection](docs/imagens/observabilidade.png) | ![Conversa com cartões de imóveis e fotos](docs/imagens/chat-web.png) |
 
-Mais telas: [a Bia embutida no site de uma imobiliária](docs/imagens/widget.png) ·
-[tentativa de prompt injection, marcada e classificada](docs/imagens/injection.png).
+Mais telas: [tentativa de prompt injection, marcada e classificada](docs/imagens/injection.png).
 
 ---
 
