@@ -1,44 +1,121 @@
 # Agente SDR Imobiliário — Bia
 
-POC de um agente de IA que atende, qualifica e agenda visitas com leads de uma imobiliária. Projeto do **FIAP Tech Challenge Fase 5**.
+POC de um agente de IA generativa que atende, qualifica e agenda visitas com leads de uma imobiliária. Projeto do **Hackathon FIAP — Tech Challenge Fase 5**.
 
-A Bia atende por Telegram (texto e áudio), chat web, widget embutido no site da imobiliária ou CLI — os quatro canais batem no mesmo orquestrador. Entende se o lead quer comprar, alugar ou investir, qualifica com uma pergunta por mensagem, mostra imóveis reais do banco, agenda a visita com o corretor certo e volta a procurar quem some no meio do caminho. O corretor acompanha num painel com score explicado, resumo e observabilidade.
+A Bia atende por Telegram (texto e áudio), chat web, widget embutido no site da imobiliária ou CLI. Os quatro canais passam pelo mesmo orquestrador. Ela entende se o lead quer comprar, alugar ou investir, qualifica com uma pergunta por mensagem, mostra imóveis reais do banco, agenda a visita com o corretor certo e volta a procurar quem some no meio da conversa. O corretor acompanha tudo num painel com score explicado, resumo e observabilidade.
 
-> **Estado da entrega:** funcional, rodando local com Docker Compose e Ollama nativo. **271 testes passando.** O modelo é local (`qwen3.5:9b`, por Metal) — não há WhatsApp nem deploy publicado, e a transcrição de áudio só funciona em Apple Silicon. Para avaliar em Windows ou Linux, veja o [modo demonstração](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração) logo abaixo.
+> **Estado da entrega:** funcional, rodando local com Docker Compose e Ollama nativo. **__TESTES_TOTAL__ testes passando** com toda a infraestrutura no ar. O modelo é local (`qwen3.5:9b`, por Metal). Não há integração com WhatsApp nem deploy publicado em cloud (ver [Limitações](#limitações-conhecidas)). Para avaliar em Windows ou Linux, use o [modo demonstração](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração).
 
-## Guia rápido para a avaliação
+📄 **Documento técnico em PDF:** [docs/DOCUMENTO_TECNICO.pdf](docs/DOCUMENTO_TECNICO.pdf) — arquitetura, IA utilizada, decisões e evidências num só arquivo.
 
-| Pergunta | Onde está a resposta |
-|---|---|
-| Quais requisitos do desafio foram atendidos, e como? | [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md) — requisito → código → teste que comprova |
-| Como instalo? | [INSTALL.md](INSTALL.md) — passo a passo por tipo de máquina, portas e problemas comuns |
-| Como rodo isso sem um Mac com GPU? | [Modo demonstração](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração), aqui embaixo |
-| Qual é a arquitetura? | [ARQUITETURA.md](ARQUITETURA.md) — camadas, grafo e fluxos · [docs/SOLID.md](docs/SOLID.md) — princípios mapeados a arquivo e função |
-| Que IA é usada, e por quê? | [IA.md](IA.md) — inclusive os achados que mudaram decisões |
-| Como fica na tela? | [Em imagens](#em-imagens) |
-| Quais diferenciais foram implementados? | [Diferenciais, na matriz de requisitos](docs/VALIDACAO_REQUISITOS.md#diferenciais) |
-| Como a qualidade é verificada? | [Testes](#testes) — 271, incluindo adversariais contra alucinação |
-| Por que as decisões foram essas? | [PLANO.md](PLANO.md) — diário de bordo com os ~15 bugs reais achados e corrigidos |
+## Sumário
+
+- [Entregáveis do desafio](#entregáveis-do-desafio)
+- [Requisitos do enunciado, um a um](#requisitos-do-enunciado-um-a-um)
+- [O problema e a solução](#o-problema-e-a-solução)
+- [Em imagens](#em-imagens)
+- [Rodar em 1 minuto (modo demonstração)](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração)
+- [Como rodar a versão completa](#como-rodar-a-versão-completa)
+- [Como usar](#como-usar)
+- [Site da imobiliária com a Bia embutida](#site-da-imobiliária-com-a-bia-embutida)
+- [Arquitetura](#arquitetura)
+- [IA utilizada](#ia-utilizada)
+- [Escalabilidade](#escalabilidade)
+- [Segurança](#segurança)
+- [Testes](#testes)
+- [Limitações conhecidas](#limitações-conhecidas)
 
 ---
 
-## O problema
+## Entregáveis do desafio
 
-Imobiliária perde lead por motivo banal, e cada lead custa caro:
+| Entregável pedido | Onde está |
+|---|---|
+| Repositório do projeto | este repositório |
+| README | este arquivo |
+| Arquitetura da solução | [ARQUITETURA.md](ARQUITETURA.md) (camadas, grafo do LangGraph, modelo de dados, trade-offs) · [docs/SOLID.md](docs/SOLID.md) · resumo [abaixo](#arquitetura) |
+| Demonstração funcional | [modo demonstração](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração) (qualquer máquina) · [versão completa](#como-rodar-a-versão-completa) · roteiro do vídeo em [pitchvideo.md](pitchvideo.md) |
+| Pitch técnico | [PITCH.md](PITCH.md) |
+| Explicação da IA utilizada | [IA.md](IA.md) · resumo [abaixo](#ia-utilizada) |
+| Documento técnico consolidado | [docs/DOCUMENTO_TECNICO.pdf](docs/DOCUMENTO_TECNICO.pdf) |
+| Rastreabilidade requisito → código → teste | [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md) |
+| Instalação detalhada | [INSTALL.md](INSTALL.md) |
+| Enunciado original | [docs/ENUNCIADO.md](docs/ENUNCIADO.md) |
 
-- **Tempo de resposta.** Quem manda mensagem às 22h de sábado fala com o concorrente antes de falar com você.
-- **Falta de follow-up.** Quem não respondeu à primeira mensagem é abandonado.
-- **Falta de priorização.** O corretor trata igual quem quer mudar em 30 dias e quem está só olhando.
-- **Sobrecarga.** O corretor faz triagem em vez de vender.
+## Requisitos do enunciado, um a um
 
-## A solução, e o que a diferencia
+Legenda: ✅ feito · ⚠️ parcial · ❌ não feito. A versão com o teste que comprova cada linha está em [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md).
 
-Um SDR digital que atende 24h em conversa natural — e que, neste projeto, roda **inteiramente na máquina da imobiliária**:
+### Objetivo do desafio
 
-- **Custo de inferência zero e dado que não viaja.** Modelo local, banco local. Nenhum token do seu cliente sai da máquina, e não há fatura de API. O painel mostra `US$ 0,00` ao lado do que a mesma conversa teria custado numa API paga.
-- **Fato crítico nunca escrito pelo LLM.** Preço, endereço, data e corretor são montados em código a partir do banco. Testado adversarialmente: [`test_adversarial.py`](tests/test_adversarial.py) não verifica se a resposta é bonita, verifica se ela **mente**.
+| Capacidade pedida | | Como foi feito |
+|---|---|---|
+| Atender leads automaticamente | ✅ | 4 canais (Telegram, chat web, widget, CLI) chamando o mesmo orquestrador, [`core/turno.py`](app/core/turno.py) |
+| Realizar conversa humanizada | ✅ | Persona fixa ([`core/prompts.py`](app/core/prompts.py)), uma pergunta por mensagem, reconhece o que o cliente disse antes de perguntar, trata objeções, despedida e aceite curto |
+| Qualificar clientes | ✅ | Extração de slots via JSON Schema ([`agents/qualifier.py`](app/agents/qualifier.py)) e score 0–100 determinístico e explicável ([`core/scoring.py`](app/core/scoring.py)) |
+| Identificar intenção de compra, aluguel ou investimento | ✅ | Campo `intencao` no schema + regras por padrão de frase; testado com as frases literais do enunciado |
+| Coletar informações relevantes | ✅ | 9 slots: intenção, região, quartos, preço mín./máx., urgência, perfil de investidor, ticket, expectativa de retorno |
+| Realizar follow-up automático | ✅ | [`core/followup.py`](app/core/followup.py) + APScheduler: 3 tentativas (30 min, 2 h, 24 h) com o contexto da conversa |
+| Agendar reuniões ou visitas | ✅ | Escolha do imóvel → horário → nome → telefone → confirmação com corretor; entende "sábado de manhã", "dia 8 às 13h"; permite reagendar |
+| Integrar com uma base de imóveis | ✅ | 266 anúncios reais (294 registros venda/aluguel, 13 cidades, 731 fotos) em Postgres 16 + pgvector, com busca híbrida |
+| Gerar resumos para corretores | ✅ | [`agents/summarizer.py`](app/agents/summarizer.py), em thread de fundo, exibido no detalhe do lead |
+
+### Cenários esperados
+
+| Cenário | | Comportamento |
+|---|---|---|
+| **1 — Compra:** *"Estou procurando apartamento na zona sul."* | ✅ | Entende a intenção → pergunta faixa de preço → quartos → região (se faltar) → urgência → apresenta imóveis → agenda a visita |
+| **2 — Investimento:** *"Quero investir em imóveis para renda."* | ✅ | Perfil investidor → ticket → expectativa de retorno → encaminha para especialista (`status=encaminhado`) |
+| **3 — Follow-up:** cliente iniciou e não respondeu | ✅ | Retoma sozinho, cita o que o cliente já disse e onde a conversa parou; quem pede para parar não recebe mais |
+
+### Requisitos funcionais
+
+| Requisito | | Onde |
+|---|---|---|
+| Atendimento conversacional | ✅ | 4 canais, um orquestrador |
+| Conversa natural | ✅ | `temperature=0.15` + guardrails de saída ([IA.md](IA.md#temperatura-e-humanização)) |
+| Fluxo humanizado | ✅ | Objeções, despedida e anti-repetição ([seção abaixo](#o-agente-nunca-repete-a-mesma-pergunta)) |
+| Continuidade da conversa | ✅ | Memória rolante ([`core/memory.py`](app/core/memory.py)) + estado do lead no Postgres; quem volta retoma de onde parou |
+| Qualificação de leads | ✅ | 9 slots + score explicável |
+| Agendamento de reuniões | ✅ | Tabelas `visitas` e `encaminhamentos` |
+| Resumo inteligente | ✅ | Card do corretor no detalhe do lead |
+| Dashboard mínimo de acompanhamento | ✅ | `/dashboard`: leads por score, funil Kanban, indicadores, detalhe e observabilidade |
+
+### Diferenciais (7 de 9)
+
+| Diferencial | | Como |
+|---|---|---|
+| Uso de RAG | ✅ | Busca híbrida: filtro SQL estruturado + `0.6 × similaridade vetorial (pgvector) + 0.4 × ts_rank (full-text)` |
+| Integração com WhatsApp | ❌ | Não feito. O Telegram usa o mesmo padrão de canal; trocar é escrever um adapter, não mexer no agente |
+| Memória conversacional | ✅ | Resumo rolante + últimos 6 turnos literais; contexto abaixo de 8K tokens em qualquer duração |
+| Multiagentes | ✅ | 5 agentes lógicos (router, qualifier, search, scheduler, summarizer) num `StateGraph` do LangGraph |
+| Voice AI | ✅ | Entrada: áudio transcrito com `mlx-whisper` local. Saída: resposta em áudio com `say` (macOS) ou `piper` (Linux/container) |
+| Integração com CRM | ✅ | `POST /crm/leads` (entrada) e `GET /crm/leads.csv` (exportação) |
+| Observabilidade | ✅ | `agent_traces`: latência, tokens e tokens/s medidos por chamada; painel com p50/p95, quebra por agente e custo |
+| Segurança | ✅ | Login argon2id + convite, sessão server-side, PII mascarada, rate limit, detecção de prompt injection |
+| Deploy em cloud | ⚠️ | Dockerfile e Compose prontos, app sobe containerizado; **não há ambiente publicado** (o modelo de 9B precisa de GPU) |
+
+---
+
+## O problema e a solução
+
+Imobiliária perde lead pelos cinco motivos que o enunciado lista. Cada um tem uma resposta implementada:
+
+| Dor | Resposta | Evidência |
+|---|---|---|
+| Tempo de resposta elevado | Atendimento automático 24h, em segundos | latência real em `agent_traces` |
+| Falta de acompanhamento | Follow-up automático em 3 tentativas | `follow_up_jobs`; indicador "recuperados" |
+| Atendimento manual | Qualificação inteira sem corretor | slots preenchidos no painel |
+| Dificuldade em priorizar leads quentes | Score explicável, selo quente/morno/frio, funil Kanban | conta aberta no detalhe do lead |
+| Sobrecarga dos corretores | Corretor entra com resumo pronto e visita marcada | card de resumo + `visitas` |
+
+O que diferencia a solução:
+
+- **Roda inteira na máquina da imobiliária.** Modelo e banco locais: nenhum dado do lead sai da máquina e o custo de inferência é zero. O painel mostra `US$ 0,00` ao lado do que a mesma conversa custaria numa API paga.
+- **Fato crítico nunca é escrito pelo LLM.** Preço, endereço, data e corretor são montados em código a partir do banco. [`test_adversarial.py`](tests/test_adversarial.py) tenta fazer o agente mentir e verifica que ele não mente.
+- **Fluxo decidido em código, texto decidido pelo LLM.** O roteador não chama o modelo: devolve um rótulo, e só depois o LLM escreve a frase daquele rótulo.
 - **Score explicável.** O painel abre a conta em vez de mostrar só o número, e diz o que falta perguntar.
-- **Fluxo decidido em código, texto decidido pelo LLM.** O roteador não chama o modelo — ele devolve um rótulo, e só depois o LLM escreve a frase daquele rótulo.
+- **Imóveis reais.** Catálogo de uma imobiliária parceira, importado com autorização a partir do dado estruturado (`schema.org`) do próprio site dela.
 
 ## Em imagens
 
@@ -57,13 +134,9 @@ Mais telas: [a Bia embutida no site de uma imobiliária](docs/imagens/widget.png
 
 ---
 
-Documentos: [ARQUITETURA.md](ARQUITETURA.md) · [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md) · [docs/SOLID.md](docs/SOLID.md) · [IA.md](IA.md) · [PITCH.md](PITCH.md) · [PLANO.md](PLANO.md) · [docs/ENUNCIADO.md](docs/ENUNCIADO.md) (enunciado literal do desafio).
-
 ## Rodar em 1 minuto, em qualquer máquina (modo demonstração)
 
-O projeto roda com um modelo de 9B local, por Metal — é a decisão central da arquitetura. Mas isso tem um custo que não é técnico: quem for **avaliar** precisaria de um Mac com Apple Silicon, 9 GB de modelo em disco, Docker e Postgres.
-
-Para isso existe o modo demonstração. Troca o Ollama por um provedor de regras ([`app/core/llm_demo.py`](app/core/llm_demo.py)) e roda o fluxo inteiro — qualificação, busca no banco, agendamento, follow-up, resumo — em Windows, Linux ou Mac sem GPU:
+O projeto usa um modelo de 9B local, por Metal. Isso exigiria de quem avalia um Mac com Apple Silicon e 9 GB de modelo em disco. O modo demonstração troca o Ollama por um provedor de regras ([`app/core/llm_demo.py`](app/core/llm_demo.py)) e roda o fluxo inteiro (qualificação, busca no banco, agendamento, follow-up, resumo) em Windows, Linux ou Mac sem GPU:
 
 ```bash
 uv venv --python 3.12 && source .venv/bin/activate && uv pip install -e .
@@ -79,23 +152,19 @@ LLM_DEMO=true python -m app.channels.cli
 > 2 quartos
 < Entendi. Você tem pressa pra fechar, ou pode esperar um pouco?
 > Tenho pressa, quero mudar logo
-< Encontrei essas opções pra você:
-  1. Apartamento 2 quarto(s) — Campo Belo · R$ 311.000 · 45m²
-> Quero o 1 … Sábado de manhã … Meu nome é Wellson, telefone 11 98888-7777
-< Show, Wellson! Marquei sua visita ao Apartamento Campo Belo com Fernanda Souza,
-  para sábado de manhã — 17/10.
+< Encontrei essas opções pra você: ...
+> Quero o 1 … Sábado de manhã … Meu nome é Ana, telefone 11 98888-7777
+< Show, Ana! Marquei sua visita ... com o corretor ..., para sábado de manhã.
 ```
 
-Os imóveis, o corretor, a data e o preço são reais, vindos do Postgres: só o **texto** sai de regra em vez de modelo. As respostas são bem piores que as do Ollama, e é esse o ponto — demonstra **fluxo**, não qualidade de redação. Em `agent_traces` o modelo aparece como `demo-rules`, sem contagem de tokens, para que o painel de observabilidade nunca passe número inventado por medição.
+Imóveis, corretor, data e preço vêm do Postgres; só o **texto** sai de regra em vez de modelo. As respostas são piores que as do Ollama, e é esse o ponto: o modo demonstra **fluxo**, não qualidade de redação. Em `agent_traces` o modelo aparece como `demo-rules`, sem contagem de tokens, para o painel nunca mostrar número inventado.
 
-Os testes de integração continuam exigindo o Ollama real: os bugs que mais custaram neste projeto foram de formato (`anyOf` devolvendo `null` em silêncio, chave `"intenção"` com acento, `think: false` faltando) e nenhum deles apareceria contra um provedor de regra.
+## Como rodar a versão completa
 
-## Como rodar
-
-Pré-requisitos: macOS com Apple Silicon (Metal é usado pelo Ollama e pelo Whisper), Docker, Python 3.12, [`uv`](https://github.com/astral-sh/uv), [Ollama](https://ollama.com) instalado nativamente (**nunca em container** — sem Metal, a inferência cai pra velocidade de CPU).
+Pré-requisitos: macOS com Apple Silicon (Metal para o Ollama e o Whisper), Docker, Python 3.12, [`uv`](https://github.com/astral-sh/uv) e [Ollama](https://ollama.com) instalado nativamente (**nunca em container**: sem Metal, a inferência cai para velocidade de CPU). Passo a passo por tipo de máquina e problemas comuns em [INSTALL.md](INSTALL.md).
 
 ```bash
-# 1. modelos do Ollama (se ainda não estiverem em disco)
+# 1. modelos
 ollama pull qwen3.5:9b
 ollama pull nomic-embed-text
 ollama serve &
@@ -104,101 +173,53 @@ ollama serve &
 docker compose up -d
 
 # 3. dependências
-uv venv --python 3.12
-source .venv/bin/activate
+uv venv --python 3.12 && source .venv/bin/activate
 uv pip install -e .
 
 # 4. configuração
 cp .env.example .env
-# editar TELEGRAM_BOT_TOKEN (token do BotFather; vazio = Telegram desligado,
-# web chat e CLI seguem funcionando)
+# TELEGRAM_BOT_TOKEN: token do BotFather (vazio = Telegram desligado; chat web e CLI seguem funcionando)
 
-# 5. schema + seed de imóveis
-python -m scripts.preparar_banco   # schema + seed, idempotente
+# 5. schema + catálogo de imóveis (idempotente)
+python -m scripts.preparar_banco
 
-# 6. subir tudo (Telegram + dashboard + chat web + CRM + follow-up, um processo só)
+# 6. tudo num processo: Telegram + dashboard + chat web + CRM + follow-up
 uvicorn app.web.api:app --host 0.0.0.0 --port 8000
 ```
 
-Dashboard: `http://localhost:8000/dashboard`. Chat web do lead: `http://localhost:8000/chat`. CLI alternativa (sem Telegram): `python -m app.channels.cli`.
+| Endereço | O quê |
+|---|---|
+| `http://localhost:8000/dashboard` | painel do corretor (o primeiro acesso cria o administrador em `/registro`) |
+| `http://localhost:8000/chat` | chat web do lead |
+| `http://localhost:5500` | site da imobiliária com a Bia embutida (sobe junto com `./run.sh`; ver [abaixo](#site-da-imobiliária-com-a-bia-embutida)) |
+| `python -m app.channels.cli` | conversa pelo terminal, sem Telegram |
 
-No primeiro acesso ao dashboard, o app manda pra `/registro`: essa primeira conta vira administrador e o cadastro aberto fecha em seguida. Os demais usuários entram por convite, em `/dashboard/usuarios`.
-
-### Rodando o app em container (alternativa)
+### App em container (alternativa)
 
 ```bash
 docker compose --profile app up -d --build
 ```
 
-Sobe Postgres e app juntos; o schema e o seed rodam sozinhos no entrypoint (idempotentes — [scripts/preparar_banco.py](scripts/preparar_banco.py) só semeia se `imoveis` estiver vazia, porque o seed começa com `TRUNCATE ... CASCADE` e levaria as visitas junto).
+Sobe Postgres e app juntos; schema e catálogo são carregados no entrypoint. O Ollama continua nativo no host (o container chega nele por `host.docker.internal:11434`) e a transcrição de áudio fica desligada no container, porque `mlx-whisper` só existe para Apple Silicon. A resposta em áudio funciona no container via `piper`.
 
-Duas coisas que **não** mudam de lugar:
+> ⚠️ **Um bot, uma instância.** O Telegram aceita um único `getUpdates` por token: `./run.sh` e o container ao mesmo tempo geram `Conflict: terminated by other getUpdates request`. Escolha um.
 
-- **O Ollama continua nativo no host.** Dentro de container no macOS não existe Metal e a inferência cai pra velocidade de CPU. O container chega nele por `host.docker.internal:11434`, via `extra_hosts: host-gateway`.
-- **STT fica desligado no container.** `mlx-whisper` depende do MLX (Apple Silicon + Metal) e não instala em Linux. Transcrição de áudio só rodando nativo, com `./run.sh`.
-
-`docker compose up -d` sem o `--profile app` continua subindo só o banco — o fluxo do `run.sh`.
-
-> ⚠️ **Um bot, uma instância.** O Telegram só aceita um `getUpdates` por token: rodar `./run.sh` e o container ao mesmo tempo faz os dois brigarem (`Conflict: terminated by other getUpdates request`). Escolha um.
-
-### Voz: a Bia ouve e responde falando (opcional)
-
-**Transcrição** (entrada) e **síntese** (saída) são as duas metades do Voice AI, e as duas rodam locais — nenhuma API paga, nenhum áudio do cliente saindo da máquina.
+### Voz (opcional)
 
 ```bash
+uv pip install -e ".[stt]"
 # no .env
 STT_ENABLED=true     # transcreve o áudio do cliente (Apple Silicon)
 TTS_ENABLED=true     # responde em áudio
 ```
 
-Por padrão a Bia só **responde em áudio para quem mandou áudio** — responder na mesma modalidade é o que um humano faz, e mandar voz para quem digitou é intrusivo. `TTS_SEMPRE=true` força o contrário. O texto vai sempre junto: voz é complemento, não substituição, porque quem está no metrô sem fone precisa poder ler.
-
-O backend é escolhido pelo que existe na máquina ([`core/tts.py`](app/core/tts.py)):
-
-| Onde | Backend | Instalação |
-|---|---|---|
-| macOS | `say`, voz pt-BR nativa | nenhuma |
-| Linux / container | `piper`, rede neural local | o Dockerfile já faz |
-
-Aqui a assimetria com o STT se inverte: `mlx-whisper` é Apple Silicon e não entra no container, mas o `piper` entra — então **o container fala, mesmo sem ouvir**.
-
-### Transcrição de áudio (opcional)
-
-```bash
-uv pip install -e ".[stt]"
-```
-
-No `.env`: `STT_ENABLED=true`. Se o download automático do modelo via HuggingFace Hub travar (aconteceu em teste real, ver [IA.md](IA.md)), rode `scripts/baixar_modelo_stt.sh` e aponte `STT_MODEL_PATH` para o diretório que ele baixa.
-
-### Testes
-
-```bash
-uv pip install -e ".[dev]"
-pytest
-```
-
-Boa parte da suíte é de integração real — fala com o Postgres e com o Ollama, sem mock. É proposital: mockar o LLM esconderia justamente os bugs de formato de schema que custaram caro (ver [IA.md](IA.md)). Mas nada disso **falha** por falta de infra: os testes que dependem de serviço pulam com a razão e o comando na mensagem ([tests/conftest.py](tests/conftest.py)).
-
-```
-# sem Docker e sem Ollama
-142 passed, 64 skipped in 3.23s
-SKIPPED tests/test_qualifier.py:17: precisa do Ollama nativo (ollama serve && ollama pull qwen3.5:9b)
-SKIPPED tests/test_inatividade.py:25: precisa do Postgres (docker compose up -d)
-
-# só com o Postgres, antes do seed
-199 passed, 7 skipped in 74s
-
-# tudo no ar
-206 passed
-```
+A Bia responde em áudio **a quem mandou áudio** (`TTS_SEMPRE=true` força sempre). O texto vai junto: voz complementa, não substitui. Se o download do modelo Whisper travar, use `scripts/baixar_modelo_stt.sh` e aponte `STT_MODEL_PATH` para o diretório baixado.
 
 ## Como usar
 
-**Telegram**: conversa normal, texto ou áudio. Ex.: *"Estou procurando apartamento na zona sul"* → o agente pergunta faixa de preço, quartos, região, urgência, e no fim apresenta imóveis reais do banco com opção de agendar visita. *"Quero investir em imóveis para renda"* leva pro fluxo de investimento (perfil, ticket, expectativa de retorno) e termina em encaminhamento a um especialista.
+**Telegram, chat web ou CLI.** Conversa normal, em texto ou áudio. *"Estou procurando apartamento na zona sul"* leva ao fluxo de compra; *"Quero investir em imóveis para renda"* leva ao fluxo de investimento, que termina em encaminhamento a um especialista. O cliente pode escolher imóvel pelo número do card ou pelo código do anúncio.
 
-**Dashboard** (`/dashboard`): lista de leads ordenada por score, com selo **quente/morno/frio**, card de detalhe (slots coletados, resumo pro corretor, histórico de mensagens) e aba de observabilidade.
-
-**Score explicável.** O número nunca é pedido ao LLM — a fórmula é determinística, e o painel mostra a conta aberta em vez de só o total:
+**Dashboard** (`/dashboard`). Leads ordenados por score com selo quente/morno/frio, funil Kanban, indicadores (1ª resposta, recuperados por follow-up) e, no detalhe de cada lead, slots, resumo para o corretor, histórico e score explicado:
 
 ```
 86  quente  de 100
@@ -206,108 +227,151 @@ Dados coletados   40/40   4 de 4 campos de qualificação preenchidos.
 Urgência          30/30   Urgência alta.
 Ticket             6/20   Ticket de R$ 600.000 (teto de referência: R$ 2.000.000).
 Visita agendada   10/10   Visita confirmada.
-Qualificação completa.
 ```
 
-A explicação **é** o cálculo, não uma narração dele: o total é a soma das parcelas, e um teste trava isso. Quando falta dado, o painel diz o que perguntar ("Falta perguntar: orçamento, urgência"). Uma regra de negócio fica acima do número: **sem orçamento informado, a prioridade não passa de morno** — um lead pode somar 70+ só com urgência e campos preenchidos sem nunca ter dito quanto pode pagar, e mandar o corretor ligar primeiro pra esse desperdiça a ligação.
+O total é a soma das parcelas, e um teste garante isso. Sem orçamento informado, a prioridade não passa de morno.
 
-**Observabilidade** (`/dashboard/traces`): além da tabela de chamadas, indicadores agregados da janela — latência p50/p95/pior, tokens/s mediano, taxa de erro e quebra por agente (qual agente custa caro). E o número que resume a arquitetura: **custo real US$ 0,00** ao lado do contrafactual *"se fosse nuvem"*, calculado aplicando preço de tabela aos tokens realmente medidos. Os preços são de referência e ficam no `.env` — não há consulta a API de preço nem de câmbio.
+**Observabilidade** (`/dashboard/traces`). Latência p50/p95/pior, tokens/s, taxa de erro, quebra por agente, tentativas de prompt injection e o custo real (US$ 0,00) ao lado do contrafactual "se fosse nuvem", calculado sobre os tokens medidos.
 
-**CRM** (`POST /crm/leads`, `GET /crm/leads.csv`): entrada simulada de lead vindo de fora do Telegram e exportação da base de leads.
+**CRM.** `POST /crm/leads` recebe lead de fora; `GET /crm/leads.csv` exporta a base.
 
-**Widget** — a Bia entra no site de qualquer imobiliária com uma linha, antes de `</body>`:
+**Widget.** A Bia entra no site de qualquer imobiliária com uma linha:
 
 ```html
 <script src="http://localhost:8000/widget.js" data-brand="Imobiliária Exemplo" defer></script>
 ```
 
-Uma bolha flutuante abre o chat num iframe (tela cheia no celular). O CSS fica isolado em Shadow DOM, então o tema do site não deforma o widget nem o contrário, e o iframe só carrega no primeiro clique — quem nunca abre o chat não paga o custo. A sessão vive no `localStorage` do site que hospeda, não em cookie: dentro de um iframe de outra origem o cookie seria third-party, e Safari e Firefox bloqueiam. O lead que chega por aí entra com canal `widget`, separado de `telegram` e `web` no dashboard. `data-position="left"` troca o lado; `Bia.abrir()` abre o chat a partir de um botão do próprio site.
+CSS isolado em Shadow DOM, iframe carregado só no primeiro clique, sessão no `localStorage` (cookie de terceiro seria bloqueado no Safari/Firefox). Quem pode embutir é controlado por `WIDGET_DOMINIOS`, que vira `frame-ancestors` no CSP.
 
-Quem pode embutir é controlado por `WIDGET_DOMINIOS` no `.env`, que vira `frame-ancestors` no CSP — quem recusa é o navegador, não o nosso código.
+## Site da imobiliária com a Bia embutida
 
-## Arquitetura em uma frase
+Para mostrar a Bia onde ela viveria de verdade, o projeto gera o site de uma imobiliária fictícia, a **Horizonte Imóveis**, com o widget já instalado. Detalhes em [site/README.md](site/README.md).
 
-Um processo FastAPI único hospeda o Telegram (long polling), o chat web, o dashboard, o CRM e o scheduler de follow-up. Todos os canais chamam o mesmo orquestrador (`core/graph.py`, um `StateGraph` do LangGraph), que por sua vez chama cinco agentes lógicos — não processos, funções puras — todos batendo no mesmo modelo Ollama já residente em memória. Detalhes completos em [ARQUITETURA.md](ARQUITETURA.md).
+- **O que tem:** página inicial (busca, destaques de venda e locação, bairros, institucional), listagens de **comprar** e **alugar** com filtro por bairro, e uma página de detalhe para cada imóvel do catálogo, com fotos do anúncio, preço, metragem, condomínio e IPTU.
+- **De onde vêm os dados:** gerado a partir do Postgres por [`site/build.py`](site/build.py). Preço, endereço, metragem e código saem do banco, nunca de template: o mesmo guardrail do card do agente vale para a vitrine.
+- **Integração com a Bia:** os botões do site abrem o chat com a mensagem pronta. *Tenho interesse* envia "Quero ver o `<código>`"; *Agendar visita* envia "Quero agendar uma visita ao `<código>`"; *Tirar dúvidas* envia "Tenho dúvidas sobre o `<código>`". A Bia já sabe de qual imóvel se trata, porque o código é o mesmo do anúncio. A busca por código leva direto à página do imóvel.
+- **Tecnologia:** HTML estático e uma folha de estilo, sem build de JavaScript. O único script é o `widget.js` do projeto.
+
+```bash
+python site/build.py                              # gera site/dist/ a partir do banco
+python -m http.server 5500 --directory site/dist  # abre em http://localhost:5500
+python site/build.py --app https://seu-app.exemplo.com   # para publicar apontando para outro servidor
+```
+
+O chat do site só responde com a aplicação rodando na porta 8000, de onde vem o `widget.js`. Sem ela, o site abre normalmente e só a bolha fica sem resposta. O `./run.sh` gera e serve o site automaticamente.
+
+---
+
+## Arquitetura
+
+Um processo FastAPI hospeda o Telegram (long polling), o chat web, o widget, o dashboard, o CRM e o scheduler de follow-up. Todos os canais chamam o mesmo orquestrador, um `StateGraph` do LangGraph ([`core/graph.py`](app/core/graph.py)), que aciona cinco agentes lógicos. Os agentes são funções, não processos, e usam o mesmo modelo Ollama já carregado em memória.
+
+```mermaid
+flowchart LR
+    TG[Telegram<br/>texto + áudio] --> ORQ
+    WEB[Chat web] --> ORQ
+    WID[Widget em site<br/>de terceiro] --> ORQ
+    CLI[CLI] --> ORQ
+    subgraph APP[Processo FastAPI]
+        ORQ[Orquestrador<br/>LangGraph StateGraph]
+        ORQ --> R[Router<br/>código, sem LLM]
+        ORQ --> Q[Qualifier<br/>JSON Schema]
+        ORQ --> S[Search<br/>busca híbrida]
+        ORQ --> A[Scheduler<br/>visita / especialista]
+        ORQ --> M[Summarizer<br/>resumo p/ corretor]
+        F[APScheduler<br/>follow-up]
+        D[Dashboard + CRM]
+    end
+    Q & A & M --> OLL[Ollama nativo<br/>qwen3.5:9b + nomic-embed-text]
+    S & Q & A & F & D --> PG[(Postgres 16<br/>+ pgvector)]
+```
+
+**Fluxo de um turno:** o canal recebe a mensagem (áudio vira texto antes) → o grafo escolhe o ramo pelo status do lead (qualificação, escolha de visita, pós-desfecho) → uma chamada de **extração** (JSON Schema) atualiza os slots → o roteador decide o próximo passo em código → uma chamada de **resposta** escreve a frase → fatos do banco são anexados em código → o nó `finalizar` atualiza memória, resumo e follow-up.
 
 ```
 app/
   agents/   router.py  qualifier.py  search.py  scheduler_agent.py  summarizer.py
-  core/     graph.py  turno.py  llm.py  prompts.py  memory.py  followup.py
-            scoring.py  security.py  traces.py  stt.py  config.py
-  channels/ telegram.py  web (via app/web/api.py)  cli.py
-  web/      api.py  templates/  (dashboard + chat + CRM, tudo HTMX)
-  db/       schema.sql  repo.py  seed.py
-scripts/    buscar.py  baixar_modelo_stt.sh
+  core/     graph.py  turno.py  llm.py  llm_demo.py  prompts.py  memory.py  followup.py
+            scoring.py  security.py  auth.py  injecao.py  traces.py  custo.py  stt.py  tts.py  config.py
+  channels/ telegram.py  cli.py
+  web/      api.py  templates/  static/   (dashboard, chat, widget e CRM; HTMX, sem build)
+  db/       schema.sql  repo.py  seed.py  catalogo_orion.json
+scripts/    preparar_banco.py  importar_orion.py  carregar_catalogo.py  buscar.py  ...
+tests/      suíte de unidade e de integração real (Postgres + Ollama)
 ```
 
-## O agente nunca repete a mesma coisa
+Detalhes (grafo completo gerado do código, modelo de dados, índices, trade-offs): [ARQUITETURA.md](ARQUITETURA.md). Princípios SOLID mapeados a arquivo e função: [docs/SOLID.md](docs/SOLID.md).
 
-`decidir_proximo` é função pura dos slots. Cliente que não responde o que foi perguntado não muda slot nenhum — a decisão não muda, e a mesma frase sai de novo. Era o caso em **6 de 6** cenários de cliente pouco cooperativo, medido por uma sonda que dirige conversas com respostas inúteis ("sim", "esse", "sei lá") e conta respostas consecutivas idênticas.
+**Stack:** Python 3.12 · FastAPI + Jinja2 + HTMX · LangGraph · Ollama (`qwen3.5:9b`, `nomic-embed-text`) · Postgres 16 + pgvector · APScheduler · `python-telegram-bot` · `mlx-whisper` · `say`/`piper` · Docker Compose.
 
-Não era um bug: era a ausência de um mecanismo. O agente não tinha noção de insistência.
+### O agente nunca repete a mesma pergunta
 
-Duas metades, as duas necessárias:
+Cliente que não responde o que foi perguntado não muda slot nenhum, e um roteador puro repetiria a mesma frase para sempre. Medido por uma sonda com respostas inúteis ("sim", "sei lá"): acontecia em 6 de 6 cenários. Hoje `leads.acao_repeticoes` conta decisões iguais seguidas e, na 3ª, o campo é dispensado e a conversa muda de rota: mostra onde há imóvel, mostra a faixa real de preços, afrouxa o filtro dizendo o que afrouxou ou passa para um humano. Resultado: 0 de 6, travado em [`tests/test_sem_loop.py`](tests/test_sem_loop.py).
 
-1. **`leads.acao_repeticoes`** conta quantas vezes **seguidas** o roteador decidiu a mesma coisa (decisão diferente zera).
-2. **`leads.campos_dispensados`** tira a pergunta do roteiro na 3ª vez.
+### Código do imóvel e fotos
 
-Só a primeira trocava um laço por outro: a pergunta parava, mas o campo continuava faltando e a mesma escalada disparava para sempre.
+Cada imóvel tem código público e estável (o mesmo do anúncio da imobiliária). O cliente pode agendar citando o código, que vale mesmo depois de outra busca, ao contrário do número posicional do card. As fotos são versionadas no repositório e servidas pela própria aplicação: a dependência anterior de um banco de imagens externo quebrou a galeria em produção quando o serviço passou a responder 401.
 
-Na 3ª repetição, cada família de impasse tem uma saída — e nenhuma delas é perguntar de novo:
+## IA utilizada
 
-| Impasse | Saída |
-|---|---|
-| Região não sai | mostra **onde** existe imóvel |
-| Orçamento não sai | mostra a faixa real da base e segue sem o campo |
-| Quartos, urgência, perfil | segue o roteiro com o que já se sabe |
-| Busca sempre vazia | afrouxa o filtro em ordem (preço → região → quartos) e **diz o que afrouxou** |
-| Escolha da visita não resolve | reapresenta a lista **com os códigos** |
-| Intenção nunca sai | passa para um corretor humano |
+| Uso | Modelo | Onde roda |
+|---|---|---|
+| Extração de slots e respostas | `qwen3.5:9b` (Q4_K_M) | Ollama nativo, Metal |
+| Embeddings da busca | `nomic-embed-text` (768 dims) | Ollama nativo |
+| Transcrição de áudio | `whisper-small` via `mlx-whisper` | local, Metal |
+| Resposta em áudio | `say` (macOS) / `piper` `pt_BR-faber-medium` | local |
 
-Hoje: **0 de 6**. A sonda virou [`tests/test_sem_loop.py`](tests/test_sem_loop.py), que roda os 6 cenários contra o Ollama real.
+Decisões principais (detalhadas, com os números medidos, em [IA.md](IA.md)):
 
-## Código do imóvel
-
-Cada imóvel tem um código público e estável — `CAM-0006`, `SAN-0002` — formado por 3 letras do bairro mais uma sequência. Ele aparece no card, na legenda da foto e na confirmação da visita, e o cliente pode agendar citando ele: *"quero ver o SAN-0002"*.
-
-Não é enfeite. O número do card (1, 2, 3) é **posicional**: só faz sentido dentro da última lista apresentada. Se o cliente voltar amanhã, depois de outra busca, "quero o 2" aponta para outro imóvel. O código não muda.
-
-A resolução tenta, nesta ordem: **código → número → texto livre** (casar bairro). O código vem primeiro por ser o único identificador não ambíguo. É reconhecido como o cliente digitar — `MOE-0001`, `moe 0001`, `CAM0006` — e por regex, não por LLM: formato fixo não se pede para o modelo classificar.
-
-## Fotos dos imóveis
-
-Ficam em `app/web/static/imoveis/`, **versionadas no repositório**, e são servidas pela própria aplicação. O Telegram envia um álbum por imóvel (`send_media_group`, legenda no primeiro, numeração igual à dos cards); o chat web e o widget renderizam a mesma galeria em `<img>`.
-
-Antes as URLs apontavam para o `loremflickr.com` em tempo de execução. O serviço passou a responder **401** e, sem nenhuma linha do nosso código mudar, o Telegram parou de enviar foto (o álbum é pulado em silêncio quando o download falha) e o chat web passou a exibir imagem quebrada. Dependência de terceiro em tempo de execução, numa demonstração ao vivo, é risco sem contrapartida — agora não há nenhuma.
-
-As fotos, os textos e os valores são do **catálogo real de uma imobiliária parceira** (266 imóveis, 731 fotos), usado com a autorização dela. Não há imóvel nem foto sintéticos: todo imóvel tem foto do próprio anúncio. A marca d'água da origem está desfocada (`scripts/borrar_marca.py`) e imagens de terceiros, como capturas do Google Street View, foram removidas (`scripts/achar_terceiros.py`). O catálogo é atualizado com `./atualizar_catalogo.sh`.
-
-## Stack
-
-Postgres 16 + pgvector · Ollama nativo (`qwen3.5:9b`, `nomic-embed-text`) · LangGraph (orquestração) · FastAPI + Jinja2 + HTMX (dashboard e chat, zero build step) · `python-telegram-bot` (long polling) · APScheduler (follow-up) · `mlx-whisper` (STT local via Metal, opcional).
+- **Saída estruturada, não tool calling livre.** Um modelo de 9B não sustenta um loop ReAct confiável. A extração usa o `format` do Ollama com JSON Schema gerado do Pydantic. Cada turno faz duas chamadas separadas: extração e resposta.
+- **Guardrails estruturais.** Prompt reduz alucinação, mas não zera. Por isso preço, endereço, data e corretor são montados em código; datas são resolvidas com `datetime`, não pelo modelo; frases com número são descartadas; o resumo é descartado se citar valor que não está nos slots.
+- **RAG híbrido.** Filtro SQL primeiro (preço, quartos, tipo, bairro), ranking semântico + full-text depois. Evita a falha clássica do RAG puro: imóvel parecido, mas fora do orçamento.
+- **Memória rolante.** Últimos 6 turnos literais + resumo do restante, regerado periodicamente.
+- **Score determinístico.** `40 × completude + 30 × urgência + 20 × ticket + 10 × visita`. Número estável e auditável vale mais que um número "inteligente" que varia entre duas chamadas.
+- **`temperature=0.15`.** A 0.4, o modelo inventava "Zona Sul" em 2 de 5 respostas.
 
 ## Escalabilidade
 
-- **Aplicação stateless.** Todo estado mora no Postgres — N réplicas do FastAPI atrás de um balanceador não exigem mudança de código.
-- **O LLM já está atrás de HTTP.** Trocar `OLLAMA_HOST` por um cluster com GPU é variável de ambiente, nenhuma linha de código muda.
-- **O gargalo é medido, não estimado.** `agent_traces` grava latência e tokens/s reais de cada chamada — decisão de escalar (ou não) parte de número real.
-- **O único componente single-node é o scheduler de follow-up** (APScheduler in-process). `follow_up_jobs` já é tabela; virar fila distribuída é um `SELECT ... FOR UPDATE SKIP LOCKED`, sem trocar de tecnologia.
-- **Busca vetorial:** scan sequencial é a escolha certa com 200 imóveis; índice HNSW entra a partir de ~10 mil registros, sem mudar a query.
+- **Aplicação stateless:** todo estado está no Postgres; N réplicas atrás de um balanceador sem mudar código.
+- **LLM atrás de HTTP:** trocar `OLLAMA_HOST` por um cluster com GPU é variável de ambiente.
+- **Gargalo medido:** `agent_traces` grava latência e tokens/s reais de cada chamada.
+- **Follow-up:** é o único componente single-node (APScheduler in-process); `follow_up_jobs` já é tabela e vira fila distribuída com `SELECT ... FOR UPDATE SKIP LOCKED`.
+- **Busca vetorial:** scan sequencial é o certo para centenas de imóveis; índice HNSW entra a partir de ~10 mil, sem mudar a query.
 
 ## Segurança
 
-- **Painel fechado.** O dashboard, o detalhe do lead, a aba de traces e o CRM exigem login; o chat do lead e o `/health` seguem públicos (quem é atendido não tem conta). Senhas no Postgres como hash **argon2id** (`core/auth.py`), sal por hash, rehash silencioso quando os parâmetros sobem. Sessão é server-side (tabela `sessoes`, só o SHA-256 do token), não JWT: desativar um usuário corta o acesso na hora. Cookie `HttpOnly` + `SameSite=Lax`.
-- **Primeiro acesso:** com o banco vazio, `/registro` abre e o primeiro cadastro vira administrador — e a rota fecha sozinha. Dali em diante, só entra quem o admin convidar em `/dashboard/usuarios`, por link de uso único com prazo (`CONVITE_HORAS`, 72 h por padrão). Não há SMTP nesta POC: o link aparece na tela e o admin entrega por fora.
-- Telefone do lead nunca persiste cru — `core/security.py::mascarar_telefone` guarda só DDD + 4 últimos dígitos.
-- Input do lead nunca é concatenado no system prompt (mitigação de prompt injection): sempre entra como mensagem `user`.
-- **Prompt injection, medido.** A mitigação acima é estrutural — o texto do lead não tem caminho até o system prompt, e preço/endereço/data/corretor são montados em código a partir do banco, nunca escritos pelo LLM. O que faltava era prova: `core/injecao.py` detecta e classifica a tentativa em 4 tipos (anular instrução, vazar prompt, trocar persona, extrair dados), marca na mensagem (`mensagens.suspeita_injecao`) e mostra no painel com o texto cru ao lado. **Marca, não bloqueia** — a mitigação já é estrutural, e recusar um cliente real por falso positivo custa mais caro que registrar uma tentativa que não era nada. Metade dos testes do módulo é justamente de falso positivo (*"prefiro algo sem restrições de pet"* não é ataque).
-- Token do bot do Telegram nunca aparece em log — supressão explícita do logger do `httpx` (que loga a URL completa da requisição, e a API do Telegram embute o token na URL).
-- Rate limit por `chat_id` (`RATE_LIMIT_MSGS_POR_MIN`).
-- O dado do lead nunca sai da máquina — modelo local, banco local. Efeito colateral da arquitetura, não um add-on de compliance.
+- **Painel fechado:** login com senha em hash **argon2id**, sessão server-side (só o SHA-256 do token no banco), cookie `HttpOnly` + `SameSite=Lax`. O primeiro cadastro vira administrador e o registro aberto fecha; os demais entram por convite de uso único com prazo.
+- **PII:** telefone do lead persiste mascarado (DDD + 4 últimos dígitos).
+- **Prompt injection:** o texto do lead nunca entra no system prompt; tentativas são detectadas por padrão de frase em 4 tipos e **marcadas** no painel (não bloqueadas, para não recusar cliente real por falso positivo).
+- **Segredos:** o token do bot é suprimido dos logs do `httpx`.
+- **Abuso:** rate limit por `chat_id`.
+- **LGPD:** o dado do lead não sai da máquina, porque modelo e banco são locais.
 
-## Limitações conhecidas desta POC
+## Testes
 
-- Sem índice vetorial (`ivfflat`/HNSW) — decisão deliberada para 200 imóveis, não escala além de ~10 mil sem adicionar um.
-- `follow_up_jobs` roda in-process (APScheduler), não é uma fila distribuída — ver seção de escalabilidade.
-- `DEMO_MODE=true` encurta os intervalos de follow-up (30 min/2 h/24 h → 90 s/180 s/300 s) para a demonstração acontecer ao vivo; produção usa `DEMO_MODE=false`.
-- Sem TTS (resposta em áudio) — só transcrição de entrada (STT). Sem integração com WhatsApp — aprovação de número de negócio não cabe no escopo desta POC.
+```bash
+uv pip install -e ".[dev]"
+pytest
+```
+
+Boa parte da suíte é de integração real, contra o Postgres e o Ollama, sem mock: os bugs que mais custaram neste projeto foram de formato de schema, e um mock os esconderia. Sem a infraestrutura, esses testes **pulam** com o motivo e o comando na mensagem, em vez de falhar ([tests/conftest.py](tests/conftest.py)).
+
+```
+sem Docker e sem Ollama   →  __TESTES_SEM_INFRA__
+tudo no ar                →  __TESTES_COM_INFRA__
+```
+
+Destaques: [`test_adversarial.py`](tests/test_adversarial.py) (o agente não mente sobre preço nem concede desconto), [`test_sem_loop.py`](tests/test_sem_loop.py) (sem repetição infinita), [`test_injecao.py`](tests/test_injecao.py) (incluindo falsos positivos), [`test_qualifier.py`](tests/test_qualifier.py) (frases literais do enunciado).
+
+## Limitações conhecidas
+
+- **Sem integração com WhatsApp.** A aprovação de número comercial não cabia no prazo; o Telegram segue o mesmo padrão de canal.
+- **Sem deploy publicado em cloud.** Há Dockerfile e Compose, mas hospedar um modelo de 9B com GPU está fora do escopo da POC.
+- **Transcrição de áudio só em Apple Silicon** (`mlx-whisper`). A resposta em áudio funciona em macOS e Linux.
+- **Follow-up in-process** (APScheduler), não fila distribuída.
+- **Sem índice vetorial**, escolha deliberada para o tamanho atual do catálogo.
+- `DEMO_MODE=true` encurta os intervalos de follow-up (30 min/2 h/24 h → 90 s/180 s/300 s) para a demonstração acontecer ao vivo; em produção, `DEMO_MODE=false`.
+
+## Licença
+
+[LICENSE](LICENSE)

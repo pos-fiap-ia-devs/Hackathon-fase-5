@@ -30,7 +30,7 @@ Legenda: ✅ feito · ⚠️ parcial, com a limitação escrita · ❌ não feit
 | 5 | Coletar informações relevantes | ✅ | 9 slots: intenção, região, quartos, faixa de preço (mín/máx), urgência, perfil de investidor, ticket, expectativa de retorno. Resposta curta ambígua ("2") é desambiguada pela pergunta pendente | `test_pergunta_vs_preferencia.py` · `test_qualifier.py` |
 | 6 | Follow-up automático | ✅ | [`core/followup.py`](../app/core/followup.py) + APScheduler; 3 tentativas com intervalos crescentes; `DEMO_MODE` encurta 30 min/2 h/24 h → 90 s/180 s/300 s para a demo acontecer ao vivo. Fechamento por inatividade roda em paralelo | `test_inatividade.py` (5) |
 | 7 | Agendar reuniões ou visitas | ✅ | Ramo B do grafo: escolha do imóvel → horário → nome → telefone → confirmação com corretor real. Entende "sábado de manhã", "dia 8 às 13h". Reagendamento pós-confirmação | `test_reagendamento.py` (5) · `test_resolucao_data.py` (11) |
-| 8 | Integrar com base simulada de imóveis | ✅ | 200 imóveis, 10 cidades, 50 bairros de SP em Postgres 16 + pgvector. Busca híbrida: filtro SQL (preço, quartos, bairro) + `0.6 × similaridade vetorial + 0.4 × ts_rank` | `test_cidade_nao_atendida.py` · `test_zona_alucinada.py` |
+| 8 | Integrar com base simulada de imóveis | ✅ | 266 anúncios reais de uma imobiliária parceira (294 registros venda/aluguel, 13 cidades, 731 fotos), em Postgres 16 + pgvector. Busca híbrida: filtro SQL (preço, quartos, bairro) + `0.6 × similaridade vetorial + 0.4 × ts_rank` | `test_cidade_nao_atendida.py` · `test_zona_alucinada.py` |
 | 9 | Gerar resumos para corretores | ✅ | [`summarizer.py`](../app/agents/summarizer.py), em thread de fundo — medido: custava 4–9 s por turno com o cliente esperando uma resposta que já estava pronta | visível em `/dashboard/lead/{id}` |
 
 ---
@@ -66,7 +66,7 @@ Legenda: ✅ feito · ⚠️ parcial, com a limitação escrita · ❌ não feit
 |---|---|---|
 | Uso de RAG | ✅ | Busca híbrida pgvector + full-text. O filtro determinístico elimina candidato errado **antes** do ranking semântico — mais barato e mais correto que RAG puro sobre texto não estruturado |
 | Memória conversacional | ✅ | Resumo rolante + estado parcial do agendamento entre turnos |
-| Multiagentes | ✅ | 5 agentes lógicos num `StateGraph` do LangGraph, 15 nós. [Diagrama gerado do grafo compilado](../ARQUITETURA.md), não desenhado à mão |
+| Multiagentes | ✅ | 5 agentes lógicos num `StateGraph` do LangGraph, 19 nós. [Diagrama gerado do grafo compilado](../ARQUITETURA.md), não desenhado à mão |
 | Observabilidade | ✅ | `agent_traces`: 1 linha por chamada de LLM, com tokens e latência **medidos** (`eval_count`/`eval_duration` da resposta do Ollama), não estimados. Painel com p50/p95/pior, tokens/s e quebra por agente |
 | Segurança | ✅ | Login argon2id com convite de uso único; sessão server-side; PII mascarada antes de persistir; rate limit; token do bot suprimido do log; detecção e classificação de prompt injection em 4 tipos | 
 | Integração com CRM | ✅ | `POST /crm/leads` e `GET /crm/leads.csv` |
@@ -88,13 +88,10 @@ Testes dos diferenciais: `test_security.py` · `test_auth.py` (13) ·
 | README | ✅ | [README.md](../README.md) |
 | Arquitetura da solução | ✅ | [ARQUITETURA.md](../ARQUITETURA.md) · [SOLID.md](SOLID.md) |
 | Demonstração funcional | ✅ | `LLM_DEMO=true python -m app.channels.cli` roda o fluxo inteiro em qualquer máquina, sem GPU |
-| Pitch técnico | ⚠️ | `PITCH.md` existe localmente mas está em `.gitignore` — **não chega a quem clonar o repositório** |
-| Explicação da IA utilizada | ⚠️ | `IA.md` idem |
+| Pitch técnico | ✅ | [PITCH.md](../PITCH.md) · roteiro do vídeo em [pitchvideo.md](../pitchvideo.md) |
+| Explicação da IA utilizada | ✅ | [IA.md](../IA.md) |
+| Documento técnico consolidado (PDF) | ✅ | [DOCUMENTO_TECNICO.pdf](DOCUMENTO_TECNICO.pdf) |
 
-> ⚠️ Os dois últimos são obrigatórios pelo enunciado e hoje não estão
-> versionados. Remover as linhas 13–15 do [`.gitignore`](../.gitignore) e
-> commitá-los resolve. Até lá, os links para eles no README e no
-> ARQUITETURA.md ficam quebrados em qualquer clone.
 
 ---
 
@@ -115,5 +112,4 @@ Testes dos diferenciais: `test_security.py` · `test_auth.py` (13) ·
   `frame-ancestors` no CSP.
 - **Bugs reais documentados**, com o número do teste que os pegou — os
   achados de formato (`anyOf` devolvendo `null` em silêncio, chave
-  `"intenção"` com acento, `think: false` faltando) estão em `IA.md` e
-  `PLANO.md`.
+  `"intenção"` com acento, `think: false` faltando) estão em [IA.md](../IA.md).

@@ -1,6 +1,6 @@
 # Site da imobiliária
 
-Site estático da **Horizonte Imóveis**, gerado a partir dos 200 imóveis do banco. Existe para mostrar a Bia atendendo **dentro do site de uma imobiliária** — que é onde ela viveria de verdade — em vez de só numa página de chat solta.
+Site estático da **Horizonte Imóveis**, gerado a partir dos imóveis do banco (catálogo real de uma imobiliária parceira, 266 anúncios). Existe para mostrar a Bia atendendo **dentro do site de uma imobiliária** — que é onde ela viveria de verdade — em vez de só numa página de chat solta.
 
 Preço, endereço, metragem e código vêm do Postgres, nunca de template: é o mesmo guardrail do card do agente. Dado de imóvel não se inventa, nem no chat nem na vitrine.
 
@@ -28,9 +28,9 @@ python site/build.py --app https://seu-app.exemplo.com
 |---|---|
 | `index.html` | Hero, busca, destaques de venda e locação, bairros, institucional |
 | `comprar.html` · `alugar.html` | Listagem completa, com filtro por bairro no cliente |
-| `imovel/CODIGO.html` | 200 páginas de detalhe, uma por imóvel |
+| `imovel/CODIGO.html` | Uma página de detalhe por imóvel do catálogo |
 
-A busca por código leva direto à página: digitar `MOE-0001` abre `imovel/MOE-0001.html`.
+A busca por código leva direto à página: digitar `CA0432-ORIO` abre `imovel/CA0432-ORIO.html`.
 
 ## A Bia no site
 
@@ -44,9 +44,9 @@ Os botões do site chamam a API do widget com a mensagem já pronta:
 
 | Botão | O que abre o chat dizendo |
 |---|---|
-| **Tenho interesse** (card) | *"Quero ver o MOE-0001"* |
-| **Agendar visita** (detalhe) | *"Quero agendar uma visita ao MOE-0001"* |
-| **Tirar dúvidas** | *"Tenho dúvidas sobre o MOE-0001"* |
+| **Tenho interesse** (card) | *"Quero ver o CA0432-ORIO"* |
+| **Agendar visita** (detalhe) | *"Quero agendar uma visita ao CA0432-ORIO"* |
+| **Tirar dúvidas** | *"Tenho dúvidas sobre o CA0432-ORIO"* |
 
 É por isso que o [código do imóvel](../README.md#código-do-imóvel) existe: o visitante clica, a Bia já sabe de qual imóvel se trata, e o código continua valendo se ele voltar amanhã.
 
