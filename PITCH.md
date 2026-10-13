@@ -37,20 +37,24 @@ Cinco agentes lógicos — não processos — cada um um prompt e um schema Pyda
 
 ## Roteiro de demonstração (6 minutos)
 
+O passo a passo de gravação — mensagens exatas, todas testadas contra o modelo real, checklist e plano B — está em [pitchvideo.md](pitchvideo.md).
+
 | Tempo | Cena |
 |---|---|
 | 0:00 | As cinco dores, painel na tela: indicadores e funil Kanban |
-| 0:20 | Cenário 1 (compra), pelo Telegram, com a frase do enunciado: *"Estou procurando apartamento na zona sul"* — a Bia pergunta faixa de preço, quartos e urgência, e os slots aparecem no painel |
-| 1:10 | Uma das respostas em áudio — a transcrição aparece no painel com o ícone de origem, e a Bia responde em áudio |
-| 1:40 | A Bia **admite** que não tem apartamento com esses critérios na zona sul, em vez de inventar um; o cliente aceita Barueri e ela apresenta um apartamento real, com foto do anúncio e código |
-| 2:20 | O cliente escolhe e passa nome e telefone — visita marcada com corretor e data resolvida no calendário; o cartão anda no Kanban |
-| 2:40 | Cenário 3 (follow-up): parar de responder, deixar correndo em segundo plano |
-| 3:00 | Cenário 2 (investimento), outro chat: *"Quero investir em imóveis para renda"* — perfil → ticket → retorno → encaminhado a especialista, com o resumo pronto |
-| 4:30 | Follow-up do cenário 1 chega sozinho, citando o que o lead já tinha dito |
-| 5:00 | Observabilidade: latência real, tokens/s, custo equivalente em API paga, e uma tentativa de prompt injection marcada |
-| 5:30 | Site da imobiliária com a Bia embutida, card de resumo pro corretor, argumento de LGPD |
+| 0:30 | Cenário 1 (compra), pelo Telegram, com a frase do enunciado: *"Estou procurando apartamento na zona sul"* — a Bia pergunta faixa de preço, quartos e urgência, e os slots aparecem no painel |
+| 1:20 | A Bia **admite** que não tem apartamento com esses critérios na zona sul, em vez de inventar um; o cliente aceita **Barueri** e ela apresenta um apartamento real, com foto do anúncio e código (`AP0190-HORZ`, Jardim Tupanci) |
+| 2:00 | O cliente escolhe e passa nome e telefone — visita marcada com corretor e data resolvida no calendário; o cartão anda no Kanban para "Visita marcada" |
+| 2:30 | Voz, em outro chat: o cliente manda áudio pedindo casa em Santana de Parnaíba — a transcrição aparece no painel e a Bia responde em áudio |
+| 3:10 | Cenário 3 (follow-up): esse cliente para de responder; deixar correndo em segundo plano |
+| 3:20 | Cenário 2 (investimento), outro chat: *"Quero investir em imóveis para renda"* — perfil → ticket → retorno → encaminhado a especialista, com o resumo pronto |
+| 4:40 | O follow-up chega sozinho ao cliente que parou de responder, citando o que ele já tinha dito |
+| 4:50 | Observabilidade: latência real, tokens/s, custo equivalente em API paga |
+| 5:40 | Site da imobiliária com a Bia embutida; fechamento com o argumento de LGPD e custo zero |
 
-O follow-up chegando sozinho enquanto a apresentação segue em outro assunto é o momento que prova automação de verdade — não é o chat que impressiona, é o sistema agindo sem ninguém pedir. E a cena das 1:40 é a que prova o guardrail: diante de uma pergunta sem resposta no estoque, a Bia diz que não tem.
+O follow-up chegando sozinho enquanto a apresentação segue em outro assunto é o momento que prova automação de verdade — não é o chat que impressiona, é o sistema agindo sem ninguém pedir. E a cena da zona sul é a que prova o guardrail: diante de uma pergunta sem resposta no estoque, a Bia diz que não tem, e oferece o que existe.
+
+O follow-up sai do chat de voz, não do cenário 1, de propósito: lead com visita marcada fechou o ciclo e não recebe follow-up (`core/followup.py`) — reengajar quem já agendou seria spam.
 
 ## Por que isso poderia existir no mercado
 

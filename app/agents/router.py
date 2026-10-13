@@ -162,6 +162,34 @@ def _normalizar(texto: str) -> str:
     return re.sub(r"\s+", " ", sem_acento.lower()).strip()
 
 
+# "Quero ver outro imovel." Achado testando: logo depois das opcoes, a Bia
+# ignorava o pedido e insistia pra escolher entre as MESMAS 3; com a visita
+# ja marcada, prometia "vamos te enviar as opcoes assim que possivel" --
+# compromisso que nada no sistema cumpre. Detectado em codigo, como a
+# despedida, porque vale em qualquer ponto da conversa.
+_PEDIDOS_OUTRO_IMOVEL = (
+    "outro imovel", "outros imoveis", "outra opcao", "outras opcoes",
+    "mais opcoes", "ver outro", "ver outra", "ver outros", "ver outras",
+    "procurar outro", "procurar outra",
+    "buscar outro", "buscar outra", "outro apartamento", "outra casa",
+    "outro terreno", "outra cobertura", "outro studio", "outra sala",
+    "nova busca", "outra busca", "comecar de novo", "recomecar",
+)
+
+
+def pediu_outro_imovel(mensagem: str | None) -> bool:
+    """Cliente quer recomecar a busca por um imovel diferente."""
+    if not mensagem:
+        return False
+    normalizada = _normalizar(mensagem)
+    # "Quero outro horario" / "outra opcao de dia" e REMARCAR a visita, nao
+    # trocar de imovel -- disparar aqui limparia a busca de quem so queria
+    # mudar a data. Fala de tempo ganha.
+    if re.search(r"\b(horario|hora|horas|dia|dias|data|semana|manha|tarde|noite)\b", normalizada):
+        return False
+    return any(pedido in normalizada for pedido in _PEDIDOS_OUTRO_IMOVEL)
+
+
 _PERGUNTAS_QUEM_E = (
     "com quem",
     "quem e voce",

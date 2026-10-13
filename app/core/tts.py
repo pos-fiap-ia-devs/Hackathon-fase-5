@@ -30,7 +30,9 @@ complemento. Mesmo princípio de `channels/telegram.py::_enviar_galeria`.
 import logging
 import shutil
 import subprocess
+import re
 import tempfile
+import unicodedata
 from pathlib import Path
 
 from app.core.config import get_settings
@@ -78,6 +80,29 @@ def _gerar_wav(texto: str, destino: Path, backend: str, timeout: int) -> bool:
         return False
 
 
+def texto_falavel(texto: str) -> str:
+    """O texto como deve ser FALADO, não como foi escrito.
+
+    Medido por ida e volta (voz -> transcrição): o `say` lê emoji em voz
+    alta. "Quantos quartos você precisa? 🏠" saía como "...você precisa
+    casa com jardim?", e o 📅 da confirmação de visita virava "calendário"
+    no fim da frase. Na tela o emoji é tom; falado, é uma palavra solta
+    sem sentido. Sai tudo que é símbolo (categoria Unicode "So"), seletor
+    de variação e junção de emoji.
+
+    Datas e o "--" a voz já lê bem ("17/10/2026" vira "17 de outubro de
+    2026"), então ficam."""
+    limpo = "".join(
+        c for c in texto
+        if unicodedata.category(c) != "So"
+        and c not in ("\ufe0f", "\u200d")
+        # Tom de pele (👋🏽): categoria "Sk", não "So". Sobrava sozinho na
+        # frase depois de tirar o emoji, e também era lido em voz alta.
+        and not "\U0001F3FB" <= c <= "\U0001F3FF"
+    )
+    return re.sub(r"[ \t]+", " ", limpo).replace(" .", ".").replace(" ?", "?").strip()
+
+
 def sintetizar(texto: str) -> bytes | None:
     """Bytes de um OGG/Opus pronto pro Telegram, ou None.
 
@@ -95,6 +120,9 @@ def sintetizar(texto: str) -> bytes | None:
     # Texto longo vira áudio longo, e áudio longo ninguém ouve. Corta na
     # fronteira de frase pra não terminar no meio de uma palavra.
     limite = settings.tts_max_caracteres
+    texto = texto_falavel(texto)
+    if not texto:
+        return None
     falado = texto if len(texto) <= limite else texto[:limite].rsplit(".", 1)[0] + "."
 
     with tempfile.TemporaryDirectory() as tmp:

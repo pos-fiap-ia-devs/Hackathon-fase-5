@@ -12,7 +12,19 @@ if ! pgrep -f "ollama serve" >/dev/null 2>&1 && ! curl -sf http://localhost:1143
     # Sem isso o Ollama descarrega o modelo apos 5min de silencio (default) --
     # cada resposta seguinte paga reload completo (10-40s medido, ver IA.md).
     OLLAMA_KEEP_ALIVE=24h ollama serve &
-    sleep 2
+fi
+# Espera o servidor RESPONDER, nao um tempo fixo. Com `sleep 2` o
+# `ollama pull` abaixo rodava antes do servidor terminar de subir,
+# falhava com "could not connect to ollama server", e o `set -e` abortava
+# o script inteiro -- Postgres, app e site ficavam todos fora, logo depois
+# de um `./stop.sh` (que derruba o Ollama junto).
+for _ in $(seq 1 30); do
+    curl -sf http://localhost:11434 >/dev/null 2>&1 && break
+    sleep 1
+done
+if ! curl -sf http://localhost:11434 >/dev/null 2>&1; then
+    echo "ERRO: o Ollama nao respondeu em 30s (rode 'ollama serve' e veja o erro)" >&2
+    exit 1
 fi
 ollama pull qwen3.5:9b
 ollama pull nomic-embed-text

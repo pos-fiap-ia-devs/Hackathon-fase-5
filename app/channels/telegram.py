@@ -68,11 +68,15 @@ async def _on_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     # Texto SEM o bloco de cards: a legenda de cada album ja traz titulo,
     # preco, metragem e codigo do imovel. Mandar os dois e a mesma
     # informacao duas vezes na tela do cliente.
-    await update.message.reply_text(getattr(resposta, "texto_sem_cards", resposta))
-    # Responde TAMBEM em audio pra quem mandou audio (core/tts.py). O texto
-    # vai sempre: voz e complemento, nao substituicao -- quem esta no metro
-    # sem fone precisa poder ler. Falha aqui nunca derruba o turno.
-    await _enviar_voz(context, telegram_chat_id, str(resposta), origem)
+    conversa = getattr(resposta, "texto_sem_cards", resposta)
+    # Quem mandou audio recebe a resposta EM VOZ, no lugar do texto -- nao
+    # alem dele. A primeira versao mandava os dois, e o cliente recebia a
+    # mesma frase escrita e falada, uma atras da outra: nao e como uma
+    # pessoa responde. O texto so vai se a voz falhar, pra nunca deixar o
+    # cliente sem resposta. Os dados do imovel continuam por escrito, na
+    # legenda do album logo abaixo.
+    if not await _enviar_voz(context, telegram_chat_id, str(conversa), origem):
+        await update.message.reply_text(conversa)
     # Fotos depois do texto: o cliente le a lista numerada e ve os albuns na
     # mesma ordem logo abaixo. `getattr` porque o fallback de excecao acima
     # e uma string comum, sem galeria.
@@ -81,21 +85,26 @@ async def _on_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 async def _enviar_voz(
     context: ContextTypes.DEFAULT_TYPE, telegram_chat_id: int, texto: str, origem: str
-) -> None:
+) -> bool:
     """Manda a resposta como mensagem de voz, quando faz sentido.
+
+    Devolve se a voz FOI enviada: quem chama manda o texto só quando ela
+    não foi (ver `_on_message`).
 
     `to_thread` porque a sintese e subprocess bloqueante (say/piper +
     ffmpeg) e seguraria o loop de eventos do bot -- mesmo motivo de
     `_processar_em_thread`."""
     if not tts.deve_falar(origem):
-        return
+        return False
     try:
         audio = await asyncio.to_thread(tts.sintetizar, texto)
         if audio:
             await context.bot.send_voice(chat_id=telegram_chat_id, voice=audio)
+            return True
     except Exception:
         logger.warning("falha enviando audio (chat=%s) -- segue so com texto",
                        telegram_chat_id, exc_info=True)
+    return False
 
 
 async def _enviar_galeria(context: ContextTypes.DEFAULT_TYPE, telegram_chat_id: int, galeria: list[dict]) -> None:

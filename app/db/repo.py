@@ -306,6 +306,47 @@ def retomar_atendimento(lead_id: int) -> None:
         conn.commit()
 
 
+def recomecar_busca(lead_id: int, tipo_imovel: str | None = None) -> None:
+    """Cliente pediu outro imovel: a busca recomeca do zero.
+
+    Sai o que descreve o imovel procurado (preco, quartos, regiao, urgencia,
+    tipo); fica quem e o cliente (intencao, nome, telefone, historico) e
+    tudo que ja foi decidido -- visita marcada mora na tabela `visitas` e
+    nao e tocada. Tambem zera o anti-laco (`acao_repeticoes`,
+    `campos_dispensados`): perguntas dispensadas na busca anterior podem
+    ser respondidas nesta."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE slots SET faixa_preco_min = NULL, faixa_preco_max = NULL,
+                quartos = NULL, regiao = NULL, urgencia = NULL,
+                tipo_imovel = %(tipo)s, atualizado_em = now()
+            WHERE lead_id = %(id)s
+            """,
+            {"id": lead_id, "tipo": tipo_imovel},
+        )
+        cur.execute(
+            """
+            UPDATE leads SET
+                status = CASE
+                    WHEN EXISTS (
+                        SELECT 1 FROM slots s
+                        WHERE s.lead_id = leads.id
+                          AND s.intencao IS NOT NULL AND s.intencao <> 'indefinido'
+                    ) THEN 'qualificando'
+                    ELSE 'novo'
+                END,
+                visita_imovel_escolhido = NULL, visita_horario_texto = NULL,
+                visita_nome_texto = NULL, visita_telefone_texto = NULL,
+                ultima_acao = NULL, acao_repeticoes = 0, campos_dispensados = '{}',
+                ultima_interacao_em = now()
+            WHERE id = %(id)s
+            """,
+            {"id": lead_id},
+        )
+        conn.commit()
+
+
 # ---------------------------------------------------------------- busca / agendamento / encaminhamento (Etapa 5)
 
 def salvar_imoveis_apresentados(lead_id: int, imovel_ids: list[int]) -> None:

@@ -32,6 +32,7 @@ from app.agents.router import (
     TRATATIVA_POR_OBJECAO,
     detectar_objecao,
     eh_aceite_curto,
+    detectar_tipo_imovel,
     perguntou_quem_e,
     quartos_do_filtro,
 )
@@ -1126,6 +1127,44 @@ def _contexto_data_mencionada(mensagem: str) -> str:
 # encaminhamento), o status DE NEGOCIO e preservado, senao a conversao
 # sumiria do dashboard por causa de um "obrigado".
 _STATUS_DESFECHO_PRESERVADO = ("visita_agendada", "encaminhado")
+
+
+# Nome do tipo na frase "vamos procurar outro(a) ...", com o genero certo.
+_OUTRO_TIPO = {
+    "apartamento": "outro apartamento", "casa": "outra casa", "terreno": "outro terreno",
+    "studio": "outro studio", "cobertura": "outra cobertura", "sala": "outra sala comercial",
+    "galpao": "outro galpão", "loja": "outra loja", "predio": "outro prédio",
+    "chacara": "outra chácara",
+}
+
+
+def _recomecar_busca(lead: dict, mensagem: str) -> str:
+    """Cliente pediu outro imóvel: recomeça a busca e pergunta o tipo.
+
+    Texto montado em código, não pelo LLM. Antes desta função a resposta
+    vinha do modelo, e com a visita já marcada ele prometeu "vamos te
+    enviar as opções disponíveis assim que possível" -- um envio que nada
+    no sistema faz. Aqui não há promessa: a próxima mensagem do cliente já
+    é a nova busca.
+
+    Se o cliente já disse o tipo ("quero ver outra casa"), não se pergunta
+    de novo: segue direto pro preço, como o roteiro faria."""
+    lead_id = lead["id"]
+    tipo = detectar_tipo_imovel(mensagem)
+    repo.recomecar_busca(lead_id, tipo)
+
+    # Visita marcada não é desmarcada por pedir outro imóvel -- e o cliente
+    # precisa saber disso, senão pode achar que perdeu o horário.
+    visita = " A visita que você já marcou continua de pé." if repo.get_visita_ativa(lead_id) else ""
+    if tipo:
+        return (
+            f"Claro, vamos procurar {_OUTRO_TIPO.get(tipo, 'outro imóvel')}!{visita} "
+            "Qual faixa de preço você tem em mente?"
+        )
+    return (
+        f"Claro, vamos procurar outro imóvel!{visita} "
+        "Que tipo você quer ver agora: apartamento, casa, terreno ou sala comercial?"
+    )
 
 
 def _despedir(lead: dict, *, turno: int) -> str:

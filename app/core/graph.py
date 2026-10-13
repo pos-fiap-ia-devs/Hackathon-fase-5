@@ -32,7 +32,7 @@ from typing import TypedDict
 
 from langgraph.graph import END, StateGraph
 
-from app.agents.router import decidir_proximo, pediu_para_encerrar
+from app.agents.router import decidir_proximo, pediu_outro_imovel, pediu_para_encerrar
 from app.agents.scheduler_agent import extrair_escolha
 from app.agents.summarizer import gerar_resumo
 from app.core.followup import agendar_proximo
@@ -46,6 +46,7 @@ from app.core.turno import (
     _cidades_atendidas,
     _confirmar_visita,
     _despedir,
+    _recomecar_busca,
     _encaminhar_especialista,
     _extrair_e_mesclar,
     _finalizar_qualificacao,
@@ -388,6 +389,10 @@ def _no_despedir(state: TurnState) -> dict:
     return {"resposta": _despedir(state["lead"], turno=state["turno"])}
 
 
+def _no_novo_imovel(state: TurnState) -> dict:
+    return {"resposta": _recomecar_busca(state["lead"], state["mensagem"])}
+
+
 def _rota_por_status(state: TurnState) -> str:
     # Despedida vem ANTES do status: "obrigado, era so isso" encerra em
     # qualquer ramo -- qualificando, escolhendo visita ou pos-desfecho.
@@ -395,6 +400,12 @@ def _rota_por_status(state: TurnState) -> str:
     # visita a cada "ok"/"obrigado" (achado no Telegram real).
     if pediu_para_encerrar(state["mensagem"]):
         return "despedir"
+    # "Quero ver outro imovel" tambem vem antes do status, pelo mesmo motivo:
+    # vale escolhendo entre opcoes, com visita marcada ou no meio da
+    # qualificacao. Sem isso cada ramo tratava o pedido do seu jeito -- e
+    # nenhum do jeito certo (ver agents/router.py::pediu_outro_imovel).
+    if pediu_outro_imovel(state["mensagem"]):
+        return "novo_imovel"
     status = state["lead"]["status"]
     if status == "aguardando_escolha":
         return "extrair_escolha"
@@ -426,6 +437,7 @@ def _construir_grafo():
     g.add_node("responder_generico", _no_responder_generico_pos_desfecho)
 
     g.add_node("despedir", _no_despedir)
+    g.add_node("novo_imovel", _no_novo_imovel)
     g.add_node("finalizar", _no_finalizar)
 
     g.set_conditional_entry_point(
@@ -435,6 +447,7 @@ def _construir_grafo():
             "extrair_escolha": "extrair_escolha",
             "checar_reagendamento": "checar_reagendamento",
             "despedir": "despedir",
+            "novo_imovel": "novo_imovel",
         },
     )
 
@@ -481,6 +494,7 @@ def _construir_grafo():
     )
     g.add_edge("responder_generico", "finalizar")
     g.add_edge("despedir", "finalizar")
+    g.add_edge("novo_imovel", "finalizar")
 
     g.add_edge("finalizar", END)
 
