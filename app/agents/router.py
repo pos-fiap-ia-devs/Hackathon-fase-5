@@ -8,7 +8,8 @@ transforma esse rotulo em pergunta humanizada e o agente `responder`
 
 Ordem das perguntas segue literalmente os dois cenarios do PDF:
   cenario 1 (compra/aluguel): preco -> quartos -> regiao -> urgencia -> reuniao
-  cenario 2 (investimento): perfil -> ticket -> retorno -> especialista
+  cenario 2 (investimento): perfil -> ticket -> retorno -> opcoes no ticket
+    -> conversa agendada com especialista (core/turno.py::_encaminhar_especialista)
 """
 
 import re
@@ -450,8 +451,9 @@ def decidir_proximo(
         return "buscar_imoveis"
 
     if intencao == "investimento":
-        # Sem atalho aqui de proposito: o desfecho do Cenario 2 do PDF e
-        # encaminhar pra especialista, nao mostrar portfolio.
+        # Sem atalho aqui de proposito: o portfolio so aparece no fim do
+        # roteiro, dentro do ticket, e a escolha vira conversa agendada com
+        # o especialista (core/turno.py::_encaminhar_especialista).
         if falta("perfil_investidor", "perguntar_perfil_investidor"):
             return "perguntar_perfil_investidor"
         if falta("ticket", "perguntar_ticket"):

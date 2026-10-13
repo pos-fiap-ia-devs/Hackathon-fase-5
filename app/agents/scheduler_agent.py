@@ -17,6 +17,8 @@ from app.core.llm import chat_structured
 from app.core.traces import TraceInfo
 
 CORRETORES = ["Ana Ribeiro", "Carlos Mendes", "Fernanda Souza"]
+# Cenario 2: investidor agenda com especialista, nao com corretor de visita.
+ESPECIALISTAS_INVESTIMENTO = ["Ricardo Alves", "Juliana Prado"]
 
 
 class EscolhaVisita(BaseModel):
@@ -76,6 +78,11 @@ def escolher_corretor(lead_id: int) -> str:
     """Distribuicao redonda-robin simples, sem estado externo -- suficiente
     pro POC ("distribuir entre corretores" nao e requisito do PDF)."""
     return CORRETORES[lead_id % len(CORRETORES)]
+
+
+def escolher_especialista(lead_id: int) -> str:
+    """Mesmo rodizio deterministico de `escolher_corretor`."""
+    return ESPECIALISTAS_INVESTIMENTO[lead_id % len(ESPECIALISTAS_INVESTIMENTO)]
 
 
 class NovaPreferenciaHorario(BaseModel):

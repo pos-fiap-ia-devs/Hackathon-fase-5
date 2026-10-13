@@ -1040,6 +1040,27 @@ def funil() -> dict[str, list[dict]]:
     return colunas
 
 
+def versao_painel() -> str:
+    """Impressao digital barata de tudo que o painel mostra. O navegador
+    pergunta isto a cada 2s e so recarrega os blocos quando muda -- e o
+    que deixa o painel "em tempo real" sem recarregar funil, tabela e
+    detalhe a cada poucos segundos a toa (e sem cancelar um arraste)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT concat_ws(':',
+                (SELECT max(id) FROM mensagens),
+                (SELECT max(id) FROM agent_traces),
+                (SELECT count(*) || '-' || coalesce(max(id), 0) FROM visitas),
+                (SELECT count(*) || '-' || coalesce(max(id), 0) FROM encaminhamentos),
+                (SELECT md5(coalesce(string_agg(id || status || score, ',' ORDER BY id), ''))
+                   FROM leads)
+            ) AS versao
+            """
+        )
+        return cur.fetchone()["versao"]
+
+
 def indicadores() -> dict:
     """Os números do topo do painel. Todos saem de dado medido, nenhum é
     estimativa -- mesma regra do painel de observabilidade."""

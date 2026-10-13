@@ -262,10 +262,16 @@ def _sanitizar_zona_alucinada(texto: str, *, slots: dict | None = None) -> str:
     if not any(zona in baixo and zona != regiao_conhecida for zona in _ZONAS_CONHECIDAS):
         return texto
 
+    # Pergunta fica SEMPRE. "Em qual regiao: zona sul, zona norte ou
+    # centro?" e o agente oferecendo opcao, nao afirmando a regiao do
+    # cliente -- e apagar ela deixava so "Perfeito! 📍" na tela, sem
+    # pergunta nenhuma, e o roteiro travava (visto no Telegram real). Os
+    # tres casos de alucinacao acima foram todos afirmacao, nenhum pergunta.
     frases = _QUEBRA_FRASE.split(texto)
     restantes = [
         f for f in frases
-        if not any(zona in f.lower() and zona != regiao_conhecida for zona in _ZONAS_CONHECIDAS)
+        if f.rstrip().endswith("?")
+        or not any(zona in f.lower() and zona != regiao_conhecida for zona in _ZONAS_CONHECIDAS)
     ]
     limpo = " ".join(restantes).strip()
     return limpo or texto  # nunca devolve string vazia

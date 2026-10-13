@@ -25,12 +25,17 @@ def buscar_imoveis(
     quartos_min: int | None = None,
     tipo: str | None = None,
     texto_livre: str | None = None,
+    so_investimento: bool = False,
     limite: int = 5,
 ) -> list[dict]:
     """Filtra por SQL (estruturado) e ranqueia por texto livre (vetor + tsvector).
 
     texto_livre entra sempre no ts_rank; so entra no calculo vetorial se houver
     conteudo -- descritivo vazio nao deve competir por similaridade.
+
+    so_investimento: so imoveis com `rentabilidade_estimada` (os marcados
+    pra investimento), maior rentabilidade primeiro -- e o que o cenario 2
+    mostra antes de agendar com o especialista.
     """
     where = ["1=1"]
     params: dict = {}
@@ -72,6 +77,8 @@ def buscar_imoveis(
         # de texto livre, entao nao ha o que normalizar.
         where.append("tipo = %(tipo)s")
         params["tipo"] = tipo
+    if so_investimento:
+        where.append("rentabilidade_estimada IS NOT NULL")
 
     where_sql = " AND ".join(where)
 
@@ -102,7 +109,7 @@ def buscar_imoveis(
                    rentabilidade_estimada, descricao, fotos, NULL AS score
             FROM imoveis
             WHERE {where_sql}
-            ORDER BY preco ASC
+            ORDER BY {"rentabilidade_estimada DESC, preco ASC" if so_investimento else "preco ASC"}
             LIMIT %(limite)s
         """
 

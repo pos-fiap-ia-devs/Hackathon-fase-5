@@ -38,6 +38,7 @@ from app.agents.router import (
 )
 from app.agents.scheduler_agent import (
     escolher_corretor,
+    escolher_especialista,
     extrair_reagendamento,
     proximo_horario_util,
 )
@@ -634,7 +635,7 @@ def _galeria_imoveis(imoveis: list[dict]) -> list[dict]:
 
 # ---------------------------------------------------------------- cenario 2: encaminhamento a especialista
 
-def _encaminhar_especialista(lead_id: int, slots: dict, mensagem: str, *, turno: int) -> str:
+def _motivo_investimento(slots: dict) -> str:
     partes = []
     if slots.get("perfil_investidor"):
         partes.append(f"perfil: {slots['perfil_investidor']}")
@@ -642,13 +643,72 @@ def _encaminhar_especialista(lead_id: int, slots: dict, mensagem: str, *, turno:
         partes.append(f"ticket: R$ {slots['ticket']:,.0f}".replace(",", "."))
     if slots.get("expectativa_retorno"):
         partes.append(f"retorno esperado: {slots['expectativa_retorno']}")
-    motivo = "; ".join(partes) if partes else "sem detalhes adicionais"
+    return "; ".join(partes) if partes else "sem detalhes adicionais"
 
-    repo.criar_encaminhamento(lead_id, especialista="Equipe de Investimentos Horizonte", motivo=motivo)
+
+def eh_investimento(slots: dict | None) -> bool:
+    return (slots or {}).get("intencao") == "investimento"
+
+
+def _buscar_para_investimento(slots: dict) -> list[dict]:
+    """Do mais especifico pro mais aberto, sempre dentro do ticket:
+    imovel marcado pra investimento (tem rentabilidade estimada) e, se
+    nao houver nenhum nessa faixa, imovel a venda comum. Regiao entra so
+    se o cliente disse uma -- o roteiro de investimento nao pergunta.
+    Nunca passa do ticket: mostrar imovel acima do que o cliente disse
+    que pode investir seria ignorar a resposta dele."""
+    regioes = [slots.get("regiao"), None] if slots.get("regiao") else [None]
+    for so_investimento in (True, False):
+        for regiao in regioes:
+            resultados = buscar_imoveis(
+                finalidade="venda", zona=regiao, preco_max=slots.get("ticket"),
+                tipo=slots.get("tipo_imovel"), so_investimento=so_investimento, limite=3,
+            )
+            if resultados:
+                return resultados
+    return []
+
+
+def _encaminhar_especialista(
+    lead_id: int, slots: dict, mensagem: str, *, turno: int
+) -> tuple[str, list[dict], str]:
+    """Cenario 2. Antes de passar pro especialista, mostra as opcoes de
+    investimento que cabem no ticket (pedido do usuario) -- o cliente
+    escolhe uma e marca a conversa com o especialista pelo MESMO sub-fluxo
+    da visita (status `aguardando_escolha`, `_confirmar_visita`). Sem
+    nenhum imovel na faixa, o encaminhamento direto de antes continua
+    sendo a saida: o especialista ainda tem o que oferecer."""
+    resultados = _buscar_para_investimento(slots)
     score = calcular_score(slots)
+
+    if resultados:
+        repo.salvar_imoveis_apresentados(lead_id, [im["id"] for im in resultados])
+        repo.atualizar_status_score(lead_id, score=score, status="aguardando_escolha")
+        cards = _formatar_cards(resultados)
+        intro = _gerar_frase(
+            "O cliente quer investir e você vai mostrar agora "
+            f"{len(resultados)} opção(ões) de imóvel que cabem no que ele pretende investir. "
+            f'Última mensagem dele: "{mensagem}". Escreva SÓ 1 frase curta e natural '
+            "apresentando as opções -- se a última mensagem trouxer uma objeção ou "
+            "hesitação, trate ela primeiro. Não liste nada, não cite preço, percentual "
+            "nem endereço, isso vem logo depois.",
+            lead_id=lead_id, turno=turno, slots=slots,
+            fallback="Separei algumas opções de investimento pra você:",
+        )
+        fechamento = (
+            "Qual delas te interessou -- pode dizer o número, o código ou o bairro? "
+            "Nosso especialista em investimentos vai analisar com você o retorno e os "
+            "custos: qual dia e período ficam bons pra essa conversa?"
+        )
+        texto = f"{intro}\n\n{cards}\n\n{fechamento}"
+        return texto, _galeria_imoveis(resultados), f"{intro}\n\n{fechamento}"
+
+    repo.criar_encaminhamento(
+        lead_id, especialista="Equipe de Investimentos Horizonte", motivo=_motivo_investimento(slots)
+    )
     repo.atualizar_status_score(lead_id, score=score, status="encaminhado")
 
-    return _gerar_frase(
+    texto = _gerar_frase(
         "O cliente acabou de ser qualificado pra investimento e você vai encaminhar ele "
         "pra um especialista em investimentos da equipe, que vai entrar em contato em breve. "
         f'Última mensagem dele: "{mensagem}". Escreva uma mensagem curta e calorosa avisando '
@@ -662,6 +722,7 @@ def _encaminhar_especialista(lead_id: int, slots: dict, mensagem: str, *, turno:
             "opções alinhadas ao que você me contou. 🤝"
         ),
     )
+    return texto, [], texto
 
 
 # ---------------------------------------------------------------- pos-busca: escolha do imovel + horario da visita
@@ -707,7 +768,8 @@ def _parece_nome_de_bairro(texto: str, imoveis: list[dict]) -> bool:
 
 
 def _proxima_pergunta_agendamento(
-    *, tem_imovel: bool, tem_horario: bool, tem_nome: bool, tem_telefone: bool
+    *, tem_imovel: bool, tem_horario: bool, tem_nome: bool, tem_telefone: bool,
+    investimento: bool = False,
 ) -> str:
     tem_contato = tem_nome and tem_telefone
     if tem_imovel and tem_horario and not tem_contato:
@@ -718,6 +780,11 @@ def _proxima_pergunta_agendamento(
             return "Perfeito! Só me confirma um telefone pra contato?"
         return "Perfeito! Última coisa: pode me passar seu nome e um telefone pra contato?"
     if tem_imovel and not tem_horario:
+        if investimento:
+            return (
+                "Ótima escolha! Qual dia e período ficam bons pra você conversar com "
+                "nosso especialista em investimentos sobre ele?"
+            )
         return "Legal! E qual dia ou período costuma funcionar melhor pra você visitar?"
     if tem_horario and not tem_imovel:
         return "Entendido sobre o horário! Qual das opções te interessou -- pode ser o número (1, 2 ou 3) ou o bairro."
@@ -796,7 +863,14 @@ def _confirmar_visita(
     lead_id: int, *, imovel_id: int, horario_texto: str, nome: str, telefone: str, turno: int
 ) -> str:
     imovel = repo.get_imovel(imovel_id)
-    corretor = escolher_corretor(lead_id)
+    slots = repo.get_slots(lead_id)
+    investimento = eh_investimento(slots)
+    # Investidor marca com o especialista, nao com corretor de visita: a
+    # conversa e sobre retorno, custo e estrategia, o imovel e o ponto de
+    # partida. Fica na mesma tabela `visitas` (agenda, reagendamento e
+    # pos-desfecho ja funcionam) e TAMBEM vira encaminhamento, que e o que
+    # o painel conta como "investidores encaminhados".
+    corretor = escolher_especialista(lead_id) if investimento else escolher_corretor(lead_id)
 
     # data real calculada em codigo quando o texto tem um dia identificavel
     # ("quinta que vem", "dia 22", "amanha"); sem isso, so um placeholder
@@ -813,8 +887,12 @@ def _confirmar_visita(
     )
     # PII nunca em texto puro no banco (secao 7) -- telefone mascarado antes de gravar.
     repo.atualizar_contato(lead_id, nome=nome, telefone_mascarado=mascarar_telefone(telefone))
+    if investimento:
+        repo.criar_encaminhamento(
+            lead_id, especialista=corretor,
+            motivo=f"{_motivo_investimento(slots)}; imóvel de interesse: {imovel['codigo']}",
+        )
 
-    slots = repo.get_slots(lead_id)
     score = calcular_score(slots, visita_agendada=True)
     repo.atualizar_status_score(lead_id, score=score, status="visita_agendada")
     repo.salvar_escolha_visita_parcial(lead_id, imovel_id=None, horario_texto=None)  # limpa estado do sub-fluxo
@@ -822,22 +900,30 @@ def _confirmar_visita(
     primeiro_nome = nome.split(maxsplit=1)[0] if nome else ""
 
     intro = _gerar_frase(
-        f"A visita do cliente {primeiro_nome or ''} acabou de ser confirmada. Escreva SÓ uma "
+        f"O agendamento do cliente {primeiro_nome or ''} acabou de ser confirmado. Escreva SÓ uma "
         "frase curta e animada reagindo/confirmando -- os detalhes da visita (imóvel, corretor, "
         "data) vêm escritos por outro processo logo depois, então NÃO invente nem repita "
         "nenhum desses detalhes agora, só a reação.",
         lead_id=lead_id, turno=turno, slots=slots,
         fallback=f"Show, {primeiro_nome}!" if primeiro_nome else "Show!",
     )
+    if investimento:
+        compromisso = (
+            f"Agendei sua conversa com {corretor}, nosso especialista em investimentos, "
+            f"sobre o {imovel['titulo']} ({imovel['bairro']}, Cód. {imovel['codigo']})"
+        )
+    else:
+        compromisso = (
+            f"Marquei sua visita ao {imovel['titulo']} ({imovel['bairro']}, Cód. {imovel['codigo']}) com {corretor}"
+        )
     if data_resolvida:
         fatos = (
-            f"Marquei sua visita ao {imovel['titulo']} ({imovel['bairro']}, Cód. {imovel['codigo']}) com {corretor}, "
-            f'para "{horario_texto}" -- {_formatar_data_extenso(data_resolvida)}. A equipe '
+            f'{compromisso}, para "{horario_texto}" -- {_formatar_data_extenso(data_resolvida)}. A equipe '
             "confirma o horário exato e te chama no telefone que você passou. 📅"
         )
     else:
         fatos = (
-            f"Marquei sua visita ao {imovel['titulo']} ({imovel['bairro']}, Cód. {imovel['codigo']}) com {corretor}. "
+            f"{compromisso}. "
             f'Horário combinado: "{horario_texto}" — a equipe confirma o horário exato e te '
             "chama no telefone que você passou. 📅"
         )
@@ -863,6 +949,10 @@ def _resumo_desfecho(lead: dict) -> str:
             titulo = imovel["titulo"] if imovel else "imóvel não encontrado"
             bairro = imovel["bairro"] if imovel else ""
             horario_texto = visita.get("horario_solicitado") or "a confirmar"
+            if eh_investimento(repo.get_slots(lead_id)):
+                quem = "Conversa com especialista em investimentos agendada, sobre o imóvel"
+            else:
+                quem = "Visita confirmada:"
 
             # data_hora so e citavel quando recalculavel a partir do texto
             # ATUAL (idempotente, mesma funcao usada pra gravar) -- assim
@@ -871,11 +961,11 @@ def _resumo_desfecho(lead: dict) -> str:
             data_resolvida = _resolver_data(horario_texto)
             if data_resolvida:
                 return (
-                    f"Visita confirmada: {titulo} ({bairro}), corretor(a) {visita['corretor']}. "
+                    f"{quem} {titulo} ({bairro}), com {visita['corretor']}. "
                     f'Horário combinado: "{horario_texto}" -- {_formatar_data_extenso(data_resolvida)}.'
                 )
             return (
-                f"Visita confirmada: {titulo} ({bairro}), corretor(a) {visita['corretor']}. "
+                f"{quem} {titulo} ({bairro}), com {visita['corretor']}. "
                 f'Horário combinado: "{horario_texto}".'
             )
 

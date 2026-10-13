@@ -426,6 +426,11 @@ def mover_etapa(
     return templates.TemplateResponse("_funil.html", _contexto_funil(request, erro))
 
 
+@app.get("/dashboard/versao")
+def versao_painel(usuario: dict = Depends(exigir_login)):
+    return {"versao": repo.versao_painel()}
+
+
 @app.get("/dashboard/indicadores", response_class=HTMLResponse)
 def indicadores(request: Request, usuario: dict = Depends(exigir_login)):
     return templates.TemplateResponse(
@@ -447,6 +452,9 @@ def leads_table(request: Request, usuario: dict = Depends(exigir_login)):
 @app.get("/dashboard/lead/{lead_id}", response_class=HTMLResponse)
 def lead_detail(request: Request, lead_id: int, usuario: dict = Depends(exigir_login)):
     lead = repo.get_lead(lead_id)
+    if not lead:
+        # Lead apagado com o detalhe aberto (o painel recarrega sozinho).
+        return HTMLResponse('<p style="color:var(--tinta-fraca);font-size:13px">Lead não encontrado.</p>')
     mensagens = repo.listar_mensagens(lead_id)
     slots = repo.get_slots(lead_id)
     resumo = repo.get_resumo(lead_id)

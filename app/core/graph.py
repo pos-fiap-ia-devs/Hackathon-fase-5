@@ -59,6 +59,7 @@ from app.core.turno import (
     _resolver_escolha,
     _responder_generico_pos_desfecho,
     _tentar_reagendar,
+    eh_investimento,
 )
 from app.db import repo
 
@@ -244,8 +245,10 @@ def _no_impasse_humano(state: TurnState) -> dict:
 
 def _no_encaminhar_especialista(state: TurnState) -> dict:
     lead_id = state["lead"]["id"]
-    resposta = _encaminhar_especialista(lead_id, state["slots"], state["mensagem"], turno=state["turno"])
-    return {"resposta": resposta}
+    resposta, galeria, sem_cards = _encaminhar_especialista(
+        lead_id, state["slots"], state["mensagem"], turno=state["turno"]
+    )
+    return {"resposta": resposta, "galeria": galeria, "texto_sem_cards": sem_cards}
 
 
 def _no_finalizar_qualificacao(state: TurnState) -> dict:
@@ -320,6 +323,7 @@ def _no_proxima_pergunta_agendamento(state: TurnState) -> dict:
     resposta = _proxima_pergunta_agendamento(
         tem_imovel=bool(r["imovel_id"]), tem_horario=bool(r["horario"]),
         tem_nome=bool(r["nome"]), tem_telefone=bool(r["telefone"]),
+        investimento=eh_investimento(repo.get_slots(lead_id)),
     )
     return {"resposta": resposta}
 
