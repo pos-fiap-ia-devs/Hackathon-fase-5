@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Documento Técnico — Agente SDR Imobiliário</title>
+<!-- Fonte do docs/DOCUMENTO_TECNICO.pdf. Para regenerar:
+     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless \
+       --no-pdf-header-footer --print-to-pdf=docs/DOCUMENTO_TECNICO.pdf docs/documento-tecnico.html -->
+<style>
+  @page { size: A4; margin: 20mm 18mm 20mm 18mm;
+    @bottom-right { content: counter(page); font: 9pt -apple-system, "Helvetica Neue", Arial, sans-serif; color: #6b7280; }
+    @bottom-left { content: "Agente SDR Imobiliário — Documento Técnico"; font: 9pt -apple-system, "Helvetica Neue", Arial, sans-serif; color: #6b7280; }
+  }
+  @page :first { @bottom-right { content: none; } @bottom-left { content: none; } }
+  :root { --marca: #0e41d5; --tinta: #111827; --suave: #4b5563; --linha: #e5e7eb; --fundo: #f3f6fd; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font: 10.5pt/1.55 -apple-system, "Helvetica Neue", Arial, sans-serif; color: var(--tinta); margin: 0; background: #fff; }
+  h1, h2, h3 { line-height: 1.25; color: var(--tinta); }
+  h2 { font-size: 17pt; margin: 0 0 10pt; padding-bottom: 6pt; border-bottom: 2px solid var(--marca); break-after: avoid; }
+  h3 { font-size: 12pt; margin: 16pt 0 6pt; color: var(--marca); break-after: avoid; }
+  p { margin: 0 0 8pt; }
+  ul, ol { margin: 0 0 8pt; padding-left: 18pt; }
+  li { margin-bottom: 3pt; }
+  code { font: 9pt "SF Mono", Menlo, Consolas, monospace; background: #f1f3f7; padding: 1px 4px; border-radius: 3px; }
+  pre { font: 8.8pt/1.45 "SF Mono", Menlo, Consolas, monospace; background: #f6f8fb; border: 1px solid var(--linha); border-radius: 6px; padding: 8pt 10pt; white-space: pre-wrap; break-inside: avoid; margin: 0 0 10pt; }
+  pre code { background: none; padding: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 4pt 0 12pt; font-size: 9.4pt; break-inside: auto; }
+  th { text-align: left; background: var(--fundo); color: var(--tinta); font-weight: 600; }
+  th, td { border: 1px solid var(--linha); padding: 4pt 6pt; vertical-align: top; }
+  tr { break-inside: avoid; }
+  .ok { color: #047857; font-weight: 700; }
+  .parcial { color: #b45309; font-weight: 700; }
+  .nao { color: #b91c1c; font-weight: 700; }
+  section { break-before: page; }
+  .nota { background: var(--fundo); border-left: 3px solid var(--marca); padding: 7pt 10pt; margin: 6pt 0 12pt; break-inside: avoid; }
+  figure { margin: 6pt 0 14pt; break-inside: avoid; text-align: center; }
+  figure img { max-width: 100%; border: 1px solid var(--linha); border-radius: 6px; }
+  figcaption { font-size: 8.8pt; color: var(--suave); margin-top: 4pt; }
+  .grade2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt 12pt; }
+  .grade2 figure { margin: 0; }
+  .grade2 img { width: 100%; height: 72mm; object-fit: contain; object-position: top; background: #f6f8fb; }
+
+  /* capa */
+  .capa { height: 257mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .capa .topo { color: var(--marca); font-weight: 700; letter-spacing: .08em; font-size: 10pt; text-transform: uppercase; }
+  .capa h1 { font-size: 30pt; margin: 0 0 10pt; letter-spacing: -.01em; }
+  .capa .sub { font-size: 14pt; color: var(--suave); margin: 0 0 24pt; max-width: 140mm; }
+  .capa .faixa { height: 6px; width: 60mm; background: var(--marca); margin-bottom: 18pt; }
+  .capa dl { display: grid; grid-template-columns: 38mm 1fr; gap: 4pt 10pt; font-size: 10.5pt; margin: 0; }
+  .capa dt { color: var(--suave); }
+  .capa dd { margin: 0; }
+  .sumario ol { columns: 2; column-gap: 14mm; padding-left: 16pt; }
+  .sumario li { break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<div class="capa">
+  <div class="topo">FIAP Pós Tech · Tech Challenge Fase 5 · Hackathon</div>
+  <div>
+    <div class="faixa"></div>
+    <h1>Agente SDR Imobiliário com IA Generativa</h1>
+    <p class="sub">Documento técnico da prova de conceito “Bia”: arquitetura, inteligência artificial utilizada, decisões de projeto e evidências de cumprimento dos requisitos.</p>
+    <dl>
+      <dt>Projeto</dt><dd>Bia — agente SDR para imobiliária</dd>
+      <dt>Autor</dt><dd>Wellson Almeida dos Santos</dd>
+      <dt>Data</dt><dd>Outubro de 2026</dd>
+      <dt>Repositório</dt><dd>README.md, ARQUITETURA.md, IA.md, PITCH.md e docs/VALIDACAO_REQUISITOS.md complementam este documento</dd>
+    </dl>
+  </div>
+  <div class="sumario">
+    <h3 style="margin-top:0">Sumário</h3>
+    <ol>
+      <li>Resumo executivo</li>
+      <li>Contexto e problema</li>
+      <li>Cobertura dos requisitos</li>
+      <li>Visão da solução</li>
+      <li>Arquitetura</li>
+      <li>Inteligência artificial utilizada</li>
+      <li>Funcionalidades</li>
+      <li>Observabilidade</li>
+      <li>Segurança e privacidade</li>
+      <li>Escalabilidade e caminho para produção</li>
+      <li>Qualidade e testes</li>
+      <li>Demonstração</li>
+      <li>Limitações e próximos passos</li>
+      <li>Anexo — telas da aplicação</li>
+    </ol>
+  </div>
+</div>
+
+<section>
+<h2>1. Resumo executivo</h2>
+<p>A <strong>Bia</strong> é um agente SDR (<em>Sales Development Representative</em>) para imobiliárias, construído como prova de conceito com IA generativa. Ela atende o lead em segundos, a qualquer hora, por quatro canais (Telegram com texto e áudio, chat web, widget embutido no site da imobiliária e linha de comando). Identifica se o cliente quer comprar, alugar ou investir, qualifica com uma pergunta por mensagem, apresenta imóveis reais do banco, agenda a visita com um corretor e retoma automaticamente o contato com quem parou de responder. O corretor acompanha tudo num painel com score explicável, resumo da conversa, funil e observabilidade.</p>
+<p>Três decisões definem a solução:</p>
+<ol>
+  <li><strong>Tudo roda localmente.</strong> O modelo de linguagem (<code>qwen3.5:9b</code> via Ollama) e o banco (Postgres 16 com pgvector) ficam na máquina da imobiliária. O custo de inferência é zero e nenhum dado do lead sai do ambiente, o que atende à LGPD pela própria arquitetura.</li>
+  <li><strong>O fluxo é decidido em código; o texto, pelo LLM.</strong> Um roteador determinístico escolhe o próximo passo a partir dos dados já coletados. O modelo só escreve a frase daquele passo.</li>
+  <li><strong>Fato crítico nunca é escrito pelo LLM.</strong> Preço, endereço, data e corretor são montados em código a partir do banco. Testes adversariais tentam fazer o agente mentir e verificam que ele não mente.</li>
+</ol>
+<div class="nota"><strong>Resultado:</strong> todos os requisitos obrigatórios do enunciado foram atendidos, assim como 7 dos 9 diferenciais. Ficaram de fora a integração com WhatsApp e o deploy publicado em cloud (há Dockerfile e Compose prontos). A suíte automatizada tem <strong>__TESTES_TOTAL__ testes</strong>, a maior parte de integração real contra o modelo e o banco, sem mocks.</div>
+</section>
+
+<section>
+<h2>2. Contexto e problema</h2>
+<p>O enunciado descreve uma imobiliária que perde leads por cinco motivos. A tabela mostra a resposta implementada para cada um e onde ela pode ser verificada.</p>
+<table>
+  <tr><th style="width:28%">Dor do negócio</th><th>Resposta da solução</th><th style="width:30%">Evidência</th></tr>
+  <tr><td>Tempo de resposta elevado</td><td>Atendimento automático 24 horas, com resposta em segundos</td><td>Latência real por chamada em <code>agent_traces</code>; indicador de 1ª resposta no painel</td></tr>
+  <tr><td>Falta de acompanhamento</td><td>Follow-up automático em até 3 tentativas, com o contexto da conversa</td><td>Fila <code>follow_up_jobs</code>; indicador “recuperados”</td></tr>
+  <tr><td>Atendimento manual</td><td>Qualificação completa sem intervenção do corretor</td><td>Slots preenchidos no detalhe do lead</td></tr>
+  <tr><td>Dificuldade em priorizar leads quentes</td><td>Score 0–100 determinístico e explicável; selo quente/morno/frio; funil Kanban</td><td>Conta aberta do score no painel</td></tr>
+  <tr><td>Sobrecarga dos corretores</td><td>O corretor entra com o resumo pronto e a visita já marcada</td><td>Card de resumo; tabelas <code>visitas</code> e <code>encaminhamentos</code></td></tr>
+</table>
+<p>O desafio pede uma <em>base simulada</em> de imóveis. A POC foi além: usa o <strong>catálogo real de uma imobiliária parceira</strong>, cedido com autorização — 266 anúncios (294 registros, porque o mesmo imóvel pode estar à venda e para aluguel), 13 cidades e 731 fotos. O catálogo foi importado a partir do dado estruturado <code>schema.org/RealEstateListing</code> publicado no próprio site da imobiliária. Assim, todo imóvel que a Bia apresenta existe, com a foto do anúncio.</p>
+</section>
+
+<section>
+<h2>3. Cobertura dos requisitos</h2>
+<p>Legenda: <span class="ok">✔ feito</span> · <span class="parcial">◐ parcial</span> · <span class="nao">✘ não feito</span>. A versão com o arquivo e o teste que comprova cada item está em <code>docs/VALIDACAO_REQUISITOS.md</code>.</p>
+
+<h3>Objetivo do desafio</h3>
+<table>
+  <tr><th style="width:30%">Capacidade</th><th style="width:6%"></th><th>Implementação</th></tr>
+  <tr><td>Atender leads automaticamente</td><td class="ok">✔</td><td>Quatro canais chamando o mesmo orquestrador (<code>core/turno.py</code>)</td></tr>
+  <tr><td>Conversa humanizada</td><td class="ok">✔</td><td>Persona fixa, uma pergunta por mensagem, reconhecimento do que o cliente disse, tratamento de objeções, despedida e aceite curto</td></tr>
+  <tr><td>Qualificar clientes</td><td class="ok">✔</td><td>Extração de slots via JSON Schema e score explicável</td></tr>
+  <tr><td>Identificar intenção (compra, aluguel, investimento)</td><td class="ok">✔</td><td>Campo <code>intencao</code> no schema + regras por padrão de frase; testado com as frases literais do enunciado</td></tr>
+  <tr><td>Coletar informações relevantes</td><td class="ok">✔</td><td>9 slots: intenção, região, quartos, preço mínimo e máximo, urgência, perfil de investidor, ticket, expectativa de retorno</td></tr>
+  <tr><td>Follow-up automático</td><td class="ok">✔</td><td>APScheduler + tabela de jobs; 3 tentativas (30 min, 2 h, 24 h)</td></tr>
+  <tr><td>Agendar reuniões ou visitas</td><td class="ok">✔</td><td>Escolha do imóvel, horário em linguagem natural, nome, telefone, confirmação com corretor; reagendamento</td></tr>
+  <tr><td>Integrar com base de imóveis</td><td class="ok">✔</td><td>Catálogo real em Postgres + pgvector, com busca híbrida</td></tr>
+  <tr><td>Gerar resumos para corretores</td><td class="ok">✔</td><td>Agente <code>summarizer</code>, executado em segundo plano</td></tr>
+</table>
+
+<h3>Cenários esperados</h3>
+<table>
+  <tr><th style="width:30%">Cenário</th><th style="width:6%"></th><th>Comportamento</th></tr>
+  <tr><td>1 — Compra: “Estou procurando apartamento na zona sul.”</td><td class="ok">✔</td><td>Entende a intenção, pergunta faixa de preço, quartos, região (se faltar) e urgência, apresenta imóveis e encaminha para a visita</td></tr>
+  <tr><td>2 — Investimento: “Quero investir em imóveis para renda.”</td><td class="ok">✔</td><td>Perfil investidor → ticket → expectativa de retorno → encaminhamento para especialista</td></tr>
+  <tr><td>3 — Follow-up: o cliente não respondeu</td><td class="ok">✔</td><td>Retoma sozinho, mantém o contexto (cita o que o cliente disse e onde parou) e respeita quem pede para parar</td></tr>
+</table>
+
+<h3>Requisitos funcionais</h3>
+<table>
+  <tr><th style="width:30%">Requisito</th><th style="width:6%"></th><th>Onde</th></tr>
+  <tr><td>Atendimento conversacional</td><td class="ok">✔</td><td>Telegram, chat web, widget e CLI</td></tr>
+  <tr><td>Conversa natural</td><td class="ok">✔</td><td><code>temperature=0.15</code> e guardrails de saída</td></tr>
+  <tr><td>Fluxo humanizado</td><td class="ok">✔</td><td>Objeções, despedida e mecanismo anti-repetição</td></tr>
+  <tr><td>Continuidade da conversa</td><td class="ok">✔</td><td>Memória rolante e estado do lead persistido; quem volta retoma de onde parou</td></tr>
+  <tr><td>Qualificação de leads</td><td class="ok">✔</td><td>9 slots + score 0–100</td></tr>
+  <tr><td>Agendamento de reuniões</td><td class="ok">✔</td><td>Visitas e encaminhamentos a especialista</td></tr>
+  <tr><td>Resumo inteligente</td><td class="ok">✔</td><td>Card do corretor no detalhe do lead</td></tr>
+  <tr><td>Dashboard mínimo de acompanhamento</td><td class="ok">✔</td><td>Leads por score, funil Kanban, indicadores, detalhe e observabilidade</td></tr>
+</table>
+
+<h3>Diferenciais</h3>
+<table>
+  <tr><th style="width:30%">Diferencial</th><th style="width:6%"></th><th>Implementação</th></tr>
+  <tr><td>Uso de RAG</td><td class="ok">✔</td><td>Busca híbrida: filtro SQL + similaridade vetorial (pgvector) + full-text</td></tr>
+  <tr><td>Integração com WhatsApp</td><td class="nao">✘</td><td>Não implementado; o Telegram segue o mesmo padrão de canal e trocar é escrever um adapter</td></tr>
+  <tr><td>Memória conversacional</td><td class="ok">✔</td><td>Resumo rolante + últimos 6 turnos literais</td></tr>
+  <tr><td>Multiagentes</td><td class="ok">✔</td><td>5 agentes lógicos num <code>StateGraph</code> do LangGraph</td></tr>
+  <tr><td>Voice AI</td><td class="ok">✔</td><td>Transcrição com Whisper local e resposta em áudio com <code>say</code>/<code>piper</code></td></tr>
+  <tr><td>Integração com CRM</td><td class="ok">✔</td><td><code>POST /crm/leads</code> e <code>GET /crm/leads.csv</code></td></tr>
+  <tr><td>Observabilidade</td><td class="ok">✔</td><td>Traces por chamada de LLM com latência e tokens medidos; painel dedicado</td></tr>
+  <tr><td>Segurança</td><td class="ok">✔</td><td>Autenticação argon2id, sessão server-side, PII mascarada, rate limit, detecção de prompt injection</td></tr>
+  <tr><td>Deploy em cloud</td><td class="parcial">◐</td><td>Dockerfile e Compose prontos; sem ambiente publicado (o modelo de 9B exige GPU)</td></tr>
+</table>
+
+<h3>Entregáveis</h3>
+<table>
+  <tr><th style="width:30%">Entregável</th><th>Onde está</th></tr>
+  <tr><td>Repositório do projeto</td><td>Repositório Git do projeto</td></tr>
+  <tr><td>README</td><td><code>README.md</code></td></tr>
+  <tr><td>Arquitetura da solução</td><td><code>ARQUITETURA.md</code>, <code>docs/SOLID.md</code> e a seção 5 deste documento</td></tr>
+  <tr><td>Demonstração funcional</td><td>Modo demonstração (qualquer máquina), versão completa e roteiro do vídeo em <code>pitchvideo.md</code></td></tr>
+  <tr><td>Pitch técnico</td><td><code>PITCH.md</code></td></tr>
+  <tr><td>Explicação da IA utilizada</td><td><code>IA.md</code> e a seção 6 deste documento</td></tr>
+</table>
+</section>
+
+<section>
+<h2>4. Visão da solução</h2>
+<h3>Atores</h3>
+<ul>
+  <li><strong>Lead:</strong> conversa com a Bia pelo Telegram (texto ou áudio), pelo chat web, pelo widget no site da imobiliária ou pela CLI.</li>
+  <li><strong>Corretor:</strong> usa o painel autenticado para ver leads priorizados, resumo, histórico, visitas e funil.</li>
+  <li><strong>Administrador:</strong> convida usuários e acompanha a observabilidade da IA.</li>
+</ul>
+<h3>Jornada de compra (cenário 1)</h3>
+<pre>Lead  › Estou procurando apartamento na zona sul
+Bia   › Perfeito, anotei. Qual faixa de preço você tem em mente?
+Lead  › Até 600 mil
+Bia   › Ótimo. De quantos quartos você precisa?
+Lead  › 2 quartos
+Bia   › Entendi. Você tem pressa pra fechar, ou pode esperar um pouco?
+Lead  › Tenho pressa, quero mudar logo
+Bia   › Encontrei essas opções pra você: [cards com foto, código, preço e metragem vindos do banco]
+Lead  › Quero o 1 … sábado de manhã … meu nome é Ana, telefone 11 98888-7777
+Bia   › Marquei sua visita com o corretor responsável para sábado de manhã, dia 17/10.</pre>
+<p>Quando não há estoque que atenda aos critérios, a Bia <strong>diz que não tem</strong> e oferece o que existe (outra região, faixa ou tipo) em vez de inventar um imóvel.</p>
+<h3>Jornada de investimento (cenário 2)</h3>
+<p>“Quero investir em imóveis para renda” abre um ramo próprio: perfil do investidor → ticket → expectativa de retorno → encaminhamento a um especialista, com o resumo pronto para ele. A rentabilidade só é exibida onde há dado no anúncio (aluguel × 12 ÷ preço de venda do mesmo imóvel) e é sempre rotulada como bruta e estimada.</p>
+<h3>Reengajamento (cenário 3)</h3>
+<p>Se o lead para de responder no meio da qualificação, o agendador envia até três mensagens de retomada com intervalos crescentes, citando o que o cliente já disse e onde a conversa parou. Quem já tem visita marcada ou pediu para encerrar não recebe follow-up.</p>
+</section>
+
+<section>
+<h2>5. Arquitetura</h2>
+<p>Um único processo FastAPI hospeda os canais, o painel, o CRM e o agendador de follow-up. Todos os canais convergem no mesmo orquestrador: adicionar um canal (por exemplo, WhatsApp) é escrever um adapter fino, sem alterar os agentes.</p>
+
+<figure>
+<svg viewBox="0 0 720 360" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica Neue, Arial, sans-serif" font-size="11">
+  <defs>
+    <marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/></marker>
+  </defs>
+  <!-- canais -->
+  <g fill="#fff" stroke="#9ca3af">
+    <rect x="10" y="40" width="120" height="38" rx="6"/>
+    <rect x="10" y="98" width="120" height="38" rx="6"/>
+    <rect x="10" y="156" width="120" height="38" rx="6"/>
+    <rect x="10" y="214" width="120" height="38" rx="6"/>
+    <rect x="10" y="290" width="120" height="38" rx="6"/>
+  </g>
+  <g text-anchor="middle" fill="#111827">
+    <text x="70" y="56">Telegram</text><text x="70" y="70" fill="#4b5563" font-size="9.5">texto + áudio</text>
+    <text x="70" y="121">Chat web</text>
+    <text x="70" y="172">Widget no site</text><text x="70" y="186" fill="#4b5563" font-size="9.5">da imobiliária</text>
+    <text x="70" y="237">CLI</text>
+    <text x="70" y="306">Corretor</text><text x="70" y="320" fill="#4b5563" font-size="9.5">navegador</text>
+  </g>
+  <!-- processo -->
+  <rect x="160" y="20" width="390" height="325" rx="10" fill="#f3f6fd" stroke="#0e41d5" stroke-dasharray="5 4"/>
+  <text x="172" y="38" fill="#0e41d5" font-weight="700">Processo FastAPI</text>
+  <rect x="180" y="110" width="130" height="70" rx="8" fill="#0e41d5"/>
+  <text x="245" y="138" fill="#fff" text-anchor="middle" font-weight="700">Orquestrador</text>
+  <text x="245" y="154" fill="#dbe4ff" text-anchor="middle" font-size="9.5">LangGraph StateGraph</text>
+  <g fill="#fff" stroke="#0e41d5">
+    <rect x="345" y="48" width="185" height="32" rx="6"/>
+    <rect x="345" y="88" width="185" height="32" rx="6"/>
+    <rect x="345" y="128" width="185" height="32" rx="6"/>
+    <rect x="345" y="168" width="185" height="32" rx="6"/>
+    <rect x="345" y="208" width="185" height="32" rx="6"/>
+  </g>
+  <g fill="#111827">
+    <text x="355" y="68"><tspan font-weight="700">Router</tspan> · código, sem LLM</text>
+    <text x="355" y="108"><tspan font-weight="700">Qualifier</tspan> · slots via JSON Schema</text>
+    <text x="355" y="148"><tspan font-weight="700">Search</tspan> · busca híbrida</text>
+    <text x="355" y="188"><tspan font-weight="700">Scheduler</tspan> · visita / especialista</text>
+    <text x="355" y="228"><tspan font-weight="700">Summarizer</tspan> · resumo do lead</text>
+  </g>
+  <g fill="#fff" stroke="#9ca3af">
+    <rect x="180" y="262" width="150" height="32" rx="6"/>
+    <rect x="345" y="262" width="185" height="32" rx="6"/>
+    <rect x="180" y="302" width="350" height="30" rx="6"/>
+  </g>
+  <text x="255" y="282" text-anchor="middle">Follow-up (APScheduler)</text>
+  <text x="437" y="282" text-anchor="middle">STT / TTS locais</text>
+  <text x="355" y="321" text-anchor="middle">Painel, CRM, autenticação, observabilidade</text>
+  <!-- externos -->
+  <rect x="580" y="70" width="130" height="70" rx="8" fill="#fff" stroke="#111827"/>
+  <text x="645" y="96" text-anchor="middle" font-weight="700">Ollama nativo</text>
+  <text x="645" y="112" text-anchor="middle" font-size="9.5" fill="#4b5563">qwen3.5:9b</text>
+  <text x="645" y="126" text-anchor="middle" font-size="9.5" fill="#4b5563">nomic-embed-text</text>
+  <path d="M580 205 v50 a65 12 0 0 0 130 0 v-50" fill="#fff" stroke="#111827"/>
+  <ellipse cx="645" cy="205" rx="65" ry="12" fill="#fff" stroke="#111827"/>
+  <text x="645" y="240" text-anchor="middle" font-weight="700">Postgres 16</text>
+  <text x="645" y="255" text-anchor="middle" font-size="9.5" fill="#4b5563">+ pgvector</text>
+  <!-- setas -->
+  <g stroke="#6b7280" fill="none" marker-end="url(#seta)">
+    <path d="M130 59 L180 130"/><path d="M130 117 L180 140"/><path d="M130 175 L180 150"/><path d="M130 233 L180 165"/>
+    <path d="M130 309 L180 317"/>
+    <path d="M310 145 L345 64"/><path d="M310 145 L345 104"/><path d="M310 145 L345 144"/><path d="M310 145 L345 184"/><path d="M310 145 L345 224"/>
+    <path d="M530 104 L580 100"/><path d="M530 224 L580 110"/>
+    <path d="M530 144 L580 220"/><path d="M530 184 L580 228"/><path d="M530 317 L580 250"/>
+  </g>
+</svg>
+<figcaption>Figura 1 — Visão de componentes. Os cinco agentes são funções, não processos, e compartilham o mesmo modelo carregado em memória.</figcaption>
+</figure>
+
+<h3>Componentes</h3>
+<table>
+  <tr><th style="width:24%">Componente</th><th style="width:26%">Arquivo</th><th>Responsabilidade</th></tr>
+  <tr><td>Orquestrador</td><td><code>core/graph.py</code>, <code>core/turno.py</code></td><td>Grafo de estados do LangGraph; decide qual nó roda em qual ordem</td></tr>
+  <tr><td>Router</td><td><code>agents/router.py</code></td><td>Decide o próximo passo a partir dos slots, 100% em código; detecta objeções, despedida e tipo de imóvel</td></tr>
+  <tr><td>Qualifier</td><td><code>agents/qualifier.py</code></td><td>Extrai slots da última mensagem com saída estruturada</td></tr>
+  <tr><td>Search</td><td><code>agents/search.py</code></td><td>Busca híbrida SQL + pgvector + full-text</td></tr>
+  <tr><td>Scheduler</td><td><code>agents/scheduler_agent.py</code></td><td>Escolha do imóvel, horário e confirmação da visita</td></tr>
+  <tr><td>Summarizer</td><td><code>agents/summarizer.py</code></td><td>Resumo para o corretor, validado contra os slots</td></tr>
+  <tr><td>Cliente LLM</td><td><code>core/llm.py</code></td><td>Chamadas ao Ollama via <code>httpx</code>, retry e guardrails de saída</td></tr>
+  <tr><td>Memória</td><td><code>core/memory.py</code></td><td>Resumo rolante da conversa</td></tr>
+  <tr><td>Follow-up</td><td><code>core/followup.py</code></td><td>Agenda, executa e cancela retomadas</td></tr>
+  <tr><td>Score</td><td><code>core/scoring.py</code></td><td>Score determinístico com explicação por parcela</td></tr>
+  <tr><td>Segurança</td><td><code>core/auth.py</code>, <code>core/security.py</code>, <code>core/injecao.py</code></td><td>Autenticação, mascaramento de PII, detecção de injection</td></tr>
+  <tr><td>Voz</td><td><code>core/stt.py</code>, <code>core/tts.py</code></td><td>Transcrição e síntese locais</td></tr>
+  <tr><td>Canais</td><td><code>channels/telegram.py</code>, <code>channels/cli.py</code>, <code>web/api.py</code>, <code>web/static/widget.js</code></td><td>Adapters de entrada e saída</td></tr>
+</table>
+
+<h3>Fluxo de um turno</h3>
+<ol>
+  <li>O canal recebe a mensagem e identifica ou cria o lead por <code>chat_id</code> com prefixo do canal (<code>tg:</code>, <code>web:</code>, <code>widget:</code>, <code>cli:</code>).</li>
+  <li>Se for áudio, o Whisper local transcreve; daí em diante, nenhum agente sabe que houve áudio.</li>
+  <li>O grafo escolhe o ramo pelo status do lead: <strong>A</strong> qualificação, <strong>B</strong> escolha de visita ou <strong>C</strong> pós-desfecho (reagendamento). Um pedido explícito de encerramento vai direto para a despedida.</li>
+  <li>No ramo, uma chamada de <strong>extração</strong> (JSON Schema) atualiza o estado; o roteador decide o próximo passo em código; uma chamada de <strong>resposta</strong> (texto livre) escreve a frase. Nunca a mesma chamada faz as duas coisas.</li>
+  <li>Fatos críticos (preço, endereço, data, corretor) são anexados em código a partir do banco.</li>
+  <li>O nó comum <code>finalizar</code> reagenda o follow-up e, em segundo plano, atualiza a memória e o resumo do corretor.</li>
+  <li>A resposta volta ao canal e o turno inteiro é gravado em <code>mensagens</code>.</li>
+</ol>
+<p>O grafo compilado tem 19 nós. Três deles são <strong>saídas anti-laço</strong>: quando a mesma decisão se repete três turnos seguidos, a conversa muda de rota (mostra a faixa de preços real, afrouxa o filtro dizendo o que afrouxou ou passa o lead a um humano). Antes desse mecanismo, um cliente pouco cooperativo ouvia a mesma pergunta indefinidamente em 6 de 6 cenários de teste; hoje, em 0 de 6.</p>
+
+<h3>Modelo de dados</h3>
+<table>
+  <tr><th style="width:22%">Tabela</th><th>Conteúdo</th></tr>
+  <tr><td><code>imoveis</code></td><td>Catálogo: preço, tipo, finalidade, quartos, área, cidade/bairro, descrição, fotos, <code>embedding(768)</code> e <code>tsvector</code> gerado</td></tr>
+  <tr><td><code>leads</code></td><td>Lead por canal, status, score, estado parcial do agendamento, contadores anti-laço</td></tr>
+  <tr><td><code>slots</code></td><td>Dados de qualificação (1:1 com o lead)</td></tr>
+  <tr><td><code>mensagens</code></td><td>Histórico completo, com origem (texto, áudio, follow-up) e marca de suspeita de injection</td></tr>
+  <tr><td><code>memoria</code>, <code>resumos</code></td><td>Resumo rolante da conversa e card do corretor</td></tr>
+  <tr><td><code>visitas</code>, <code>encaminhamentos</code></td><td>Desfechos dos cenários de compra/aluguel e de investimento</td></tr>
+  <tr><td><code>follow_up_jobs</code></td><td>Fila de reengajamento (pendente, enviado, cancelado)</td></tr>
+  <tr><td><code>agent_traces</code></td><td>Uma linha por chamada de LLM: agente, modelo, tokens, latência, tokens/s</td></tr>
+  <tr><td><code>usuarios</code>, <code>sessoes</code>, <code>convites</code></td><td>Autenticação do painel</td></tr>
+</table>
+
+<h3>Decisões de projeto e trade-offs</h3>
+<table>
+  <tr><th style="width:28%">Decisão</th><th style="width:24%">Alternativa</th><th>Motivo</th></tr>
+  <tr><td>Processo FastAPI único</td><td>Um processo por canal</td><td>Menos partes móveis; a aplicação é stateless e escala horizontalmente mesmo assim</td></tr>
+  <tr><td>LangGraph <code>StateGraph</code> explícito</td><td><code>if</code>/<code>match</code> aninhado</td><td>Componentização visível; o diagrama é gerado do grafo real</td></tr>
+  <tr><td><code>httpx</code> direto no Ollama</td><td>LangChain <code>with_structured_output</code></td><td>O schema do LangChain usa <code>anyOf</code>, formato que fazia campos voltarem <code>null</code> em silêncio no motor do Ollama</td></tr>
+  <tr><td>Fatos montados em código</td><td>Confiar no prompt</td><td>Medido: regras no prompt reduzem o erro de um modelo de 9B, mas não o eliminam</td></tr>
+  <tr><td>Sem índice vetorial</td><td><code>ivfflat</code>/HNSW</td><td>Com algumas centenas de linhas, o scan sequencial é mais rápido; HNSW entra a partir de ~10 mil</td></tr>
+  <tr><td>Follow-up in-process</td><td>Redis/Celery</td><td>Um ponto de falha a menos na POC; a tabela de jobs já permite virar fila distribuída</td></tr>
+  <tr><td>Sem checkpointer do LangGraph</td><td>Checkpointer persistente</td><td>O Postgres já é a fonte de verdade; um checkpointer duplicaria estado</td></tr>
+</table>
+</section>
+
+<section>
+<h2>6. Inteligência artificial utilizada</h2>
+<h3>Modelos</h3>
+<table>
+  <tr><th style="width:26%">Uso</th><th style="width:30%">Modelo</th><th>Motivo</th></tr>
+  <tr><td>Extração e resposta</td><td><code>qwen3.5:9b</code> (Q4_K_M) no Ollama nativo</td><td>Roda em Metal num Mac M1 de 16 GB com orçamento de memória validado; bom português</td></tr>
+  <tr><td>Embeddings</td><td><code>nomic-embed-text</code> (768 dimensões)</td><td>Leve; convive na memória com o modelo de chat</td></tr>
+  <tr><td>Transcrição de áudio</td><td><code>whisper-small</code> via <code>mlx-whisper</code></td><td>Metal nativo; o <code>tiny</code> errava palavras em português (“três quastos”)</td></tr>
+  <tr><td>Resposta em áudio</td><td><code>say</code> (macOS) / <code>piper</code> <code>pt_BR-faber-medium</code></td><td>Ambos locais; saída em OGG/Opus, formato de voz do Telegram</td></tr>
+</table>
+<p>Todos os modelos rodam localmente. Não há chamada a API paga e nenhum dado do lead sai da máquina.</p>
+
+<h3>Saída estruturada em vez de tool calling livre</h3>
+<p>Um modelo de 9B não sustenta um loop ReAct confiável com várias ferramentas. A extração usa o parâmetro <code>format</code> do Ollama com um JSON Schema gerado a partir de Pydantic, o que restringe a decodificação por gramática:</p>
+<pre><code>class LeadQualification(BaseModel):
+    intencao: Literal["compra", "aluguel", "investimento", "indefinido"] = "indefinido"
+    regiao: str | None = None
+    quartos: int | None = None
+    faixa_preco_min: int | None = None
+    faixa_preco_max: int | None = None
+    urgencia: Literal["alta", "media", "baixa"] | None = None
+    perfil_investidor: str | None = None
+    ticket: int | None = None
+    expectativa_retorno: str | None = None</code></pre>
+<p>A ordem dos campos importa: com <code>regiao</code> no fim do schema, a frase do cenário 1 voltava com região nula; movida para logo após <code>intencao</code>, o mesmo modelo extrai corretamente.</p>
+
+<h3>Multiagentes com um único modelo</h3>
+<p>Cinco papéis (router, qualifier, search, scheduler, summarizer) são funções <code>(estado) → schema</code>. O router não usa LLM; os demais chamam o mesmo modelo com prompt e schema próprios. É uma arquitetura multiagente com o custo de inferência de um só modelo e sem troca de pesos na memória.</p>
+
+<h3>Guardrails contra alucinação</h3>
+<p>O achado mais repetido do projeto foi: <strong>regra de prompt reduz o erro de um modelo deste porte, mas não o elimina</strong>. A resposta foi tirar o LLM do caminho de todo dado que não pode estar errado:</p>
+<ol>
+  <li><strong>Fato é montado, não gerado.</strong> Card do imóvel, confirmação de visita e encaminhamento são templates preenchidos com dados do banco. O LLM só escreve a frase de abertura.</li>
+  <li><strong>Datas são calculadas em Python.</strong> “Sábado de manhã” e “dia 8 às 13h” são resolvidos com <code>datetime</code>. O modelo havia errado o dia do mês e a semana do ano em testes.</li>
+  <li><strong>A saída do LLM também é validada.</strong> Frase de abertura com dígito, <code>R$</code> ou <code>%</code> é descartada; o resumo é descartado se citar valor em reais que não está nos slots; tiques conhecidos são removidos por regex após o retry.</li>
+  <li><strong>Vocabulário fechado fica no código.</strong> O tipo de imóvel (casa, terreno, galpão…) é detectado por regex. A tentativa de extraí-lo pelo LLM derrubou a extração da região no cenário 1.</li>
+</ol>
+<p>O teste adversarial <code>test_adversarial.py</code>, contra modelo e banco reais, pede desconto de 50%, tenta validar um preço falso e procura bairro sem estoque. A asserção é objetiva: todo valor em reais na resposta precisa ser um preço real do banco ou o orçamento que o próprio cliente informou.</p>
+
+<h3>RAG: busca híbrida</h3>
+<p>Preço, quartos, tipo, bairro e finalidade são filtrados com <code>WHERE</code>. Só depois o texto descritivo (“varanda gourmet”, “área verde”) é ranqueado:</p>
+<pre>score_final = 0,6 × similaridade_vetorial (pgvector) + 0,4 × ts_rank (full-text)</pre>
+<p>Isso evita a falha típica do RAG puro, que devolve um imóvel semanticamente parecido mas fora do orçamento. Quando a busca vem vazia, o filtro é afrouxado em ordem (preço → região → quartos) e a Bia diz o que afrouxou.</p>
+
+<h3>Memória conversacional</h3>
+<p>Os últimos 6 turnos entram literais no prompt; o restante é condensado num resumo rolante regerado periodicamente. O contexto fica abaixo de 8 mil tokens em qualquer duração de conversa. O RAG do projeto resolve a busca de imóveis; a memória da conversa não precisa de recuperação vetorial, porque as conversas deste domínio têm dezenas de turnos, não milhares.</p>
+
+<h3>Score do lead</h3>
+<pre>score = 40 × (campos preenchidos ÷ campos do fluxo)
+      + 30 × peso da urgência   (alta 1,0 · média 0,6 · baixa 0,3)
+      + 20 × peso do ticket     (normalizado, teto R$ 2 milhões)
+      + 10 × visita agendada
+
+prioridade: quente ≥ 70 · morno ≥ 40 · frio abaixo
+regra de negócio: sem orçamento informado, no máximo morno</pre>
+<p>O score não é pedido ao LLM: um número estável e auditável vale mais para o corretor do que um número que varia entre duas chamadas idênticas. O painel mostra cada parcela com o motivo ao lado e o que falta perguntar.</p>
+
+<h3>Temperatura e humanização</h3>
+<p>A resposta usa <code>temperature=0.15</code>. A 0,4, o modelo inventava “Zona Sul” em conversas que nunca citaram região (2 de 5 respostas). As regras de humanização incluem: uma pergunta por mensagem, nunca repetir pergunta já respondida (garantido pelo estado, não pelo modelo) e reconhecer o que o cliente disse antes de perguntar o próximo dado. Cinco tipos de objeção de venda recebem tratamento próprio.</p>
+
+<h3>Números medidos</h3>
+<table>
+  <tr><th style="width:40%">Métrica</th><th>Valor</th></tr>
+  <tr><td>Chamada de extração (schema de 9 campos)</td><td>~7–12 s, ~19 tokens/s</td></tr>
+  <tr><td>Chamada de resposta</td><td>~2,5–3,5 s</td></tr>
+  <tr><td>Turno completo</td><td>~12 s em média (era ~25 s antes da otimização)</td></tr>
+  <tr><td>Otimizações aplicadas</td><td>resumo e memória fora do caminho crítico; resumo a cada 2 turnos; prompt de resposta comprimido de ~1000 para ~800 tokens</td></tr>
+</table>
+<p>Os números vêm de <code>agent_traces</code>, lidos de <code>eval_count</code> e <code>eval_duration</code> da resposta do Ollama, e não de estimativa.</p>
+</section>
+
+<section>
+<h2>7. Funcionalidades</h2>
+<h3>Agendamento de visitas</h3>
+<p>Após a apresentação dos imóveis, o lead escolhe pelo número do card, pelo código do anúncio (estável, igual ao da imobiliária) ou por texto livre. O agente coleta horário, nome e telefone, atribui o corretor e confirma com data resolvida no calendário. Depois da confirmação, o lead pode reagendar.</p>
+<h3>Follow-up automático</h3>
+<p>Três tentativas com intervalos de 30 minutos, 2 horas e 24 horas (90 s, 180 s e 300 s em modo demonstração). A mensagem cita o contexto da conversa. O follow-up é cancelado quando o lead responde, agenda a visita, é encaminhado ou pede para parar. Um fechamento por inatividade roda em paralelo.</p>
+<h3>Painel do corretor</h3>
+<ul>
+  <li>Lista de leads ordenada por score, com selo quente/morno/frio e canal de origem.</li>
+  <li>Funil Kanban com as etapas do lead, atualizado em tempo real.</li>
+  <li>Indicadores medidos: tempo médio de 1ª resposta, taxa de qualificação, visitas agendadas, investidores encaminhados e leads recuperados pelo follow-up.</li>
+  <li>Detalhe do lead: slots, score explicado, resumo, histórico completo e mensagens marcadas como suspeitas.</li>
+  <li>Gestão de usuários por convite.</li>
+</ul>
+<h3>Integração com CRM</h3>
+<p><code>POST /crm/leads</code> recebe leads de fontes externas; <code>GET /crm/leads.csv</code> exporta a base para qualquer CRM.</p>
+<h3>Widget e site da imobiliária</h3>
+<p>Uma linha de HTML instala a Bia em qualquer site. O widget usa Shadow DOM (CSS isolado), carrega o iframe só no primeiro clique e guarda a sessão no <code>localStorage</code>, porque cookies de terceiros são bloqueados no Safari e no Firefox. Os domínios autorizados viram <code>frame-ancestors</code> na política CSP.</p>
+<p>Para demonstrar o widget em contexto real, o projeto gera o site estático da imobiliária fictícia <strong>Horizonte Imóveis</strong> (<code>site/build.py</code>) a partir do banco: página inicial com busca e destaques, listagens de compra e aluguel e uma página por imóvel. Os botões “Tenho interesse”, “Agendar visita” e “Tirar dúvidas” abrem o chat já com o código do imóvel, então a Bia sabe de qual imóvel se trata.</p>
+<h3>Voz</h3>
+<p>Áudios recebidos pelo Telegram são transcritos localmente e seguem o mesmo fluxo do texto. A Bia responde em áudio a quem mandou áudio, sempre com o texto junto. Para caber num Mac de 16 GB, o modelo de chat é descarregado antes de cada transcrição, e a transcrição roda com timeout rígido.</p>
+</section>
+
+<section>
+<h2>8. Observabilidade</h2>
+<p>Cada chamada ao LLM grava uma linha em <code>agent_traces</code> com agente, modelo, tokens de prompt e de resposta, latência e tokens/s. A aba de observabilidade do painel mostra:</p>
+<ul>
+  <li>latência p50, p95 e pior caso; tokens/s mediano; taxa de erro;</li>
+  <li>quebra por agente, que mostra qual etapa é o gargalo;</li>
+  <li>tentativas de prompt injection, por tipo, com o texto original;</li>
+  <li>custo real (US$ 0,00) ao lado do contrafactual “se fosse nuvem”, calculado aplicando preços de tabela, configuráveis no <code>.env</code>, aos tokens realmente medidos.</li>
+</ul>
+<p>Em modo demonstração, o modelo aparece como <code>demo-rules</code> e sem contagem de tokens, para que o painel nunca exiba número inventado.</p>
+</section>
+
+<section>
+<h2>9. Segurança e privacidade</h2>
+<table>
+  <tr><th style="width:28%">Controle</th><th>Implementação</th></tr>
+  <tr><td>Autenticação do painel</td><td>Senha em hash argon2id com sal por hash e rehash automático; sessão server-side (só o SHA-256 do token é armazenado); cookie <code>HttpOnly</code> e <code>SameSite=Lax</code>. Desativar um usuário corta o acesso imediatamente</td></tr>
+  <tr><td>Cadastro</td><td>O primeiro cadastro vira administrador e o registro aberto fecha; os demais entram por convite de uso único com prazo</td></tr>
+  <tr><td>Dados pessoais</td><td>Telefone persistido mascarado (DDD + 4 últimos dígitos)</td></tr>
+  <tr><td>Prompt injection</td><td>Texto do lead nunca entra no system prompt; fatos montados em código; detecção por padrão em 4 tipos (anular instrução, vazar prompt, trocar persona, extrair dados), com marcação no painel em vez de bloqueio, para não recusar cliente real por falso positivo</td></tr>
+  <tr><td>Segredos</td><td>Token do bot suprimido dos logs do <code>httpx</code>, que registraria a URL completa</td></tr>
+  <tr><td>Abuso</td><td>Rate limit por <code>chat_id</code></td></tr>
+  <tr><td>Widget</td><td>Domínios permitidos controlados por CSP <code>frame-ancestors</code></td></tr>
+  <tr><td>LGPD</td><td>Modelo e banco locais: o dado do lead não sai da máquina</td></tr>
+</table>
+</section>
+
+<section>
+<h2>10. Escalabilidade e caminho para produção</h2>
+<ul>
+  <li><strong>Aplicação stateless:</strong> todo estado está no Postgres; N réplicas atrás de um balanceador não exigem mudança de código.</li>
+  <li><strong>LLM atrás de HTTP:</strong> apontar <code>OLLAMA_HOST</code> para um cluster com GPU (ou um servidor compatível) é configuração.</li>
+  <li><strong>Gargalo medido:</strong> a decisão de escalar parte dos números reais de <code>agent_traces</code>.</li>
+  <li><strong>Follow-up distribuído:</strong> único componente single-node hoje; <code>follow_up_jobs</code> já é tabela e vira fila com <code>SELECT … FOR UPDATE SKIP LOCKED</code>.</li>
+  <li><strong>Busca vetorial:</strong> índice HNSW a partir de ~10 mil imóveis, sem alterar a query.</li>
+  <li><strong>Novos canais:</strong> WhatsApp entra como mais um adapter, como o Telegram.</li>
+  <li><strong>Deploy:</strong> Dockerfile e Compose prontos (perfil <code>app</code>). Em cloud, o app e o Postgres sobem em containers e o modelo vai para uma instância com GPU.</li>
+</ul>
+</section>
+
+<section>
+<h2>11. Qualidade e testes</h2>
+<p>A suíte tem <strong>__TESTES_TOTAL__ testes</strong>. A maior parte é de integração real contra o Postgres e o Ollama, sem mocks: os bugs mais caros do projeto foram de formato de schema (<code>anyOf</code> devolvendo <code>null</code> em silêncio, chave <code>"intenção"</code> com acento, <code>think: false</code> ausente) e um mock os esconderia. Sem a infraestrutura, esses testes são pulados com o motivo e o comando para subir o serviço.</p>
+<pre>sem Docker e sem Ollama   →  __TESTES_SEM_INFRA__
+tudo no ar                →  __TESTES_COM_INFRA__</pre>
+<table>
+  <tr><th style="width:32%">Teste</th><th>O que garante</th></tr>
+  <tr><td><code>test_qualifier.py</code></td><td>Frases literais dos cenários do enunciado extraem intenção e slots corretos</td></tr>
+  <tr><td><code>test_adversarial.py</code></td><td>O agente não concede desconto, não valida preço falso e não inventa imóvel</td></tr>
+  <tr><td><code>test_sem_loop.py</code></td><td>Seis cenários de cliente pouco cooperativo sem repetição infinita</td></tr>
+  <tr><td><code>test_injecao.py</code></td><td>Detecção de injection, incluindo casos de falso positivo</td></tr>
+  <tr><td><code>test_scoring_explicavel.py</code></td><td>O total do score é a soma das parcelas explicadas</td></tr>
+  <tr><td><code>test_resolucao_data.py</code>, <code>test_reagendamento.py</code></td><td>Datas em linguagem natural e reagendamento</td></tr>
+  <tr><td><code>test_auth.py</code>, <code>test_auth_rotas.py</code></td><td>Login, convites e proteção das rotas do painel</td></tr>
+  <tr><td><code>test_widget.py</code>, <code>test_telegram_voz.py</code>, <code>test_tts.py</code></td><td>Canais e voz</td></tr>
+</table>
+</section>
+
+<section>
+<h2>12. Demonstração</h2>
+<h3>Modo demonstração (qualquer máquina)</h3>
+<p>Para avaliar sem um Mac com Apple Silicon, o modo demonstração troca o Ollama por um provedor de regras. O fluxo é o mesmo (qualificação, busca no banco, agendamento, follow-up, resumo); só a redação das frases é mais simples.</p>
+<pre>uv venv --python 3.12 &amp;&amp; source .venv/bin/activate &amp;&amp; uv pip install -e .
+docker compose up -d &amp;&amp; python -m scripts.preparar_banco
+LLM_DEMO=true python -m app.channels.cli</pre>
+<h3>Versão completa</h3>
+<pre>ollama pull qwen3.5:9b &amp;&amp; ollama pull nomic-embed-text
+docker compose up -d
+uv venv --python 3.12 &amp;&amp; source .venv/bin/activate &amp;&amp; uv pip install -e .
+cp .env.example .env            # TELEGRAM_BOT_TOKEN opcional
+python -m scripts.preparar_banco
+./run.sh                        # app em :8000 e site da imobiliária em :5500</pre>
+<table>
+  <tr><th style="width:40%">Endereço</th><th>Conteúdo</th></tr>
+  <tr><td><code>localhost:8000/dashboard</code></td><td>Painel do corretor</td></tr>
+  <tr><td><code>localhost:8000/chat</code></td><td>Chat web do lead</td></tr>
+  <tr><td><code>localhost:5500</code></td><td>Site da imobiliária com a Bia embutida</td></tr>
+</table>
+<h3>Roteiro do vídeo (6 minutos)</h3>
+<table>
+  <tr><th style="width:12%">Tempo</th><th>Cena</th></tr>
+  <tr><td>0:00</td><td>As cinco dores do enunciado, com o painel na tela</td></tr>
+  <tr><td>0:30</td><td>Cenário 1 pelo Telegram, com a frase do enunciado; slots aparecendo no painel</td></tr>
+  <tr><td>1:20</td><td>A Bia admite que não tem o imóvel pedido e oferece alternativa real, com foto e código</td></tr>
+  <tr><td>2:00</td><td>Visita marcada; o card anda no funil</td></tr>
+  <tr><td>2:30</td><td>Voz: áudio do cliente transcrito e resposta em áudio</td></tr>
+  <tr><td>3:20</td><td>Cenário 2: investimento até o encaminhamento ao especialista</td></tr>
+  <tr><td>4:40</td><td>Cenário 3: o follow-up chega sozinho ao cliente que parou de responder</td></tr>
+  <tr><td>4:50</td><td>Observabilidade: latência, tokens/s e custo</td></tr>
+  <tr><td>5:40</td><td>Site da imobiliária com a Bia embutida; fechamento</td></tr>
+</table>
+</section>
+
+<section>
+<h2>13. Limitações e próximos passos</h2>
+<table>
+  <tr><th style="width:34%">Limitação</th><th>Próximo passo</th></tr>
+  <tr><td>Sem integração com WhatsApp</td><td>Adapter para a WhatsApp Business API, após aprovação do número comercial</td></tr>
+  <tr><td>Sem deploy publicado em cloud</td><td>App e Postgres em containers gerenciados; modelo em instância com GPU</td></tr>
+  <tr><td>Transcrição só em Apple Silicon</td><td>Backend alternativo (<code>faster-whisper</code>) para Linux</td></tr>
+  <tr><td>Follow-up in-process</td><td>Fila distribuída sobre a tabela <code>follow_up_jobs</code></td></tr>
+  <tr><td>Sem índice vetorial</td><td>HNSW quando o catálogo passar de ~10 mil imóveis</td></tr>
+  <tr><td>Agenda de corretores simplificada</td><td>Integração com calendário real (Google Calendar ou CRM)</td></tr>
+</table>
+</section>
+
+<section>
+<h2>14. Anexo — telas da aplicação</h2>
+<div class="grade2">
+  <figure><img src="imagens/dashboard.png" alt="Dashboard"><figcaption>Painel do corretor: leads por score e selo de prioridade</figcaption></figure>
+  <figure><img src="imagens/lead-detalhe.png" alt="Detalhe do lead"><figcaption>Detalhe do lead com o score aberto por parcela</figcaption></figure>
+  <figure><img src="imagens/observabilidade.png" alt="Observabilidade"><figcaption>Observabilidade: latência, custo e injeções</figcaption></figure>
+  <figure><img src="imagens/chat-web.png" alt="Chat web"><figcaption>Chat do lead com galeria de imóveis</figcaption></figure>
+  <figure><img src="imagens/widget.png" alt="Widget"><figcaption>A Bia embutida no site da imobiliária</figcaption></figure>
+  <figure><img src="imagens/injection.png" alt="Prompt injection"><figcaption>Tentativa de prompt injection marcada e classificada</figcaption></figure>
+</div>
+</section>
+
+</body>
+</html>

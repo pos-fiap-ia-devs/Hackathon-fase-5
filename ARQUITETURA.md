@@ -2,13 +2,14 @@
 
 ## Visão geral
 
-Um processo FastAPI único hospeda tudo: os três canais de entrada (Telegram, chat web, CLI), o dashboard do corretor, o endpoint de CRM e o scheduler de follow-up. Todos os canais convergem no mesmo orquestrador — trocar de canal é escrever um adapter fino, não reescrever o agente.
+Um processo FastAPI único hospeda tudo: os quatro canais de entrada (Telegram, chat web, widget embutível, CLI), o dashboard do corretor, o endpoint de CRM e o scheduler de follow-up. Todos os canais convergem no mesmo orquestrador — trocar de canal é escrever um adapter fino, não reescrever o agente.
 
 ```mermaid
 flowchart TD
     TG[Telegram<br/>long polling] --> APP
     WEB[Web chat do lead<br/>HTMX] --> APP
     CLI[CLI fallback] --> APP
+    WID[Widget em site<br/>de terceiro] --> APP
     BROWSER[Dashboard do corretor] --> APP
 
     subgraph APP[Processo único FastAPI]
@@ -53,15 +54,22 @@ app/
                followup.py         agendamento e execução de follow-up
                scoring.py          score determinístico do lead
                security.py         mascaramento de PII
+               auth.py             login argon2id, sessão server-side, convites
+               injecao.py          detecção e classificação de prompt injection
                traces.py           dataclass de observabilidade
+               custo.py            custo real x contrafactual de API paga
                stt.py              transcrição de áudio local
+               tts.py              resposta em áudio (say / piper)
+               llm_demo.py         provedor de regras do modo demonstração
                config.py           settings via .env (pydantic-settings)
   channels/    telegram.py         adapter Telegram (long polling + voice)
                cli.py              adapter CLI
-  web/         api.py              FastAPI: dashboard, chat web, CRM, lifespan do bot Telegram
+  web/         api.py              FastAPI: dashboard, chat web, widget, CRM, auth, lifespan do bot Telegram
                templates/          Jinja2 + HTMX, zero build step
+               static/widget.js    widget embutível (Shadow DOM + iframe)
   db/          schema.sql  repo.py  seed.py
-scripts/       buscar.py  baixar_modelo_stt.sh
+scripts/       preparar_banco.py  importar_orion.py  carregar_catalogo.py  buscar.py  baixar_modelo_stt.sh
+site/          build.py            site estático da imobiliária com a Bia embutida
 ```
 
 Cada agente é uma função pura `(estado) -> schema`, testável sozinha, sem Telegram e sem banco — é a componentização que a rubrica de arquitetura cobra.
@@ -73,8 +81,13 @@ Cada agente é uma função pura `(estado) -> schema`, testável sozinha, sem Te
 Diagrama gerado direto do grafo compilado (`core/graph.py::exportar_mermaid()`):
 
 ```mermaid
-graph TD
-	__start__([start]):::first
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
 	extrair_slots(extrair_slots)
 	decidir_proximo(decidir_proximo)
 	apresentar_imoveis(apresentar_imoveis)
@@ -92,40 +105,46 @@ graph TD
 	checar_reagendamento(checar_reagendamento)
 	responder_generico(responder_generico)
 	despedir(despedir)
+	novo_imovel(novo_imovel)
 	finalizar(finalizar)
-	__end__([end]):::last
-	__start__ -.-> checar_reagendamento
-	__start__ -.-> despedir
-	__start__ -.-> extrair_escolha
-	__start__ -.-> extrair_slots
-	apresentar_imoveis --> finalizar
-	checar_reagendamento -. fim .-> finalizar
-	checar_reagendamento -.-> responder_generico
-	cidade_nao_atendida --> finalizar
-	confirmar_visita --> finalizar
-	decidir_proximo -.-> apresentar_imoveis
-	decidir_proximo -.-> cidade_nao_atendida
-	decidir_proximo -.-> encaminhar_especialista
-	decidir_proximo -.-> finalizar_qualificacao
-	decidir_proximo -.-> impasse_faixa
-	decidir_proximo -.-> impasse_humano
-	decidir_proximo -.-> impasse_sem_resultado
-	decidir_proximo -.-> listar_regioes
-	despedir --> finalizar
-	encaminhar_especialista --> finalizar
-	extrair_escolha -. fim .-> finalizar
-	extrair_escolha -.-> resolver_escolha
-	extrair_slots --> decidir_proximo
-	finalizar_qualificacao --> finalizar
-	impasse_faixa --> finalizar
-	impasse_humano --> finalizar
-	impasse_sem_resultado --> finalizar
-	listar_regioes --> finalizar
-	proxima_pergunta_agendamento --> finalizar
-	resolver_escolha -.-> confirmar_visita
-	resolver_escolha -.-> proxima_pergunta_agendamento
-	responder_generico --> finalizar
-	finalizar --> __end__
+	__end__([<p>__end__</p>]):::last
+	__start__ -.-> checar_reagendamento;
+	__start__ -.-> despedir;
+	__start__ -.-> extrair_escolha;
+	__start__ -.-> extrair_slots;
+	__start__ -.-> novo_imovel;
+	apresentar_imoveis --> finalizar;
+	checar_reagendamento -. &nbsp;fim&nbsp; .-> finalizar;
+	checar_reagendamento -.-> responder_generico;
+	cidade_nao_atendida --> finalizar;
+	confirmar_visita --> finalizar;
+	decidir_proximo -.-> apresentar_imoveis;
+	decidir_proximo -.-> cidade_nao_atendida;
+	decidir_proximo -.-> encaminhar_especialista;
+	decidir_proximo -.-> finalizar_qualificacao;
+	decidir_proximo -.-> impasse_faixa;
+	decidir_proximo -.-> impasse_humano;
+	decidir_proximo -.-> impasse_sem_resultado;
+	decidir_proximo -.-> listar_regioes;
+	despedir --> finalizar;
+	encaminhar_especialista --> finalizar;
+	extrair_escolha -. &nbsp;fim&nbsp; .-> finalizar;
+	extrair_escolha -.-> resolver_escolha;
+	extrair_slots --> decidir_proximo;
+	finalizar_qualificacao --> finalizar;
+	impasse_faixa --> finalizar;
+	impasse_humano --> finalizar;
+	impasse_sem_resultado --> finalizar;
+	listar_regioes --> finalizar;
+	novo_imovel --> finalizar;
+	proxima_pergunta_agendamento --> finalizar;
+	resolver_escolha -.-> confirmar_visita;
+	resolver_escolha -.-> proxima_pergunta_agendamento;
+	responder_generico --> finalizar;
+	finalizar --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
 ```
 
 **Entrada única, 3 ramos + 1 atalho**, roteados pela aresta de entrada condicional em `lead["status"]` — com uma exceção que vem antes do status: pedido explícito de encerramento (`router.py::pediu_para_encerrar`) cai direto em `despedir`, valha qual for o ramo. Sem isso, um "obrigado" com a visita já marcada fazia o ramo C repetir a confirmação inteira.
@@ -151,7 +170,7 @@ Sem checkpointer persistente do LangGraph: o Postgres já é a fonte de verdade 
 ## Modelo de dados
 
 ```sql
-imoveis         200 registros — 10 cidades de SP; preço, quartos, cidade/zona/bairro,
+imoveis         294 registros (266 anúncios reais; venda e aluguel do mesmo imóvel são linhas separadas), 13 cidades; preço, quartos, cidade/zona/bairro,
                 descrição, embedding(768), tsvector gerado
 leads           chat_id único, canal, status, score, estado parcial do agendamento
 slots           1:1 com lead — intenção, preço, quartos, região, urgência, perfil de investidor
@@ -186,7 +205,7 @@ Toda chamada ao LLM grava uma linha em `agent_traces`: agente, modelo, tokens de
 2. **O LLM já está atrás de HTTP** — trocar `OLLAMA_HOST` por um cluster com GPU é variável de ambiente.
 3. **O gargalo é medido** — `agent_traces` tem latência e tokens/s reais por chamada.
 4. **O único componente single-node é o scheduler de follow-up** (APScheduler in-process). `follow_up_jobs` já é tabela — `SELECT ... FOR UPDATE SKIP LOCKED` vira fila distribuída sem trocar de tecnologia.
-5. **Busca vetorial** — scan sequencial é a escolha certa em 200 imóveis; HNSW entra a partir de ~10 mil, sem mudar a query.
+5. **Busca vetorial** — scan sequencial é a escolha certa com algumas centenas de imóveis; HNSW entra a partir de ~10 mil, sem mudar a query.
 
 ## Segurança
 
@@ -204,8 +223,8 @@ Toda chamada ao LLM grava uma linha em `agent_traces`: agente, modelo, tokens de
 | LangGraph `StateGraph` explícito | `match`/`if` aninhado à mão | Componentização visível, diagrama gerado do grafo real (não desenhado à mão), sem reescrever a lógica de negócio já validada |
 | `httpx` puro pro Ollama, não LangChain `with_structured_output` | Usar a abstração do LangChain também na chamada ao LLM | O `with_structured_output` do LangChain gera o schema pela rota padrão do Pydantic (`anyOf`), o mesmo formato que causava campo `null` silencioso no llama.cpp (ver IA.md) — trocar essa camada reabriria um risco já fechado |
 | Fatos críticos (preço, data, corretor) montados em código, nunca escritos pelo LLM | Confiar em prompt + validação pós-geração | Testado: regra de prompt sozinha não segura um modelo de 9B (taxa de erro caiu, não zerou) — tirar o LLM do caminho do dado é garantia estrutural, não comportamental |
-| Sem índice vetorial | `ivfflat` desde o início | Com 200 linhas o índice não ajuda e ainda exige `lists` calibrado; decisão documentada, não omissão |
+| Sem índice vetorial | `ivfflat` desde o início | Com ~300 linhas o índice não ajuda e ainda exige `lists` calibrado; decisão documentada, não omissão |
 | Follow-up via APScheduler in-process | Fila externa (Redis/Celery) desde o início | Menos um ponto de falha numa POC de 1 pessoa; a tabela `follow_up_jobs` já está desenhada pra virar fila distribuída depois, sem reescrever |
 | STT com timeout duro em thread separada | Deixar `mlx_whisper.transcribe` rodar sem limite | Download do modelo via HF Hub travou indefinidamente em teste real (rede específica, ver IA.md) — sem timeout, um único áudio travaria o turno (e o processo do bot) pra sempre |
 
-Mais detalhes de cada achado (com números de teste) em [PLANO.md](PLANO.md), que documenta a sessão inteira de desenvolvimento como um diário de bordo auditável.
+Os achados que motivaram cada decisão, com os números medidos, estão em [IA.md](IA.md). A correspondência requisito → código → teste está em [docs/VALIDACAO_REQUISITOS.md](docs/VALIDACAO_REQUISITOS.md).
