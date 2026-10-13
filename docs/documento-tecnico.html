@@ -64,7 +64,9 @@
     <p class="sub">Documento técnico da prova de conceito “Bia”: arquitetura, inteligência artificial utilizada, decisões de projeto e evidências de cumprimento dos requisitos.</p>
     <dl>
       <dt>Projeto</dt><dd>Bia — agente SDR para imobiliária</dd>
-      <dt>Autor</dt><dd>Wellson Almeida dos Santos</dd>
+      <dt>Grupo</dt><dd>Grupo 10</dd>
+      <dt>Integrantes</dt><dd>Wellson Almeida dos Santos (RM369201)<br>Nelson Seiji Takahashi (RM370089)</dd>
+      <dt>Vídeo</dt><dd>youtube.com/watch?v=E5UAWlIyjjk</dd>
       <dt>Data</dt><dd>Outubro de 2026</dd>
       <dt>Repositório</dt><dd>README.md, ARQUITETURA.md, IA.md, PITCH.md e docs/VALIDACAO_REQUISITOS.md complementam este documento</dd>
     </dl>
@@ -99,7 +101,7 @@
   <li><strong>O fluxo é decidido em código; o texto, pelo LLM.</strong> Um roteador determinístico escolhe o próximo passo a partir dos dados já coletados. O modelo só escreve a frase daquele passo.</li>
   <li><strong>Fato crítico nunca é escrito pelo LLM.</strong> Preço, endereço, data e corretor são montados em código a partir do banco. Testes adversariais tentam fazer o agente mentir e verificam que ele não mente.</li>
 </ol>
-<div class="nota"><strong>Resultado:</strong> todos os requisitos obrigatórios do enunciado foram atendidos, assim como 7 dos 9 diferenciais. Ficaram de fora a integração com WhatsApp e o deploy publicado em cloud (há Dockerfile e Compose prontos). A suíte automatizada tem <strong>371 testes</strong>, a maior parte de integração real contra o modelo e o banco, sem mocks.</div>
+<div class="nota"><strong>Resultado:</strong> todos os requisitos obrigatórios do enunciado foram atendidos, assim como 8 dos 9 diferenciais. Ficou de fora a integração com WhatsApp. A versão está publicada e acessível pela internet. A suíte automatizada tem <strong>371 testes</strong>, a maior parte de integração real contra o modelo e o banco, sem mocks.</div>
 </section>
 
 <section>
@@ -166,7 +168,7 @@
   <tr><td>Integração com CRM</td><td class="ok">✔</td><td><code>POST /crm/leads</code> e <code>GET /crm/leads.csv</code></td></tr>
   <tr><td>Observabilidade</td><td class="ok">✔</td><td>Traces por chamada de LLM com latência e tokens medidos; painel dedicado</td></tr>
   <tr><td>Segurança</td><td class="ok">✔</td><td>Autenticação argon2id, sessão server-side, PII mascarada, rate limit, detecção de prompt injection</td></tr>
-  <tr><td>Deploy em cloud</td><td class="parcial">◐</td><td>Dockerfile e Compose prontos; sem ambiente publicado (o modelo de 9B exige GPU)</td></tr>
+  <tr><td>Deploy em cloud</td><td class="ok">✔</td><td>Versão publicada em servidor remoto (bot, painel e site; ver seção 12); Dockerfile e Compose prontos para replicar</td></tr>
 </table>
 
 <h3>Entregáveis</h3>
@@ -467,7 +469,7 @@ regra de negócio: sem orçamento informado, no máximo morno</pre>
   <li><strong>Follow-up distribuído:</strong> único componente single-node hoje; <code>follow_up_jobs</code> já é tabela e vira fila com <code>SELECT … FOR UPDATE SKIP LOCKED</code>.</li>
   <li><strong>Busca vetorial:</strong> índice HNSW a partir de ~10 mil imóveis, sem alterar a query.</li>
   <li><strong>Novos canais:</strong> WhatsApp entra como mais um adapter, como o Telegram.</li>
-  <li><strong>Deploy:</strong> Dockerfile e Compose prontos (perfil <code>app</code>). Em cloud, o app e o Postgres sobem em containers e o modelo vai para uma instância com GPU.</li>
+  <li><strong>Deploy:</strong> versão publicada em servidor remoto, acessível pela internet; Dockerfile e Compose (perfil <code>app</code>) permitem replicar o ambiente. Para escala, o app e o Postgres vão para containers gerenciados e o modelo para uma instância com GPU.</li>
 </ul>
 </section>
 
@@ -496,7 +498,16 @@ tudo no ar                →  371 passed em ~15 min</pre>
 <pre>uv venv --python 3.12 &amp;&amp; source .venv/bin/activate &amp;&amp; uv pip install -e .
 docker compose up -d &amp;&amp; python -m scripts.preparar_banco
 LLM_DEMO=true python -m app.channels.cli</pre>
-<h3>Versão completa</h3>
+<h3>Versão no ar</h3>
+<p>A solução está publicada e pode ser testada sem instalar nada:</p>
+<table>
+  <tr><th style="width:30%">O quê</th><th>Onde</th></tr>
+  <tr><td>Bot no Telegram (texto e áudio)</td><td><code>t.me/ImobVendas_bot</code></td></tr>
+  <tr><td>Painel do corretor</td><td><code>http://168.0.198.45:8000</code> (credenciais enviadas à banca)</td></tr>
+  <tr><td>Site da imobiliária com a Bia</td><td><code>http://168.0.198.45:5500</code></td></tr>
+  <tr><td>Vídeo de demonstração</td><td><code>youtube.com/watch?v=E5UAWlIyjjk</code></td></tr>
+</table>
+<h3>Versão completa (local)</h3>
 <pre>ollama pull qwen3.5:9b &amp;&amp; ollama pull nomic-embed-text
 docker compose up -d
 uv venv --python 3.12 &amp;&amp; source .venv/bin/activate &amp;&amp; uv pip install -e .
@@ -529,7 +540,7 @@ python -m scripts.preparar_banco
 <table>
   <tr><th style="width:34%">Limitação</th><th>Próximo passo</th></tr>
   <tr><td>Sem integração com WhatsApp</td><td>Adapter para a WhatsApp Business API, após aprovação do número comercial</td></tr>
-  <tr><td>Sem deploy publicado em cloud</td><td>App e Postgres em containers gerenciados; modelo em instância com GPU</td></tr>
+  <tr><td>Deploy em servidor único</td><td>App em réplicas atrás de balanceador, Postgres gerenciado e modelo em instância com GPU</td></tr>
   <tr><td>Transcrição só em Apple Silicon</td><td>Backend alternativo (<code>faster-whisper</code>) para Linux</td></tr>
   <tr><td>Follow-up in-process</td><td>Fila distribuída sobre a tabela <code>follow_up_jobs</code></td></tr>
   <tr><td>Sem índice vetorial</td><td>HNSW quando o catálogo passar de ~10 mil imóveis</td></tr>

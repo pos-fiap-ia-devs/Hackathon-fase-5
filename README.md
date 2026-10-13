@@ -2,7 +2,7 @@
 
 POC de um agente de IA generativa que atende, qualifica e agenda visitas com leads de uma imobiliária. Projeto do **Hackathon FIAP — Tech Challenge Fase 5**.
 
-## Integrantes do grupo 15
+## Integrantes do grupo 10
 
 Os membros do grupo são compostos pelos seguintes alunos:
 
@@ -30,12 +30,13 @@ Roteiro sugerido: abra o painel numa aba e converse com o bot no Telegram. O lea
 
 A Bia atende por Telegram (texto e áudio), chat web, widget embutido no site da imobiliária ou CLI. Os quatro canais passam pelo mesmo orquestrador. Ela entende se o lead quer comprar, alugar ou investir, qualifica com uma pergunta por mensagem, mostra imóveis reais do banco, agenda a visita com o corretor certo e volta a procurar quem some no meio da conversa. O corretor acompanha tudo num painel com score explicado, resumo e observabilidade.
 
-> **Estado da entrega:** funcional, rodando local com Docker Compose e Ollama nativo. **371 testes passando** com toda a infraestrutura no ar. O modelo é local (`qwen3.5:9b`, por Metal). Não há integração com WhatsApp nem deploy publicado em cloud (ver [Limitações](#limitações-conhecidas)). Para avaliar em Windows ou Linux, use o [modo demonstração](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração).
+> **Estado da entrega:** funcional e [publicada num servidor remoto](#testar-agora-versão-no-ar), acessível pela internet; também roda local com Docker Compose e Ollama nativo. **371 testes passando** com toda a infraestrutura no ar. O modelo é local (`qwen3.5:9b`, por Metal). Não há integração com WhatsApp (ver [Limitações](#limitações-conhecidas)). Para avaliar em Windows ou Linux, use o [modo demonstração](#rodar-em-1-minuto-em-qualquer-máquina-modo-demonstração).
 
 📄 **Documento técnico em PDF:** [docs/DOCUMENTO_TECNICO.pdf](docs/DOCUMENTO_TECNICO.pdf) — arquitetura, IA utilizada, decisões e evidências num só arquivo.
 
 ## Sumário
 
+- [Integrantes do grupo 10](#integrantes-do-grupo-10)
 - [Testar agora (versão no ar)](#testar-agora-versão-no-ar)
 - [Entregáveis do desafio](#entregáveis-do-desafio)
 - [Requisitos do enunciado, um a um](#requisitos-do-enunciado-um-a-um)
@@ -108,7 +109,7 @@ Legenda: ✅ feito · ⚠️ parcial · ❌ não feito. A versão com o teste qu
 | Resumo inteligente | ✅ | Card do corretor no detalhe do lead |
 | Dashboard mínimo de acompanhamento | ✅ | `/dashboard`: leads por score, funil Kanban, indicadores, detalhe e observabilidade |
 
-### Diferenciais (7 de 9)
+### Diferenciais (8 de 9)
 
 | Diferencial | | Como |
 |---|---|---|
@@ -120,7 +121,7 @@ Legenda: ✅ feito · ⚠️ parcial · ❌ não feito. A versão com o teste qu
 | Integração com CRM | ✅ | `POST /crm/leads` (entrada) e `GET /crm/leads.csv` (exportação) |
 | Observabilidade | ✅ | `agent_traces`: latência, tokens e tokens/s medidos por chamada; painel com p50/p95, quebra por agente e custo |
 | Segurança | ✅ | Login argon2id + convite, sessão server-side, PII mascarada, rate limit, detecção de prompt injection |
-| Deploy em cloud | ⚠️ | Dockerfile e Compose prontos, app sobe containerizado; **não há ambiente publicado** (o modelo de 9B precisa de GPU) |
+| Deploy em cloud | ✅ | Versão publicada em servidor remoto, acessível pela internet: bot, painel e site ([Testar agora](#testar-agora-versão-no-ar)). Dockerfile e Compose prontos para replicar |
 
 ---
 
@@ -394,7 +395,7 @@ Destaques: [`test_adversarial.py`](tests/test_adversarial.py) (o agente não men
 ## Limitações conhecidas
 
 - **Sem integração com WhatsApp.** A aprovação de número comercial não cabia no prazo; o Telegram segue o mesmo padrão de canal.
-- **Sem deploy publicado em cloud.** Há Dockerfile e Compose, mas hospedar um modelo de 9B com GPU está fora do escopo da POC.
+- **Deploy em servidor único.** A versão no ar roda numa máquina só; escalar horizontalmente exige balanceador e fila distribuída para o follow-up (ver [Escalabilidade](#escalabilidade)).
 - **Transcrição de áudio só em Apple Silicon** (`mlx-whisper`). A resposta em áudio funciona em macOS e Linux.
 - **Follow-up in-process** (APScheduler), não fila distribuída.
 - **Sem índice vetorial**, escolha deliberada para o tamanho atual do catálogo.

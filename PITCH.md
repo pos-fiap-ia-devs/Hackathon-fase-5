@@ -32,7 +32,7 @@ Cinco agentes lógicos — não processos — cada um um prompt e um schema Pyda
 - **Memória sem inchar o contexto.** Resumo rolante — a conversa pode durar horas sem o prompt crescer sem limite.
 - **Observabilidade própria.** Toda chamada ao LLM grava latência, tokens e tokens/s reais, e o painel mostra quanto a mesma conversa teria custado numa API paga — o custo real é zero, e isso é medido, não dito.
 - **Segurança de verdade.** Login com argon2id e sessão no servidor, convite por link, e tentativa de prompt injection detectada e marcada no painel.
-- **7 dos 9 diferenciais opcionais do PDF entregues**: RAG híbrido, memória conversacional, multiagentes, Voice AI (transcrição local via `mlx-whisper` e resposta em áudio via `say`/`piper`), integração com CRM (entrada e exportação de leads), observabilidade e segurança. Ficaram de fora WhatsApp (o canal é Telegram) e deploy em cloud (roda local com Docker).
+- **8 dos 9 diferenciais opcionais do PDF entregues**: deploy (versão publicada e acessível pela internet), RAG híbrido, memória conversacional, multiagentes, Voice AI (transcrição local via `mlx-whisper` e resposta em áudio via `say`/`piper`), integração com CRM (entrada e exportação de leads), observabilidade e segurança. Ficou de fora o WhatsApp (o canal é Telegram).
 - **LGPD por arquitetura, não por política.** O dado nunca sai da máquina porque o modelo e o banco são locais — não é uma promessa, é uma consequência de onde os componentes rodam.
 
 ## Roteiro de demonstração (6 minutos)
